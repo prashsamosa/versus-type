@@ -1,5 +1,5 @@
 - [x] write schema
 - [x] better-auth integration
 - [x] .env validation
-- [ ] connect turso
-- [ ] seeding
+- [x] connect turso
+- [ ] auth endpoints 

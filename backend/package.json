@@ -16,6 +16,7 @@
   "packageManager": "pnpm@10.8.1",
   "dependencies": {
     "@libsql/client": "^0.15.3",
+    "@types/express": "^5.0.1",
     "better-auth": "^1.2.7",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
