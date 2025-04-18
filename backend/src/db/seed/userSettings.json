@@ -1,0 +1,52 @@
+[
+  {
+    "userId": "7a6f8d73-4f7a-4fcd-bd3e-11c8c0e7a23a",
+    "soundEnabled": true,
+    "typingSoundEnabled": true
+  },
+  {
+    "userId": "15aa965a-8b82-4b82-9af1-0e88e2d09c79",
+    "soundEnabled": false,
+    "typingSoundEnabled": true
+  },
+  {
+    "userId": "3e1d8a93-5aa1-47ad-9ab2-4298cb2c18be",
+    "soundEnabled": true,
+    "typingSoundEnabled": false
+  },
+  {
+    "userId": "dd59cfe5-2ba4-4f59-84d0-1c60a86e6f9b",
+    "soundEnabled": true,
+    "typingSoundEnabled": true
+  },
+  {
+    "userId": "9e6bf5b2-0b7f-4aa3-97f2-273e96b1f889",
+    "soundEnabled": false,
+    "typingSoundEnabled": false
+  },
+  {
+    "userId": "b5f8c49f-dc1b-4f9e-93d7-fca9e8a1a123",
+    "soundEnabled": true,
+    "typingSoundEnabled": true
+  },
+  {
+    "userId": "a7d5b3e9-f6cf-4fce-8a59-8b4751d7f8c1",
+    "soundEnabled": true,
+    "typingSoundEnabled": false
+  },
+  {
+    "userId": "ea6c0321-4b7a-4e4e-9bbf-3bb9c652e43f",
+    "soundEnabled": false,
+    "typingSoundEnabled": true
+  },
+  {
+    "userId": "f3d0ec48-5d2a-4d90-a3f0-69cb24d9b293",
+    "soundEnabled": true,
+    "typingSoundEnabled": true
+  },
+  {
+    "userId": "c9e57a6d-9d5a-4b65-93ab-2d6843e7492d",
+    "soundEnabled": false,
+    "typingSoundEnabled": false
+  }
+]

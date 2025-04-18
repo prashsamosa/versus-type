@@ -1,0 +1,122 @@
+[
+  {
+    "userId": "7a6f8d73-4f7a-4fcd-bd3e-11c8c0e7a23a",
+    "soloMatches": 15,
+    "pvpMatches": 5,
+    "wins": 8,
+    "avgWpmPvp": 68,
+    "avgAccuracyPvp": 92,
+    "highestWpm": 95,
+    "totalTimePlayed": 5400,
+    "wordsTyped": 12000,
+    "updatedAt": "2025-04-14T10:00:00Z"
+  },
+  {
+    "userId": "15aa965a-8b82-4b82-9af1-0e88e2d09c79",
+    "soloMatches": 10,
+    "pvpMatches": 7,
+    "wins": 6,
+    "avgWpmPvp": 70,
+    "avgAccuracyPvp": 90,
+    "highestWpm": 100,
+    "totalTimePlayed": 4800,
+    "wordsTyped": 11000,
+    "updatedAt": "2025-04-14T09:45:00Z"
+  },
+  {
+    "userId": "3e1d8a93-5aa1-47ad-9ab2-4298cb2c18be",
+    "soloMatches": 20,
+    "pvpMatches": 9,
+    "wins": 12,
+    "avgWpmPvp": 75,
+    "avgAccuracyPvp": 93,
+    "highestWpm": 105,
+    "totalTimePlayed": 6000,
+    "wordsTyped": 13500,
+    "updatedAt": "2025-04-14T08:30:00Z"
+  },
+  {
+    "userId": "dd59cfe5-2ba4-4f59-84d0-1c60a86e6f9b",
+    "soloMatches": 8,
+    "pvpMatches": 12,
+    "wins": 7,
+    "avgWpmPvp": 65,
+    "avgAccuracyPvp": 89,
+    "highestWpm": 90,
+    "totalTimePlayed": 4200,
+    "wordsTyped": 10000,
+    "updatedAt": "2025-04-14T11:15:00Z"
+  },
+  {
+    "userId": "9e6bf5b2-0b7f-4aa3-97f2-273e96b1f889",
+    "soloMatches": 25,
+    "pvpMatches": 4,
+    "wins": 15,
+    "avgWpmPvp": 80,
+    "avgAccuracyPvp": 94,
+    "highestWpm": 110,
+    "totalTimePlayed": 7200,
+    "wordsTyped": 15000,
+    "updatedAt": "2025-04-14T07:50:00Z"
+  },
+  {
+    "userId": "b5f8c49f-dc1b-4f9e-93d7-fca9e8a1a123",
+    "soloMatches": 12,
+    "pvpMatches": 6,
+    "wins": 5,
+    "avgWpmPvp": 67,
+    "avgAccuracyPvp": 91,
+    "highestWpm": 93,
+    "totalTimePlayed": 5000,
+    "wordsTyped": 11200,
+    "updatedAt": "2025-04-14T12:05:00Z"
+  },
+  {
+    "userId": "a7d5b3e9-f6cf-4fce-8a59-8b4751d7f8c1",
+    "soloMatches": 18,
+    "pvpMatches": 8,
+    "wins": 10,
+    "avgWpmPvp": 72,
+    "avgAccuracyPvp": 92,
+    "highestWpm": 98,
+    "totalTimePlayed": 6300,
+    "wordsTyped": 12800,
+    "updatedAt": "2025-04-14T10:20:00Z"
+  },
+  {
+    "userId": "ea6c0321-4b7a-4e4e-9bbf-3bb9c652e43f",
+    "soloMatches": 14,
+    "pvpMatches": 11,
+    "wins": 9,
+    "avgWpmPvp": 74,
+    "avgAccuracyPvp": 90,
+    "highestWpm": 102,
+    "totalTimePlayed": 5600,
+    "wordsTyped": 11500,
+    "updatedAt": "2025-04-14T08:55:00Z"
+  },
+  {
+    "userId": "f3d0ec48-5d2a-4d90-a3f0-69cb24d9b293",
+    "soloMatches": 16,
+    "pvpMatches": 10,
+    "wins": 11,
+    "avgWpmPvp": 77,
+    "avgAccuracyPvp": 93,
+    "highestWpm": 107,
+    "totalTimePlayed": 6100,
+    "wordsTyped": 13000,
+    "updatedAt": "2025-04-14T11:40:00Z"
+  },
+  {
+    "userId": "c9e57a6d-9d5a-4b65-93ab-2d6843e7492d",
+    "soloMatches": 22,
+    "pvpMatches": 5,
+    "wins": 13,
+    "avgWpmPvp": 79,
+    "avgAccuracyPvp": 92,
+    "highestWpm": 106,
+    "totalTimePlayed": 6800,
+    "wordsTyped": 13800,
+    "updatedAt": "2025-04-14T09:30:00Z"
+  }
+]

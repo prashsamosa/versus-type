@@ -1,0 +1,92 @@
+[
+  {
+    "id": "7a6f8d73-4f7a-4fcd-bd3e-11c8c0e7a23a",
+    "username": "alice",
+    "email": "alice@example.com",
+    "passwordHash": "$2b$10$abc123hashExample",
+    "lastLogin": "2025-04-14T10:00:00Z",
+    "createdAt": "2025-04-10T08:30:00Z",
+    "updatedAt": "2025-04-14T10:00:00Z"
+  },
+  {
+    "id": "15aa965a-8b82-4b82-9af1-0e88e2d09c79",
+    "username": "bob",
+    "email": "bob@example.com",
+    "passwordHash": "$2b$10$def456hashExample",
+    "lastLogin": "2025-04-14T09:45:00Z",
+    "createdAt": "2025-04-11T11:20:00Z",
+    "updatedAt": "2025-04-14T09:45:00Z"
+  },
+  {
+    "id": "3e1d8a93-5aa1-47ad-9ab2-4298cb2c18be",
+    "username": "charlie",
+    "email": "charlie@example.com",
+    "passwordHash": "$2b$10$ghi789hashExample",
+    "lastLogin": "2025-04-14T08:30:00Z",
+    "createdAt": "2025-04-12T14:00:00Z",
+    "updatedAt": "2025-04-14T08:30:00Z"
+  },
+  {
+    "id": "dd59cfe5-2ba4-4f59-84d0-1c60a86e6f9b",
+    "username": "diana",
+    "email": "diana@example.com",
+    "passwordHash": "$2b$10$jkl012hashExample",
+    "lastLogin": "2025-04-14T11:15:00Z",
+    "createdAt": "2025-04-09T16:45:00Z",
+    "updatedAt": "2025-04-14T11:15:00Z"
+  },
+  {
+    "id": "9e6bf5b2-0b7f-4aa3-97f2-273e96b1f889",
+    "username": "edward",
+    "email": "edward@example.com",
+    "passwordHash": "$2b$10$mno345hashExample",
+    "lastLogin": "2025-04-14T07:50:00Z",
+    "createdAt": "2025-04-08T10:00:00Z",
+    "updatedAt": "2025-04-14T07:50:00Z"
+  },
+  {
+    "id": "b5f8c49f-dc1b-4f9e-93d7-fca9e8a1a123",
+    "username": "fiona",
+    "email": "fiona@example.com",
+    "passwordHash": "$2b$10$pqr678hashExample",
+    "lastLogin": "2025-04-14T12:05:00Z",
+    "createdAt": "2025-04-07T12:00:00Z",
+    "updatedAt": "2025-04-14T12:05:00Z"
+  },
+  {
+    "id": "a7d5b3e9-f6cf-4fce-8a59-8b4751d7f8c1",
+    "username": "george",
+    "email": "george@example.com",
+    "passwordHash": "$2b$10$stu901hashExample",
+    "lastLogin": "2025-04-14T10:20:00Z",
+    "createdAt": "2025-04-06T09:15:00Z",
+    "updatedAt": "2025-04-14T10:20:00Z"
+  },
+  {
+    "id": "ea6c0321-4b7a-4e4e-9bbf-3bb9c652e43f",
+    "username": "hannah",
+    "email": "hannah@example.com",
+    "passwordHash": "$2b$10$vwx234hashExample",
+    "lastLogin": "2025-04-14T08:55:00Z",
+    "createdAt": "2025-04-05T14:30:00Z",
+    "updatedAt": "2025-04-14T08:55:00Z"
+  },
+  {
+    "id": "f3d0ec48-5d2a-4d90-a3f0-69cb24d9b293",
+    "username": "ian",
+    "email": "ian@example.com",
+    "passwordHash": "$2b$10$yzA567hashExample",
+    "lastLogin": "2025-04-14T11:40:00Z",
+    "createdAt": "2025-04-04T18:10:00Z",
+    "updatedAt": "2025-04-14T11:40:00Z"
+  },
+  {
+    "id": "c9e57a6d-9d5a-4b65-93ab-2d6843e7492d",
+    "username": "julia",
+    "email": "julia@example.com",
+    "passwordHash": "$2b$10$BCD890hashExample",
+    "lastLogin": "2025-04-14T09:30:00Z",
+    "createdAt": "2025-04-03T13:25:00Z",
+    "updatedAt": "2025-04-14T09:30:00Z"
+  }
+]
