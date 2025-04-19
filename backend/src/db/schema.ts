@@ -20,6 +20,7 @@ export const user = sqliteTable(
     image: text("image"),
     createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+    isAnonymous: integer("is_anonymous", { mode: "boolean" }),
   },
   (table) => [index("idx_name").on(table.name)],
 );
