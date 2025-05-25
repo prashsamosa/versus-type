@@ -4,6 +4,7 @@ import {
   check,
   index,
   integer,
+  real,
   sqliteTable,
   text,
 } from "drizzle-orm/sqlite-core";
@@ -74,6 +75,7 @@ export const verification = sqliteTable("verification", {
 export const userSettings = sqliteTable("userSettings", {
   userId: text()
     .notNull()
+    .primaryKey()
     .references(() => user.id),
   soundEnabled: integer({ mode: "boolean" }).notNull().default(true),
   typingSoundEnabled: integer({ mode: "boolean" }).notNull().default(true),
@@ -84,16 +86,19 @@ export const userStats = sqliteTable(
   {
     userId: text()
       .notNull()
+      .primaryKey()
       .references(() => user.id),
     soloMatches: integer().notNull().default(0),
     pvpMatches: integer().notNull().default(0),
     wins: integer().notNull().default(0),
-    avgWpmPvp: integer().notNull().default(0),
-    avgAccuracyPvp: integer().notNull().default(0),
-    highestWpm: integer().notNull().default(0),
+    avgWpmPvp: real().notNull().default(0),
+    avgAccuracyPvp: real().notNull().default(0),
+    highestWpm: real().notNull().default(0),
     totalTimePlayed: integer().notNull().default(0),
     wordsTyped: integer().notNull().default(0),
-    updatedAt: text(),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .$onUpdateFn(() => new Date()),
   },
   (table) => [
     index("idx_avgWpmPvp").on(table.avgWpmPvp),
@@ -110,16 +115,12 @@ export const matches = sqliteTable(
       .$defaultFn(() => randomUUID()),
     mode: text().notNull().$type<"solo" | "pvp">(),
     private: integer({ mode: "boolean" }).notNull().default(false),
-    status: text().notNull().default("completed"),
+    status: text().notNull().default("waiting"),
     matchCode: text().unique(),
     createdAt: text().notNull(),
-    participantsDetails: text({ mode: "json" }).notNull().$type<{
-      userId: string;
-      wpm: number;
-      accuracy: number;
-      isWinner: boolean;
-      disconnected: boolean;
-    }>(),
+    participantsDetails: text()
+      .notNull()
+      .references(() => matchParticipants.id),
   },
   (table) => [
     // index("idx_matchType").on(table.matchType),
@@ -130,3 +131,18 @@ export const matches = sqliteTable(
     ),
   ],
 );
+
+export const matchParticipants = sqliteTable("matchParticipants", {
+  id: text()
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => randomUUID()),
+  matchId: text()
+    .notNull()
+    .references(() => matches.id, { onDelete: "cascade" }),
+  userId: text().notNull(),
+  wpm: real().notNull(),
+  accuracy: real().notNull(),
+  isWinner: integer({ mode: "boolean" }).notNull(),
+  disconnected: integer({ mode: "boolean" }).notNull(),
+});
