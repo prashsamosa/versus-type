@@ -8,7 +8,7 @@ const envSchema = z.object({
   BETTER_AUTH_SECRET: z.string(),
   BETTER_AUTH_URL: z.string().url(),
   PORT: z.coerce.number().default(3000),
-  CORS_ORIGIN: z.string().url(),
+  CORS_ORIGIN: z.string().url().or(z.literal("*")),
 });
 
 const env = envSchema.parse(process.env);
