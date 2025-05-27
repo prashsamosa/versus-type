@@ -1,0 +1,22 @@
+@server = http://localhost:3001/api
+@e1 = temp2@temp.com
+@p1 = password123
+
+### sign up
+POST {{server}}/auth/sign-up/email
+
+{
+  "name": "Test User",
+  "email": "{{e1}}",
+  "password": "{{p1}}"
+}
+
+### sign in
+POST {{server}}/auth/sign-in/email
+
+{
+  "email": "{{e1}}",
+  "password": "{{p1}}"
+}
+### get user info
+GET {{server}}/me

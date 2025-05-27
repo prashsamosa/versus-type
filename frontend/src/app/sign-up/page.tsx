@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function SignIn() {
   const [loading, setLoading] = useState(false);

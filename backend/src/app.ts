@@ -2,8 +2,8 @@ import express from "express";
 import cors from "cors";
 import env from "./env";
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "./utils/auth";
-import { fromNodeHeaders } from "better-auth/node";
+import { auth } from "./auth/auth";
+import userRouter from "./routes/user.router";
 
 const app = express();
 app.use(
@@ -13,18 +13,13 @@ app.use(
   }),
 );
 
-app.get("/api/me", async (req, res) => {
-  const session = await auth.api.getSession({
-    headers: fromNodeHeaders(req.headers),
-  });
-  res.json(session);
-});
-
 app.get("/ping", (_, res) => {
   res.send("pong");
 });
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
-app.use(express.json());
+app.use(express.json({ limit: "16kb" }));
+
+app.use("/api", userRouter);
 
 export default app;

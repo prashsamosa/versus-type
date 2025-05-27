@@ -78,7 +78,7 @@ export const userSettings = sqliteTable("userSettings", {
     .primaryKey()
     .references(() => user.id),
   soundEnabled: integer({ mode: "boolean" }).notNull().default(true),
-  typingSoundEnabled: integer({ mode: "boolean" }).notNull().default(true),
+  typingSoundEnabled: integer({ mode: "boolean" }).notNull().default(false),
 });
 
 export const userStats = sqliteTable(
