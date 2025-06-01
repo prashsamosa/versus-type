@@ -19,7 +19,6 @@ app.get("/ping", (_, res) => {
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use(express.json({ limit: "16kb" }));
-
-app.use("/api", userRouter);
+app.use("/api/user", userRouter);
 
 export default app;

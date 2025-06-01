@@ -1,5 +1,5 @@
 @server = http://localhost:3001/api
-@e1 = temp2@temp.com
+@e1 = temp4@temp.com
 @p1 = password123
 
 ### sign up
@@ -18,5 +18,14 @@ POST {{server}}/auth/sign-in/email
   "email": "{{e1}}",
   "password": "{{p1}}"
 }
+### sign out
+POST {{server}}/auth/sign-out
+
 ### get user info
-GET {{server}}/me
+GET {{server}}/user
+
+### get settings
+GET {{server}}/user/settings
+
+### get stats
+GET {{server}}/user/stats
