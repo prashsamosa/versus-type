@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "babel-plugin-react-compiler": "19.1.0-rc.2",
     "better-auth": "^1.2.8",
     "next": "15.3.2",
     "react": "^19.0.0",
