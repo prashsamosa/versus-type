@@ -1,1 +1,2 @@
-export * from "./settings.zod.ts";
+export * from "./settings.zod";
+export * from "./stats.zod";

@@ -4,16 +4,22 @@ import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 export default function SignIn() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const email = form.get("email") as string;
     const password = form.get("password") as string;
+    
     authClient.signIn.email(
       { email, password },
       {
@@ -27,49 +33,66 @@ export default function SignIn() {
         },
         onError: (ctx) => {
           setLoading(false);
-          setError("Unexpected error occurred");
-          if (ctx.error.message) setError(ctx.error.message);
+          setError(ctx.error.message || "Unexpected error occurred");
         },
       },
     );
   }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <h1 className="text-4xl font-bold">Sign In</h1>
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            className="border border-solid invalid:border-red-400 rounded-full h-10 px-4 w-full"
-            required
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            className="border border-solid border-black/[.08] dark:border-white/[.145] rounded-full h-10 px-4 w-full"
-            required
-          />
-          <p
-            className={
-              "text-center text-red-500 text-xl" + (error || " hidden")
-            }
-          >
-            {error}
-          </p>
-          <button
-            type="submit"
-            className={`rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto cursor-pointer ${loading ? "cursor-wait bg-gray-300" : ""}`}
-          >
-            Sign In
-          </button>
-        </form>
-        <Link href="/sign-up" className="text-xl m-auto">
-          Sign up instead
-        </Link>
-      </main>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Sign In</CardTitle>
+          <CardDescription>
+            Enter your credentials to access your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+
+            {error && (
+              <div className="text-destructive text-sm text-center">
+                {error}
+              </div>
+            )}
+
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading ? "Signing In..." : "Sign In"}
+            </Button>
+          </form>
+
+          <div className="text-center mt-4">
+            <Link 
+              href="/sign-up" 
+              className="text-sm text-muted-foreground hover:underline"
+            >
+              Don&apos;t have an account? Sign up
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

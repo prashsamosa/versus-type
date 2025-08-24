@@ -29,3 +29,11 @@ GET {{server}}/user/settings
 
 ### get stats
 GET {{server}}/user/stats
+
+### update settings
+PATCH {{server}}/user/settings
+
+{
+  "soundEnabled": true,
+  "typingSoundEnabled": true
+}

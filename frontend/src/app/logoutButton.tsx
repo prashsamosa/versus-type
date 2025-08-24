@@ -1,6 +1,7 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
 
 export function LogoutButton() {
   const handleLogout = async () => {
@@ -14,12 +15,10 @@ export function LogoutButton() {
   if (!authClient.useSession().data?.user) {
     return null;
   }
+  
   return (
-    <button
-      onClick={handleLogout}
-      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-    >
+    <Button variant="destructive" onClick={handleLogout}>
       Logout
-    </button>
+    </Button>
   );
 }

@@ -4,6 +4,7 @@ import { auth } from "../auth/auth";
 import { db } from "../db";
 import { userSettings, userStats } from "../db/schema";
 import { eq } from "drizzle-orm";
+import { SettingsSchema } from "@brawltype/types";
 
 const userRouter = Router();
 
@@ -14,12 +15,40 @@ userRouter.get("/", async (req, res) => {
   res.json(session);
 });
 
+userRouter.patch("/settings", async (req, res) => {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const session = await auth.api.getSession({
+    headers: fromNodeHeaders(req.headers),
+  });
+  if (!session) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  const updatedSettings = SettingsSchema.parse(req.body);
+  const existingSettings = await db
+    .select()
+    .from(userSettings)
+    .where(eq(userSettings.userId, session.user.id));
+
+  if (existingSettings.length > 0) {
+    await db
+      .update(userSettings)
+      .set(updatedSettings)
+      .where(eq(userSettings.userId, session.user.id));
+  } else {
+    await db
+      .insert(userSettings)
+      .values({ userId: session.user.id, ...updatedSettings });
+  }
+
+  res.json({ message: "Settings updated successfully" });
+});
+
 userRouter.get("/settings", async (req, res) => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
   const session = await auth.api.getSession({
     headers: fromNodeHeaders(req.headers),
   });
-  console.log("Session:", session);
   if (!session) {
     res.status(401).json({ error: "Unauthorized" });
     return;

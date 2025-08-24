@@ -14,7 +14,6 @@ export default async function middleware(req: NextRequest) {
   // IMP: This only checks the cookie, not the session validity.
   // TODO: Handle loop for corrupt cookie: / (invalid session) -> /sign-in (cookie present) -> / (invalid session) -> ...
   // use signOut to clear the cookie.
-  console.log(`Middleware triggered for ${req.method} ${req.nextUrl.pathname}`);
 
   const { pathname } = req.nextUrl;
 
