@@ -1,21 +1,21 @@
 {
-  "name": "@brawltype/types",
-  "version": "1.0.0",
-  "private": true,
-  "description": "",
-  "types": "src/index.ts",
-  "main": "src/index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.11.0",
-  "peerDependencies": {
-    "zod": "^3.25.51"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.2"
-  }
+	"name": "@brawltype/types",
+	"version": "1.0.0",
+	"private": true,
+	"description": "",
+	"types": "src/index.ts",
+	"main": "src/index.ts",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.11.0",
+	"peerDependencies": {
+		"zod": "^3.25.51"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.2"
+	}
 }

@@ -7,14 +7,14 @@ import userRouter from "./routes/user.router";
 
 const app = express();
 app.use(
-  cors({
-    origin: env.CORS_ORIGIN.split(" "),
-    credentials: true,
-  }),
+	cors({
+		origin: env.CORS_ORIGIN.split(" "),
+		credentials: true,
+	}),
 );
 
 app.get("/ping", (_, res) => {
-  res.send("pong");
+	res.send("pong");
 });
 
 app.all("/api/auth/*splat", toNodeHandler(auth));

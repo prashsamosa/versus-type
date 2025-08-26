@@ -6,15 +6,15 @@ import * as schema from "../db/schema";
 import { afterSignUpHook } from "./afterSignUp.middleware";
 
 export const auth = betterAuth({
-  database: drizzleAdapter(db, {
-    provider: "sqlite",
-    schema: schema,
-  }),
-  emailAndPassword: {
-    enabled: true,
-  },
-  plugins: [anonymous()],
-  hooks: {
-    after: afterSignUpHook,
-  },
+	database: drizzleAdapter(db, {
+		provider: "sqlite",
+		schema: schema,
+	}),
+	emailAndPassword: {
+		enabled: true,
+	},
+	plugins: [anonymous()],
+	hooks: {
+		after: afterSignUpHook,
+	},
 });

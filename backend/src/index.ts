@@ -4,5 +4,5 @@ import app from "./app";
 const port = env.PORT;
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+	console.log(`Server is running on port ${port}`);
 });
