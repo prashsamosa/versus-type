@@ -23,10 +23,7 @@
 - [x] POST Settings
 - [x] Working Settings page
 - [x] Working Profile page
-- [ ] text gen
-- [ ] Figure out how to get passage
-- [ ] Figure out starting match
-
+- [x] text gen
 - [ ] Solo game page: Monkeytype like text input
 - [ ] Core UI Feedback
 - [ ] match stuff API with edge cases

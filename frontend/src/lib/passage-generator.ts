@@ -8,13 +8,13 @@ function getRandomElement(arr: string[]) {
 	return arr[Math.floor(Math.random() * arr.length)];
 }
 
-type Config = {
+export type GeneratorConfig = {
 	wordCount?: number;
 	punctuation?: boolean;
 	numbers?: boolean;
 };
 
-export function generateWords(config: Config = {}) {
+export function generateWords(config: GeneratorConfig = {}) {
 	const { wordCount = 50, punctuation = true, numbers = true } = config;
 
 	const generatedWords = [];
