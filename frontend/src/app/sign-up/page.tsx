@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -12,8 +12,8 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/auth-client";
 
 export default function SignUp() {
 	const [loading, setLoading] = useState(false);

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { SettingsForm } from "./form";
 import { getUserSettings } from "@/services/user.server";
+import { SettingsForm } from "./form";
 
 export default function SettingsPage() {
 	const settingsData = getUserSettings();

@@ -1,4 +1,3 @@
-import { LogoutButton } from "./logoutButton";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,6 +7,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { LogoutButton } from "./logoutButton";
 
 export default function Home() {
 	return (
@@ -28,8 +28,8 @@ export default function Home() {
 								<CardDescription>Jump right into the action</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<Button className="w-full" size="lg">
-									Start Game
+								<Button className="w-full" size="lg" asChild>
+									<Link href="/solo">Start Game</Link>
 								</Button>
 							</CardContent>
 						</Card>

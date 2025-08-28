@@ -1,7 +1,7 @@
 "use client";
+import type { Settings } from "@brawltype/types";
 import { use, useState } from "react";
-import { Settings } from "@brawltype/types";
-import { updateUserSettings } from "@/services/user.client";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -9,10 +9,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { updateUserSettings } from "@/services/user.client";
 
 export function SettingsForm({
 	settingsData,

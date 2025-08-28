@@ -6,7 +6,8 @@
 		"useIgnoreFile": false
 	},
 	"files": {
-		"ignoreUnknown": false
+		"ignoreUnknown": true,
+		"includes": ["**", "!**/.next/**", "!**/components/ui/**"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -15,9 +16,14 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"suspicious": {
-				"noArrayIndexKey": "off"
+			"correctness": {
+				"useUniqueElementIds": "off"
 			},
+			"suspicious": {
+				"noArrayIndexKey": "off",
+				"noUnknownAtRules": "off"
+			},
+			"a11y": "off",
 			"recommended": true
 		}
 	},

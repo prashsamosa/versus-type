@@ -1,4 +1,4 @@
-import { getUserStats } from "@/services/user.server";
+import type { Stats } from "@brawltype/types";
 import {
 	Card,
 	CardContent,
@@ -7,7 +7,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Stats } from "@brawltype/types";
+import { getUserStats } from "@/services/user.server";
 
 function StatCard({
 	title,
