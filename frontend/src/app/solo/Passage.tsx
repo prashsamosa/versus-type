@@ -13,8 +13,8 @@ const config: GeneratorConfig = {
 };
 
 export default function Passage() {
-	const [passage, setPassage] = useState(() => generateWords(config).join(" "));
-	const characters = passage.split("");
+	const [words, setWords] = useState(() => generateWords(config));
+	const passageChars = words.join(" ");
 
 	const [typedText, setTypedText] = useState("");
 	const [scrollOffset, setScrollOffset] = useState(0);
@@ -49,7 +49,7 @@ export default function Passage() {
 
 		const totalHeight =
 			span.offsetParent?.scrollHeight ?? container.scrollHeight;
-		const visibleHeight = Math.min(totalHeight, lineHeight * 3 + pt + pb);
+		const visibleHeight = Math.min(totalHeight, lineHeight * 4 + pt + pb);
 		container.style.height = `${visibleHeight}px`;
 
 		const targetOffset = Math.max(span.offsetTop - lineHeight, 0);
@@ -77,7 +77,7 @@ export default function Passage() {
 		const idx = prev.length;
 		if (val.length === prev.length + 1 && val.startsWith(prev)) {
 			const typed = val[idx];
-			const expected = passage[idx];
+			const expected = passageChars[idx];
 			recordKey(typed, expected);
 		}
 		prevInputRef.current = val;
@@ -85,14 +85,14 @@ export default function Passage() {
 		setTypedText(val);
 		if (startRef.current === null) startRef.current = performance.now();
 
-		if (val.length >= passage.length && !finished) {
+		if (val.length >= passageChars.length && !finished) {
 			endRef.current = performance.now();
 			setFinished(true);
 		}
 	}
 
 	function restartTest() {
-		setPassage(generateWords(config).join(" "));
+		setWords(generateWords(config));
 		setTypedText("");
 		startRef.current = null;
 		endRef.current = null;
@@ -119,11 +119,12 @@ export default function Passage() {
 				startTs={startRef.current}
 				endTs={endRef.current}
 				input={typedText}
-				target={passage}
+				target={passageChars}
 				onRestartAction={restartTest}
 			/>
 		);
 	}
+	let idx = 0;
 
 	return (
 		<div
@@ -132,8 +133,13 @@ export default function Passage() {
 			onClick={() => {
 				hiddenInputRef.current?.focus();
 			}}
-			style={{ position: "relative" }}
 		>
+			<div
+				className="absolute bottom-0 left-0 w-full h-16 z-10 select-none"
+				style={{
+					background: "linear-gradient(to bottom, transparent, var(--card))",
+				}}
+			/>
 			<input
 				ref={hiddenInputRef}
 				type="text"
@@ -155,28 +161,60 @@ export default function Passage() {
 					transition: "transform 0.1s ease-out",
 				}}
 			>
-				{characters.map((char, index) => {
-					const isTyped = index < currentIndex;
-					const isCorrect = char === typedText[index];
-					let charClassName = "text-foreground";
-					if (isTyped) {
-						charClassName = isCorrect ? "text-gray-400" : "text-destructive";
-					}
-					return (
-						<span
-							key={index}
-							ref={(el) => {
-								if (el) charRefs.current[index] = el;
-							}}
-							className={charClassName}
-						>
-							{char || " "}
+				{words.map((word, w) => (
+					<>
+						<span key={`w-${w}`} className="border">
+							{word.split("").map((char, c) => {
+								const i = idx++;
+								const isTyped = i < currentIndex;
+								const isCorrect = char === typedText[i];
+								let charClassName = "text-foreground";
+								if (isTyped) {
+									charClassName = isCorrect
+										? "text-gray-400"
+										: "text-destructive";
+								}
+								return (
+									<span
+										key={`c-${w}-${c}`}
+										ref={(el) => {
+											if (el) charRefs.current[i] = el;
+										}}
+										className={charClassName}
+									>
+										{char}
+									</span>
+								);
+							})}
 						</span>
-					);
-				})}
+						{w < words.length - 1
+							? // IFFE to capture and increment idx value, because ref callbacks are called later when everything is done
+								(() => {
+									const i = idx++;
+									return (
+										<span
+											key={`sp-${w}`}
+											ref={(el) => {
+												if (el) charRefs.current[i] = el;
+											}}
+											className={
+												currentIndex > i
+													? typedText[i] === " "
+														? "text-gray-400"
+														: "bg-destructive/50"
+													: "text-foreground"
+											}
+										>
+											{" "}
+										</span>
+									);
+								})()
+							: null}
+					</>
+				))}
 				<span
 					ref={(el) => {
-						if (el) charRefs.current[characters.length] = el;
+						if (el) charRefs.current[passageChars.length] = el;
 					}}
 					className="inline-block w-px opacity-0"
 				></span>
@@ -186,7 +224,7 @@ export default function Passage() {
 				<Cursor
 					x={cursorPos.x}
 					y={cursorPos.y}
-					height={charRefs.current[0].offsetHeight ?? 0}
+					height={charRefs.current[0]?.offsetHeight ?? 0}
 				/>
 			) : null}
 		</div>
