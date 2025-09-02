@@ -7,7 +7,7 @@ import Cursor from "./Cursor";
 import FinishedStats from "./FinishedStats";
 
 const config: GeneratorConfig = {
-	wordCount: 30,
+	wordCount: 90,
 	punctuation: true,
 	numbers: false,
 };
@@ -16,10 +16,11 @@ export default function Passage() {
 	const [passage, setPassage] = useState(() => generateWords(config).join(" "));
 	const characters = passage.split("");
 
-	const [userInput, setUserInput] = useState("");
+	const [typedText, setTypedText] = useState("");
+	const [scrollOffset, setScrollOffset] = useState(0);
 	const hiddenInputRef = useRef<HTMLInputElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
-	const measureSpansRef = useRef<HTMLSpanElement[]>([]);
+	const charRefs = useRef<HTMLSpanElement[]>([]);
 	const startRef = useRef<number | null>(null);
 	const endRef = useRef<number | null>(null);
 	const [focused, setFocused] = useState(false);
@@ -27,29 +28,45 @@ export default function Passage() {
 	const [cursorPos, setCursorPos] = useState<{
 		x: number;
 		y: number;
-		h: number;
-	}>({ x: 0, y: 0, h: 0 });
+	}>({ x: 0, y: 0 });
 
 	useEffect(() => {
 		hiddenInputRef.current?.focus();
 	}, []);
 
+	// every time I touch this code, plumbing school looks real nice
 	useLayoutEffect(() => {
-		const index = userInput.length;
-		const span = measureSpansRef.current[index];
+		const index = typedText.length;
+		const span = charRefs.current[index];
 		const container = containerRef.current;
 		if (!span || !container) return;
-		const sb = span.getBoundingClientRect();
-		const cb = container.getBoundingClientRect();
-		const cs = getComputedStyle(container);
-		const paddingLeft = parseFloat(cs.paddingLeft) || 0;
-		const paddingTop = parseFloat(cs.paddingTop) || 0;
-		setCursorPos({
-			x: sb.left - cb.left - paddingLeft,
-			y: sb.top - cb.top - paddingTop,
-			h: sb.height,
+
+		const containerStyle = getComputedStyle(container);
+		const lineHeight = span.offsetHeight;
+		const pt = parseFloat(containerStyle.paddingTop) || 0;
+		const pb = parseFloat(containerStyle.paddingBottom) || 0;
+		const pl = parseFloat(containerStyle.paddingLeft) || 0;
+
+		const totalHeight =
+			span.offsetParent?.scrollHeight ?? container.scrollHeight;
+		const visibleHeight = Math.min(totalHeight, lineHeight * 3 + pt + pb);
+		container.style.height = `${visibleHeight}px`;
+
+		const targetOffset = Math.max(span.offsetTop - lineHeight, 0);
+
+		if (targetOffset !== scrollOffset) {
+			setScrollOffset(targetOffset);
+		}
+
+		const raf = requestAnimationFrame(() => {
+			const x = pl + span.offsetLeft;
+			const y = pt + (span.offsetTop - targetOffset);
+			setCursorPos({ x, y });
 		});
-	}, [userInput]);
+
+		return () => cancelAnimationFrame(raf);
+	}, [typedText]);
+	// }, [userInput, scrollOffset]);
 
 	const prevInputRef = useRef("");
 
@@ -65,7 +82,7 @@ export default function Passage() {
 		}
 		prevInputRef.current = val;
 
-		setUserInput(val);
+		setTypedText(val);
 		if (startRef.current === null) startRef.current = performance.now();
 
 		if (val.length >= passage.length && !finished) {
@@ -76,10 +93,12 @@ export default function Passage() {
 
 	function restartTest() {
 		setPassage(generateWords(config).join(" "));
-		setUserInput("");
+		setTypedText("");
 		startRef.current = null;
 		endRef.current = null;
+		charRefs.current = [];
 		prevInputRef.current = "";
+		scrollOffset && setScrollOffset(0);
 		resetAccuracy();
 		setFinished(false);
 		hiddenInputRef.current?.focus();
@@ -92,14 +111,14 @@ export default function Passage() {
 		}
 	}
 
-	const currentIndex = userInput.length;
+	const currentIndex = typedText.length;
 
 	if (finished && startRef.current && endRef.current) {
 		return (
 			<FinishedStats
 				startTs={startRef.current}
 				endTs={endRef.current}
-				input={userInput}
+				input={typedText}
 				target={passage}
 				onRestartAction={restartTest}
 			/>
@@ -109,7 +128,7 @@ export default function Passage() {
 	return (
 		<div
 			ref={containerRef}
-			className="max-w-3xl mx-auto mt-20 p-4 bg-card rounded-md relative cursor-text"
+			className="max-w-3xl h-32 overflow-hidden mx-auto mt-20 p-4 bg-card rounded-md relative cursor-text"
 			onClick={() => {
 				hiddenInputRef.current?.focus();
 			}}
@@ -119,7 +138,7 @@ export default function Passage() {
 				ref={hiddenInputRef}
 				type="text"
 				className="absolute opacity-0 -z-10"
-				value={userInput}
+				value={typedText}
 				onChange={handleInputChange}
 				onKeyDown={handleKeyDown}
 				onFocus={() => {
@@ -129,10 +148,16 @@ export default function Passage() {
 					setFocused(false);
 				}}
 			/>
-			<div className="relative text-2xl leading-relaxed font-mono select-none">
+			<div
+				className="relative text-2xl leading-relaxed font-mono select-none"
+				style={{
+					transform: `translateY(-${scrollOffset}px)`,
+					transition: "transform 0.1s ease-out",
+				}}
+			>
 				{characters.map((char, index) => {
 					const isTyped = index < currentIndex;
-					const isCorrect = char === userInput[index];
+					const isCorrect = char === typedText[index];
 					let charClassName = "text-foreground";
 					if (isTyped) {
 						charClassName = isCorrect ? "text-gray-400" : "text-destructive";
@@ -141,7 +166,7 @@ export default function Passage() {
 						<span
 							key={index}
 							ref={(el) => {
-								if (el) measureSpansRef.current[index] = el;
+								if (el) charRefs.current[index] = el;
 							}}
 							className={charClassName}
 						>
@@ -151,14 +176,19 @@ export default function Passage() {
 				})}
 				<span
 					ref={(el) => {
-						if (el) measureSpansRef.current[characters.length] = el;
+						if (el) charRefs.current[characters.length] = el;
 					}}
 					className="inline-block w-px opacity-0"
 				></span>
-				{focused ? (
-					<Cursor x={cursorPos.x} y={cursorPos.y} height={cursorPos.h} />
-				) : null}
 			</div>
+
+			{focused ? (
+				<Cursor
+					x={cursorPos.x}
+					y={cursorPos.y}
+					height={charRefs.current[0].offsetHeight ?? 0}
+				/>
+			) : null}
 		</div>
 	);
 }
