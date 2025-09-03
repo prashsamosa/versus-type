@@ -7,12 +7,16 @@ import Cursor from "./Cursor";
 import FinishedStats from "./FinishedStats";
 
 const config: GeneratorConfig = {
-	wordCount: 90,
+	wordCount: 60,
 	punctuation: true,
 	numbers: false,
 };
 
-export default function Passage() {
+export default function Passage({
+	burstEffect = true,
+}: {
+	burstEffect?: boolean;
+}) {
 	const [words, setWords] = useState(() => generateWords(config));
 	const passageChars = words.join(" ");
 
@@ -150,7 +154,7 @@ export default function Passage() {
 			}}
 		>
 			<div
-				className="absolute bottom-0 left-0 w-full h-16 z-10 select-none"
+				className="absolute bottom-0 left-0 w-full h-12 z-10 select-none"
 				style={{
 					background: "linear-gradient(to bottom, transparent, var(--card))",
 				}}
@@ -177,26 +181,36 @@ export default function Passage() {
 				}}
 			>
 				{words.map((word, w) => {
+					// idx = index of first char of the word
+					// currentIndex = index of user's input(typedText.length)
 					const isWordTyped = currentIndex > idx + word.length;
 					const isWordCorrect =
 						typedText.slice(idx, idx + word.length) === word;
+					const isWordPartiallyCorrect =
+						typedText.slice(idx, idx + word.length) ===
+						word.slice(0, currentIndex - idx);
+					const isWordCurrentOrPrev = currentIndex >= idx;
 					return (
 						<>
 							<span
 								key={`w-${w}`}
-								className={`
-									whitespace-nowrap px-1 py-0.5 rounded transition`}
+								className={`whitespace-nowrap rounded transition ${isWordCurrentOrPrev && !isWordPartiallyCorrect ? "underline underline-offset-2 decoration-destructive" : ""}`}
 							>
 								{word.split("").map((char, c) => {
 									const i = idx++;
 									const isTyped = i < currentIndex;
 									const isCorrect = char === typedText[i];
-									let charClassName = "text-foreground";
+									let charClassName = "text-foreground ";
 									if (isTyped) {
 										charClassName = isCorrect
 											? "text-gray-400"
 											: "text-destructive";
 									}
+									charClassName +=
+										isWordCurrentOrPrev && !isWordPartiallyCorrect
+											? " underline underline-offset-4 decoration-destructive"
+											: "";
+
 									return (
 										<span
 											key={`c-${w}-${c}`}
@@ -209,7 +223,7 @@ export default function Passage() {
 												transition:
 													"transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
 												transform:
-													isWordTyped && isWordCorrect
+													burstEffect && isWordTyped && isWordCorrect
 														? passageTransforms[w][c]
 														: "none",
 
