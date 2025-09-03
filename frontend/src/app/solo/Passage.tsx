@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { recordKey, resetAccuracy } from "@/lib/accuracy";
 import { type GeneratorConfig, generateWords } from "@/lib/passage-generator";
 import Cursor from "./Cursor";
@@ -23,12 +23,17 @@ export default function Passage() {
 	const charRefs = useRef<HTMLSpanElement[]>([]);
 	const startRef = useRef<number | null>(null);
 	const endRef = useRef<number | null>(null);
+	const lineHeightRef = useRef<number>(0);
 	const [focused, setFocused] = useState(false);
 	const [finished, setFinished] = useState(false);
 	const [cursorPos, setCursorPos] = useState<{
 		x: number;
 		y: number;
 	}>({ x: 0, y: 0 });
+
+	const passageTransforms = useMemo(() => {
+		return words.map((word) => word.split("").map(() => getRandomTransform()));
+	}, [words]);
 
 	useEffect(() => {
 		hiddenInputRef.current?.focus();
@@ -42,7 +47,13 @@ export default function Passage() {
 		if (!span || !container) return;
 
 		const containerStyle = getComputedStyle(container);
-		const lineHeight = span.offsetHeight;
+		// idk why these span.offsetHeight and span.offsetTop gets messed up when i type last char of a word
+		// so making em stable
+		if (lineHeightRef.current === 0 && span.offsetHeight > 0) {
+			lineHeightRef.current = span.offsetHeight;
+		}
+		const lineHeight = lineHeightRef.current;
+
 		const pt = parseFloat(containerStyle.paddingTop) || 0;
 		const pb = parseFloat(containerStyle.paddingBottom) || 0;
 		const pl = parseFloat(containerStyle.paddingLeft) || 0;
@@ -50,9 +61,12 @@ export default function Passage() {
 		const totalHeight =
 			span.offsetParent?.scrollHeight ?? container.scrollHeight;
 		const visibleHeight = Math.min(totalHeight, lineHeight * 4 + pt + pb);
-		container.style.height = `${visibleHeight}px`;
 
-		const targetOffset = Math.max(span.offsetTop - lineHeight, 0);
+		container.style.height = `${Math.max(visibleHeight, lineHeight * 4 + pt + pb)}px`;
+		const stableOffsetTop =
+			Math.round(span.offsetTop / lineHeight) * lineHeight;
+
+		const targetOffset = Math.max(stableOffsetTop - lineHeight, 0);
 
 		if (targetOffset !== scrollOffset) {
 			setScrollOffset(targetOffset);
@@ -60,7 +74,7 @@ export default function Passage() {
 
 		const raf = requestAnimationFrame(() => {
 			const x = pl + span.offsetLeft;
-			const y = pt + (span.offsetTop - targetOffset);
+			const y = pt + (stableOffsetTop - targetOffset);
 			setCursorPos({ x, y });
 		});
 
@@ -83,6 +97,7 @@ export default function Passage() {
 		prevInputRef.current = val;
 
 		setTypedText(val);
+
 		if (startRef.current === null) startRef.current = performance.now();
 
 		if (val.length >= passageChars.length && !finished) {
@@ -161,57 +176,77 @@ export default function Passage() {
 					transition: "transform 0.1s ease-out",
 				}}
 			>
-				{words.map((word, w) => (
-					<>
-						<span key={`w-${w}`} className="border">
-							{word.split("").map((char, c) => {
-								const i = idx++;
-								const isTyped = i < currentIndex;
-								const isCorrect = char === typedText[i];
-								let charClassName = "text-foreground";
-								if (isTyped) {
-									charClassName = isCorrect
-										? "text-gray-400"
-										: "text-destructive";
-								}
-								return (
-									<span
-										key={`c-${w}-${c}`}
-										ref={(el) => {
-											if (el) charRefs.current[i] = el;
-										}}
-										className={charClassName}
-									>
-										{char}
-									</span>
-								);
-							})}
-						</span>
-						{w < words.length - 1
-							? // IFFE to capture and increment idx value, because ref callbacks are called later when everything is done
-								(() => {
+				{words.map((word, w) => {
+					const isWordTyped = currentIndex > idx + word.length;
+					const isWordCorrect =
+						typedText.slice(idx, idx + word.length) === word;
+					return (
+						<>
+							<span
+								key={`w-${w}`}
+								className={`
+									whitespace-nowrap px-1 py-0.5 rounded transition`}
+							>
+								{word.split("").map((char, c) => {
 									const i = idx++;
+									const isTyped = i < currentIndex;
+									const isCorrect = char === typedText[i];
+									let charClassName = "text-foreground";
+									if (isTyped) {
+										charClassName = isCorrect
+											? "text-gray-400"
+											: "text-destructive";
+									}
 									return (
 										<span
-											key={`sp-${w}`}
+											key={`c-${w}-${c}`}
 											ref={(el) => {
 												if (el) charRefs.current[i] = el;
 											}}
-											className={
-												currentIndex > i
-													? typedText[i] === " "
-														? "text-gray-400"
-														: "bg-destructive/50"
-													: "text-foreground"
-											}
+											className={charClassName}
+											style={{
+												display: "inline-block",
+												transition:
+													"transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+												transform:
+													isWordTyped && isWordCorrect
+														? passageTransforms[w][c]
+														: "none",
+
+												willChange: "transform",
+											}}
 										>
-											{" "}
+											{char}
 										</span>
 									);
-								})()
-							: null}
-					</>
-				))}
+								})}
+							</span>
+							{w < words.length - 1
+								? // IFFE to capture and increment idx value, because ref callbacks are called later when everything is done
+									(() => {
+										const i = idx++;
+										return (
+											<span
+												key={`sp-${w}`}
+												ref={(el) => {
+													if (el) charRefs.current[i] = el;
+												}}
+												className={
+													currentIndex > i
+														? typedText[i] === " "
+															? "text-gray-400"
+															: "bg-destructive/20 rounded"
+														: "text-foreground"
+												}
+											>
+												{" "}
+											</span>
+										);
+									})()
+								: null}
+						</>
+					);
+				})}
 				<span
 					ref={(el) => {
 						if (el) charRefs.current[passageChars.length] = el;
@@ -229,4 +264,11 @@ export default function Passage() {
 			) : null}
 		</div>
 	);
+}
+
+function getRandomTransform() {
+	const x = Math.random() * 10 - 5; // -5px to 5px
+	const y = Math.random() * 10 - 5; // -5px to 5px
+	const rot = Math.random() * 50 - 25; // -25deg to 25deg
+	return `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${rot.toFixed(2)}deg)`;
 }
