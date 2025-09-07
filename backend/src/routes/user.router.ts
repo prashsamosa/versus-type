@@ -1,10 +1,11 @@
+import { SettingsSchema } from "@brawltype/types";
+import { TestStatsSchema } from "@brawltype/types/src/test.zod";
 import { fromNodeHeaders } from "better-auth/node";
+import { eq, sql } from "drizzle-orm";
 import { Router } from "express";
 import { auth } from "../auth/auth";
 import { db } from "../db";
-import { userSettings, userStats } from "../db/schema";
-import { eq } from "drizzle-orm";
-import { SettingsSchema } from "@brawltype/types";
+import { tests, userSettings, userStats } from "../db/schema";
 
 const userRouter = Router();
 

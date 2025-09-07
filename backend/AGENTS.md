@@ -12,3 +12,13 @@ here are the scripts in package.json:
   },
 ```
 use lint:fix where possible, instead of manually fixing formatting errors.
+
+Do NOT make arrow functions where functions can be defined normally.
+like, do this:
+function fun() {...}
+instead of this:
+const fun = () => {...}
+
+And this doesn't apply for inline functions, use arrow functions for inline functions.
+
+Use 'type' instead of 'interface' for defining types.

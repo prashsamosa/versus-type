@@ -1,5 +1,5 @@
-import { sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { sql } from "drizzle-orm";
 import {
 	check,
 	index,
@@ -88,14 +88,17 @@ export const userStats = sqliteTable(
 			.notNull()
 			.primaryKey()
 			.references(() => user.id),
-		soloMatches: integer().notNull().default(0),
+		tests: integer().notNull().default(0),
 		pvpMatches: integer().notNull().default(0),
 		wins: integer().notNull().default(0),
 		avgWpmPvp: real().notNull().default(0),
 		avgAccuracyPvp: real().notNull().default(0),
 		highestWpm: real().notNull().default(0),
+		avgWpm: real().notNull().default(0),
+		avgAccuracy: real().notNull().default(0),
+		correctChars: integer().notNull().default(0),
+		errorChars: integer().notNull().default(0),
 		totalTimePlayed: integer().notNull().default(0),
-		wordsTyped: integer().notNull().default(0),
 		updatedAt: integer("updated_at", { mode: "timestamp" })
 			.notNull()
 			.$onUpdateFn(() => new Date()),
@@ -113,18 +116,18 @@ export const matches = sqliteTable(
 			.primaryKey()
 			.notNull()
 			.$defaultFn(() => randomUUID()),
-		mode: text().notNull().$type<"solo" | "pvp">(),
 		private: integer({ mode: "boolean" }).notNull().default(false),
 		status: text().notNull().default("waiting"),
 		matchCode: text().unique(),
-		createdAt: text().notNull(),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.$defaultFn(() => new Date()),
 		participantsDetails: text()
 			.notNull()
 			.references(() => matchParticipants.id),
 	},
 	(table) => [
 		// index("idx_matchType").on(table.matchType),
-		check("chk_matchType", sql`${table.mode} IN ('solo', 'pvp')`),
 		check(
 			"chk_status",
 			sql`${table.status} IN ('inProgress', 'completed', 'cancelled')`,
@@ -146,3 +149,28 @@ export const matchParticipants = sqliteTable("matchParticipants", {
 	isWinner: integer({ mode: "boolean" }).notNull(),
 	disconnected: integer({ mode: "boolean" }).notNull(),
 });
+
+export const tests = sqliteTable(
+	"tests",
+	{
+		id: text()
+			.primaryKey()
+			.notNull()
+			.$defaultFn(() => randomUUID()),
+		userId: text()
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		wpm: real().notNull(),
+		rawWpm: real().notNull(),
+		accuracy: real().notNull(),
+		time: integer().notNull(),
+		wordsTyped: integer().notNull(),
+		correctChars: integer().notNull(),
+		errorChars: integer().notNull(),
+		mode: text().$type<"time" | "words">().notNull(),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.$defaultFn(() => new Date()),
+	},
+	(table) => [check("chk_mode", sql`${table.mode} IN ('time', 'words')`)],
+);
