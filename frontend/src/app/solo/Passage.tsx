@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { recordKey, resetAccuracy } from "@/lib/accuracy";
-import { type GeneratorConfig, generateWords } from "@/lib/passage-generator";
+import { useEffect, useRef, useState } from "react";
+import type { GeneratorConfig } from "@/lib/passage-generator";
 import Cursor from "./Cursor";
 import FinishedStats from "./FinishedStats";
+import { useCursorPosition } from "./hooks/useCursorPosition";
+import { useTypingTest } from "./hooks/useTypingTest";
+import PassageDisplay from "./PassageDisplay";
 
 const config: GeneratorConfig = {
 	wordCount: 60,
@@ -17,120 +19,33 @@ export default function Passage({
 }: {
 	burstEffect?: boolean;
 }) {
-	const [words, setWords] = useState(() => generateWords(config));
-	const passageChars = words.join(" ");
+	const {
+		words,
+		passageChars,
+		typedText,
+		finished,
+		startRef,
+		endRef,
+		handleInputChange,
+		restartTest,
+		handleKeyDown,
+	} = useTypingTest(config);
 
-	const [typedText, setTypedText] = useState("");
-	const [scrollOffset, setScrollOffset] = useState(0);
-	const hiddenInputRef = useRef<HTMLInputElement>(null);
-	const containerRef = useRef<HTMLDivElement>(null);
-	const charRefs = useRef<HTMLSpanElement[]>([]);
-	const startRef = useRef<number | null>(null);
-	const endRef = useRef<number | null>(null);
-	const lineHeightRef = useRef<number>(0);
+	const { scrollOffset, cursorPos, containerRef, charRefs } =
+		useCursorPosition(typedText);
 	const [focused, setFocused] = useState(false);
-	const [finished, setFinished] = useState(false);
-	const [cursorPos, setCursorPos] = useState<{
-		x: number;
-		y: number;
-	}>({ x: 0, y: 0 });
 
-	const passageTransforms = useMemo(() => {
-		return words.map((word) => word.split("").map(() => getRandomTransform()));
-	}, [words]);
+	const hiddenInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
 		hiddenInputRef.current?.focus();
 	}, []);
 
-	// every time I touch this code, plumbing school looks real nice
-	useLayoutEffect(() => {
-		const index = typedText.length;
-		const span = charRefs.current[index];
-		const container = containerRef.current;
-		if (!span || !container) return;
-
-		const containerStyle = getComputedStyle(container);
-		// idk why these span.offsetHeight and span.offsetTop gets messed up when i type last char of a word
-		// so making em stable
-		if (lineHeightRef.current === 0 && span.offsetHeight > 0) {
-			lineHeightRef.current = span.offsetHeight;
-		}
-		const lineHeight = lineHeightRef.current;
-
-		const pt = parseFloat(containerStyle.paddingTop) || 0;
-		const pb = parseFloat(containerStyle.paddingBottom) || 0;
-		const pl = parseFloat(containerStyle.paddingLeft) || 0;
-
-		const totalHeight =
-			span.offsetParent?.scrollHeight ?? container.scrollHeight;
-		const visibleHeight = Math.min(totalHeight, lineHeight * 4 + pt + pb);
-
-		container.style.height = `${Math.max(visibleHeight, lineHeight * 4 + pt + pb)}px`;
-		const stableOffsetTop =
-			Math.round(span.offsetTop / lineHeight) * lineHeight;
-
-		const targetOffset = Math.max(stableOffsetTop - lineHeight, 0);
-
-		if (targetOffset !== scrollOffset) {
-			setScrollOffset(targetOffset);
-		}
-
-		const raf = requestAnimationFrame(() => {
-			const x = pl + span.offsetLeft;
-			const y = pt + (stableOffsetTop - targetOffset);
-			setCursorPos({ x, y });
-		});
-
-		return () => cancelAnimationFrame(raf);
-	}, [typedText]);
-	// }, [userInput, scrollOffset]);
-
-	const prevInputRef = useRef("");
-
-	function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const val = e.target.value;
-
-		const prev = prevInputRef.current;
-		const idx = prev.length;
-		if (val.length === prev.length + 1 && val.startsWith(prev)) {
-			const typed = val[idx];
-			const expected = passageChars[idx];
-			recordKey(typed, expected);
-		}
-		prevInputRef.current = val;
-
-		setTypedText(val);
-
-		if (startRef.current === null) startRef.current = performance.now();
-
-		if (val.length >= passageChars.length && !finished) {
-			endRef.current = performance.now();
-			setFinished(true);
-		}
-	}
-
-	function restartTest() {
-		setWords(generateWords(config));
-		setTypedText("");
-		startRef.current = null;
-		endRef.current = null;
-		charRefs.current = [];
-		prevInputRef.current = "";
-		scrollOffset && setScrollOffset(0);
-		resetAccuracy();
-		setFinished(false);
+	function handleRestart() {
+		restartTest();
+		if (charRefs.current) charRefs.current.length = 0;
 		hiddenInputRef.current?.focus();
 	}
-
-	function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-		if (e.key === "Tab") {
-			e.preventDefault();
-			restartTest();
-		}
-	}
-
-	const currentIndex = typedText.length;
 
 	if (finished && startRef.current && endRef.current) {
 		return (
@@ -139,11 +54,10 @@ export default function Passage({
 				endTs={endRef.current}
 				input={typedText}
 				target={passageChars}
-				onRestartAction={restartTest}
+				onRestartAction={handleRestart}
 			/>
 		);
 	}
-	let idx = 0;
 
 	return (
 		<div
@@ -154,7 +68,7 @@ export default function Passage({
 			}}
 		>
 			<div
-				className="absolute bottom-0 left-0 w-full h-12 z-10 select-none"
+				className="absolute bottom-0 left-0 w-full h-14 z-10 select-none"
 				style={{
 					background: "linear-gradient(to bottom, transparent, var(--card))",
 				}}
@@ -166,123 +80,25 @@ export default function Passage({
 				value={typedText}
 				onChange={handleInputChange}
 				onKeyDown={handleKeyDown}
-				onFocus={() => {
-					setFocused(true);
-				}}
-				onBlur={() => {
-					setFocused(false);
-				}}
+				onFocus={() => setFocused(true)}
+				onBlur={() => setFocused(false)}
 			/>
-			<div
-				className="relative text-2xl leading-relaxed font-mono select-none"
-				style={{
-					transform: `translateY(-${scrollOffset}px)`,
-					transition: "transform 0.1s ease-out",
-				}}
-			>
-				{words.map((word, w) => {
-					// idx = index of first char of the word
-					// currentIndex = index of user's input(typedText.length)
-					const isWordTyped = currentIndex > idx + word.length;
-					const isWordCorrect =
-						typedText.slice(idx, idx + word.length) === word;
-					const isWordPartiallyCorrect =
-						typedText.slice(idx, idx + word.length) ===
-						word.slice(0, currentIndex - idx);
-					const isWordCurrentOrPrev = currentIndex >= idx;
-					return (
-						<>
-							<span
-								key={`w-${w}`}
-								className={`whitespace-nowrap rounded transition ${isWordCurrentOrPrev && !isWordPartiallyCorrect ? "underline underline-offset-2 decoration-destructive" : ""}`}
-							>
-								{word.split("").map((char, c) => {
-									const i = idx++;
-									const isTyped = i < currentIndex;
-									const isCorrect = char === typedText[i];
-									let charClassName = "text-foreground ";
-									if (isTyped) {
-										charClassName = isCorrect
-											? "text-gray-400"
-											: "text-destructive";
-									}
-									charClassName +=
-										isWordCurrentOrPrev && !isWordPartiallyCorrect
-											? " underline underline-offset-4 decoration-destructive"
-											: "";
 
-									return (
-										<span
-											key={`c-${w}-${c}`}
-											ref={(el) => {
-												if (el) charRefs.current[i] = el;
-											}}
-											className={charClassName}
-											style={{
-												display: "inline-block",
-												transition:
-													"transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
-												transform:
-													burstEffect && isWordTyped && isWordCorrect
-														? passageTransforms[w][c]
-														: "none",
-
-												willChange: "transform",
-											}}
-										>
-											{char}
-										</span>
-									);
-								})}
-							</span>
-							{w < words.length - 1
-								? // IFFE to capture and increment idx value, because ref callbacks are called later when everything is done
-									(() => {
-										const i = idx++;
-										return (
-											<span
-												key={`sp-${w}`}
-												ref={(el) => {
-													if (el) charRefs.current[i] = el;
-												}}
-												className={
-													currentIndex > i
-														? typedText[i] === " "
-															? "text-gray-400"
-															: "bg-destructive/20 rounded"
-														: "text-foreground"
-												}
-											>
-												{" "}
-											</span>
-										);
-									})()
-								: null}
-						</>
-					);
-				})}
-				<span
-					ref={(el) => {
-						if (el) charRefs.current[passageChars.length] = el;
-					}}
-					className="inline-block w-px opacity-0"
-				></span>
-			</div>
+			<PassageDisplay
+				words={words}
+				typedText={typedText}
+				charRefs={charRefs}
+				scrollOffset={scrollOffset}
+				burstEffect={burstEffect}
+			/>
 
 			{focused ? (
 				<Cursor
 					x={cursorPos.x}
 					y={cursorPos.y}
-					height={charRefs.current[0]?.offsetHeight ?? 0}
+					height={charRefs.current?.[0]?.offsetHeight ?? 0}
 				/>
 			) : null}
 		</div>
 	);
-}
-
-function getRandomTransform() {
-	const x = Math.random() * 10 - 5; // -5px to 5px
-	const y = Math.random() * 10 - 5; // -5px to 5px
-	const rot = Math.random() * 50 - 25; // -25deg to 25deg
-	return `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${rot.toFixed(2)}deg)`;
 }

@@ -22,3 +22,7 @@ export function getAccuracy(): {
 	const acc = den > 0 ? (state.correct / den) * 100 : 100;
 	return { correct: state.correct, incorrect: state.incorrect, acc };
 }
+
+export function getErrorCount(): number {
+	return state.incorrect;
+}

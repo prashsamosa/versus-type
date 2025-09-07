@@ -37,3 +37,23 @@ PATCH {{server}}/user/settings
   "soundEnabled": true,
   "typingSoundEnabled": true
 }
+
+### Complete test
+POST {{server}}/test/
+
+{
+  "wpm": 128,
+  "rawWpm": 130,
+  "accuracy": 98.75,
+  "correctChars": 150,
+  "errorChars": 10,
+  "time": 33,
+  "wordsTyped": 60,
+  "mode": "words"
+}
+### Delete test
+DELETE {{server}}/test/
+
+{
+  "testId": "yo123"
+}
