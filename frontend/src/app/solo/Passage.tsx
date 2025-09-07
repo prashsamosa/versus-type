@@ -9,7 +9,7 @@ import { useTypingTest } from "./hooks/useTypingTest";
 import PassageDisplay from "./PassageDisplay";
 
 const config: GeneratorConfig = {
-	wordCount: 60,
+	wordCount: 15,
 	punctuation: true,
 	numbers: false,
 };
