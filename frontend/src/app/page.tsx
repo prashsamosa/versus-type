@@ -15,7 +15,7 @@ export default function Home() {
 			<div className="container max-w-4xl mx-auto">
 				<div className="text-center space-y-8">
 					<div className="space-y-4">
-						<h1 className="text-4xl font-bold tracking-tight">BrawlType</h1>
+						<h1 className="text-4xl font-bold tracking-tight">Versus Type</h1>
 						<p className="text-xl text-muted-foreground">
 							Test your typing skills in fast-paced battles
 						</p>

@@ -1,4 +1,4 @@
-import type { Settings, TestStats } from "@brawltype/types";
+import type { Settings, TestStats } from "@versus-type/types";
 
 const url = "http://localhost:3001/api/test";
 export async function completeTest(data: TestStats): Promise<Settings> {

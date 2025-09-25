@@ -1,4 +1,4 @@
-import { type Settings, SettingsSchema } from "@brawltype/types";
+import { type Settings, SettingsSchema } from "@versus-type/types";
 
 const url = "http://localhost:3001/api/user";
 export async function updateUserSettings(settings: Settings) {

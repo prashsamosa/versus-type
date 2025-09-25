@@ -1,4 +1,4 @@
-import type { Stats } from "@brawltype/types";
+import type { Stats } from "@versus-type/types";
 import {
 	Card,
 	CardContent,

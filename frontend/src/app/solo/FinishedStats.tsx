@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getAccuracy, getErrorCount } from "@/lib/accuracy";
+import { authClient } from "@/lib/auth-client";
 import { computeStats } from "@/lib/stats";
 import { completeTest } from "@/services/test.client";
 

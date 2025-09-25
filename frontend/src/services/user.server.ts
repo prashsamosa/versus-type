@@ -1,4 +1,4 @@
-import type { Settings, Stats } from "@brawltype/types";
+import type { Settings, Stats } from "@versus-type/types";
 import { headers } from "next/headers";
 
 const url = "http://localhost:3001/api/user";

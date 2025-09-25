@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Brawl Type",
+	title: "Versus Type",
 	description: "yeah",
 };
 
@@ -25,7 +25,7 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<head>
-				<title>Brawl Type</title>
+				<title>Versus Type</title>
 			</head>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}

@@ -1,5 +1,5 @@
-import { SettingsSchema } from "@brawltype/types";
-import { TestStatsSchema } from "@brawltype/types/src/test.zod";
+import { SettingsSchema } from "@versus-type/types";
+import { TestStatsSchema } from "@versus-type/types/src/test.zod";
 import { fromNodeHeaders } from "better-auth/node";
 import { eq, sql } from "drizzle-orm";
 import { Router } from "express";

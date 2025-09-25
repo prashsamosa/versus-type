@@ -1,5 +1,5 @@
 "use client";
-import type { Settings } from "@brawltype/types";
+import type { Settings } from "@versus-type/types";
 import { use, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
