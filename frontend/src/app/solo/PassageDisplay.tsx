@@ -45,11 +45,16 @@ function Space({
 	);
 }
 
-function getRandomTransform() {
-	const x = Math.random() * 6 - 3;
-	const y = Math.random() * 6 - 3;
-	const rot = Math.random() * 30 - 15;
-	return `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${rot.toFixed(2)}deg)`;
+// was testing funky ass effects for correct words
+function getTransform() {
+	// function getTransform(index: number) {
+	// const isDiagonalUp = index % 2 === 0;
+	// const x = isDiagonalUp ? -2 : 2;
+	// const y = isDiagonalUp ? -2 : 2;
+	// const rot = isDiagonalUp ? -8 : 8;
+	// return `translate(${x}px, ${y}px) rotate(${rot}deg)`;
+	// return `rotate(12deg)`;
+	return `translateX(-5px)`;
 }
 
 export default function PassageDisplay({
@@ -62,7 +67,7 @@ export default function PassageDisplay({
 	const currentIndex = typedText.length;
 
 	const passageTransforms = useMemo(() => {
-		return words.map((word) => word.split("").map(() => getRandomTransform()));
+		return words.map((word) => word.split("").map(() => getTransform()));
 	}, [words]);
 
 	let idx = 0;
