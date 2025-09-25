@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import Word from "./Word";
 
 interface PassageDisplayProps {
@@ -46,16 +45,12 @@ function Space({
 }
 
 // was testing funky ass effects for correct words
-function getTransform() {
-	// function getTransform(index: number) {
-	// const isDiagonalUp = index % 2 === 0;
-	// const x = isDiagonalUp ? -2 : 2;
-	// const y = isDiagonalUp ? -2 : 2;
-	// const rot = isDiagonalUp ? -8 : 8;
-	// return `translate(${x}px, ${y}px) rotate(${rot}deg)`;
-	// return `rotate(12deg)`;
-	return `translateX(-5px)`;
-}
+// function getRandomTransform() {
+// 	const x = Math.random() * 6 - 3;
+// 	const y = Math.random() * 6 - 3;
+// 	const rot = Math.random() * 30 - 15;
+// 	return `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${rot.toFixed(2)}deg)`;
+// }
 
 export default function PassageDisplay({
 	words,
@@ -66,9 +61,9 @@ export default function PassageDisplay({
 }: PassageDisplayProps) {
 	const currentIndex = typedText.length;
 
-	const passageTransforms = useMemo(() => {
-		return words.map((word) => word.split("").map(() => getTransform()));
-	}, [words]);
+	// const passageTransforms = useMemo(() => {
+	// 	return words.map((word) => word.split("").map(() => getTransform()));
+	// }, [words]);
 
 	let idx = 0;
 
@@ -85,7 +80,7 @@ export default function PassageDisplay({
 				idx += word.length;
 
 				return (
-					<>
+					<div key={`word-container-${wordIndex}`} className="inline">
 						<Word
 							key={`w-${wordIndex}`}
 							word={word}
@@ -95,7 +90,7 @@ export default function PassageDisplay({
 							typedText={typedText}
 							charRefs={charRefs}
 							burstEffect={burstEffect}
-							passageTransforms={passageTransforms}
+							// passageTransforms={passageTransforms}
 						/>
 						{wordIndex < words.length - 1 ? (
 							<Space
@@ -106,7 +101,7 @@ export default function PassageDisplay({
 								wordIndex={wordIndex}
 							/>
 						) : null}
-					</>
+					</div>
 				);
 			})}
 			<span

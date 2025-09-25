@@ -8,7 +8,7 @@ interface WordProps {
 	typedText: string;
 	charRefs: React.RefObject<HTMLSpanElement[]>;
 	burstEffect: boolean;
-	passageTransforms: string[][];
+	// passageTransforms: string[][];
 }
 
 export default function Word({
@@ -19,7 +19,7 @@ export default function Word({
 	typedText,
 	charRefs,
 	burstEffect,
-	passageTransforms,
+	// passageTransforms,
 }: WordProps) {
 	let idx = startIndex;
 
@@ -64,7 +64,8 @@ export default function Word({
 							transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
 							transform:
 								burstEffect && isWordTyped && isWordCorrect
-									? passageTransforms[wordIndex][charIndex]
+									? // ? passageTransforms[wordIndex][charIndex]
+										"translateX(-5px)"
 									: "none",
 							willChange: "transform",
 						}}

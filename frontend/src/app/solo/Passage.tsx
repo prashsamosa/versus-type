@@ -44,7 +44,10 @@ export default function Passage({
 	function handleRestart() {
 		restartTest();
 		if (charRefs.current) charRefs.current.length = 0;
-		hiddenInputRef.current?.focus();
+		setFocused(false);
+		setTimeout(() => {
+			hiddenInputRef.current?.focus();
+		}, 0);
 	}
 
 	if (finished && startRef.current && endRef.current) {
