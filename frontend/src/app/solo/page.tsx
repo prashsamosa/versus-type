@@ -12,7 +12,7 @@ export default function SoloPage() {
 
 	return (
 		<div className="bg-background flex items-center justify-center min-h-screen py-2">
-			<Passage burstEffect={true} initialWords={words} config={config} />
+			<Passage initialWords={words} config={config} />
 		</div>
 	);
 }

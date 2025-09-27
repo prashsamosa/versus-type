@@ -7,7 +7,6 @@ interface WordProps {
 	currentIndex: number;
 	typedText: string;
 	charRefs: React.RefObject<HTMLSpanElement[]>;
-	burstEffect: boolean;
 	// passageTransforms: string[][];
 }
 
@@ -18,7 +17,6 @@ export default function Word({
 	currentIndex,
 	typedText,
 	charRefs,
-	burstEffect,
 	// passageTransforms,
 }: WordProps) {
 	let idx = startIndex;
@@ -63,7 +61,7 @@ export default function Word({
 							display: "inline-block",
 							transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
 							transform:
-								burstEffect && isWordTyped && isWordCorrect
+								isWordTyped && isWordCorrect
 									? // ? passageTransforms[wordIndex][charIndex]
 										"translateX(-5px)"
 									: "none",

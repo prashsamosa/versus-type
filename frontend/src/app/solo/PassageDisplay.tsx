@@ -7,7 +7,6 @@ interface PassageDisplayProps {
 	typedText: string;
 	charRefs: React.RefObject<HTMLSpanElement[]>;
 	scrollOffset: number;
-	burstEffect: boolean;
 }
 
 interface SpaceProps {
@@ -57,7 +56,6 @@ export default function PassageDisplay({
 	typedText,
 	charRefs,
 	scrollOffset,
-	burstEffect,
 }: PassageDisplayProps) {
 	const currentIndex = typedText.length;
 
@@ -89,7 +87,6 @@ export default function PassageDisplay({
 							currentIndex={currentIndex}
 							typedText={typedText}
 							charRefs={charRefs}
-							burstEffect={burstEffect}
 							// passageTransforms={passageTransforms}
 						/>
 						{wordIndex < words.length - 1 ? (

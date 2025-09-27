@@ -9,11 +9,9 @@ import { useTypingTest } from "./hooks/useTypingTest";
 import PassageDisplay from "./PassageDisplay";
 
 export default function Passage({
-	burstEffect = true,
 	initialWords,
 	config,
 }: {
-	burstEffect?: boolean;
 	initialWords: string[];
 	config: GeneratorConfig;
 }) {
@@ -90,7 +88,6 @@ export default function Passage({
 				typedText={typedText}
 				charRefs={charRefs}
 				scrollOffset={scrollOffset}
-				burstEffect={burstEffect}
 			/>
 
 			{focused ? (
