@@ -8,16 +8,14 @@ import { useCursorPosition } from "./hooks/useCursorPosition";
 import { useTypingTest } from "./hooks/useTypingTest";
 import PassageDisplay from "./PassageDisplay";
 
-const config: GeneratorConfig = {
-	wordCount: 15,
-	punctuation: true,
-	numbers: false,
-};
-
 export default function Passage({
 	burstEffect = true,
+	initialWords,
+	config,
 }: {
 	burstEffect?: boolean;
+	initialWords: string[];
+	config: GeneratorConfig;
 }) {
 	const {
 		words,
@@ -29,7 +27,7 @@ export default function Passage({
 		handleInputChange,
 		restartTest,
 		handleKeyDown,
-	} = useTypingTest(config);
+	} = useTypingTest(config, initialWords);
 
 	const { scrollOffset, cursorPos, containerRef, charRefs } =
 		useCursorPosition(typedText);

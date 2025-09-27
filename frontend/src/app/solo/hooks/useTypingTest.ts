@@ -4,8 +4,8 @@ import { useRef, useState } from "react";
 import { recordKey, resetAccuracy } from "@/lib/accuracy";
 import { type GeneratorConfig, generateWords } from "@/lib/passage-generator";
 
-export function useTypingTest(config: GeneratorConfig) {
-	const [words, setWords] = useState(() => generateWords(config));
+export function useTypingTest(config: GeneratorConfig, initialWords: string[]) {
+	const [words, setWords] = useState(initialWords);
 	const passageChars = words.join(" ");
 
 	const [typedText, setTypedText] = useState("");
