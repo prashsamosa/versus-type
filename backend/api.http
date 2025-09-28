@@ -1,7 +1,8 @@
-@server = http://localhost:3001/api
+@server = http://localhost:4000/api
 @e1 = temp4@temp.com
 @p1 = password123
 
+##### User Auth and Info
 ### sign up
 POST {{server}}/auth/sign-up/email
 
@@ -38,7 +39,7 @@ PATCH {{server}}/user/settings
   "typingSoundEnabled": true
 }
 
-
+##### Tests
 ### Complete test
 POST {{server}}/test/
 
@@ -52,6 +53,7 @@ POST {{server}}/test/
   "wordsTyped": 60,
   "mode": "words"
 }
+
 ### Delete test
 DELETE {{server}}/test/
 
@@ -59,9 +61,10 @@ DELETE {{server}}/test/
   "testId": "yo123"
 }
 
+##### PvP
 ### Host
-POST {{server}}/pvp/host
+POST {{server}}/pvp/host/
 
 {
-  "private": true,
+  "private": true
 }
