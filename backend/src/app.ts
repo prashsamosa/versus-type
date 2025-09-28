@@ -34,4 +34,7 @@ export const io = new Server(httpServer, {
 	cors: { origin: "http://localhost:3000" },
 });
 
+import { initializeSocket } from "./socket";
+initializeSocket(io);
+
 export default app;

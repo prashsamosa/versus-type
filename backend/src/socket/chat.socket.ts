@@ -1,6 +1,7 @@
 import type { Server, Socket } from "socket.io";
 export function registerChatHandlers(io: Server, socket: Socket) {
 	socket.on("chat:send-message", (data) => {
+		console.log("chat:send-message", data);
 		const username = socket.data.username;
 		if (!username) {
 			return socket.emit("chat:error", { message: "Username not set" });

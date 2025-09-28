@@ -1,7 +1,8 @@
 import type { Server, Socket } from "socket.io";
 
 export function registerPvpSessionHandlers(io: Server, socket: Socket) {
-	socket.on("pvp:joinAsHost", (data, callback) => {
+	socket.on("pvp:join-as-host", (data, callback) => {
+		console.log("pvp:join-as-host", data);
 		const matchCode = data.matchCode;
 		const username = data.username;
 		if (typeof matchCode !== "string" || matchCode.length === 0) {
@@ -23,6 +24,7 @@ export function registerPvpSessionHandlers(io: Server, socket: Socket) {
 	});
 
 	socket.on("pvp:join", (data, callback) => {
+		console.log("pvp:join", data);
 		const matchCode = data.matchCode;
 		const username = data.username;
 		if (typeof matchCode !== "string" || matchCode.length === 0) {
