@@ -1,7 +1,7 @@
 import type { Server, Socket } from "socket.io";
 
 export function registerPvpSessionHandlers(io: Server, socket: Socket) {
-	socket.on("pvp:host", (data, callback) => {
+	socket.on("pvp:joinAsHost", (data, callback) => {
 		const matchCode = data.matchCode;
 		const username = data.username;
 		if (typeof matchCode !== "string" || matchCode.length === 0) {

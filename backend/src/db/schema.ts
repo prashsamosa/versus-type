@@ -117,7 +117,10 @@ export const matches = sqliteTable(
 			.notNull()
 			.$defaultFn(() => randomUUID()),
 		private: integer({ mode: "boolean" }).notNull().default(false),
-		status: text().notNull().default("waiting"),
+		status: text()
+			.$type<"waiting" | "inProgress" | "completed" | "cancelled">()
+			.notNull()
+			.default("waiting"),
 		matchCode: text().unique(),
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()

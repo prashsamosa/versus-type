@@ -68,3 +68,9 @@ POST {{server}}/pvp/host/
 {
   "private": true
 }
+### Get Match status
+POST {{server}}/pvp/match-status/
+
+{
+  "matchCode": "yo123"
+}
