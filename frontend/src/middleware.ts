@@ -20,11 +20,11 @@ export default async function middleware(req: NextRequest) {
 	const sessionCookie = (await cookies()).get(SESSION_COOKIE_NAME);
 	const isAuthenticated = !!sessionCookie;
 
-	const publicPaths = ["/sign-in", "/sign-up", "/forgot-password"];
-	const authPaths = ["/dashboard", "/profile", "/settings"];
+	const guestOnlyPaths = ["/sign-in", "/sign-up"];
+	const protectedPaths = ["/dashboard", "/profile", "/settings"];
 
-	// send already authenticated users to the home page (for public paths)
-	if (isAuthenticated && publicPaths.includes(pathname)) {
+	// send already authenticated users to the home page (for guest-only paths)
+	if (isAuthenticated && guestOnlyPaths.includes(pathname)) {
 		console.log(
 			`Authenticated user accessing public path ${pathname}. Redirecting to /.`,
 		);
@@ -32,7 +32,7 @@ export default async function middleware(req: NextRequest) {
 	}
 
 	// send non-authenticated user to /sign-in for protected routes
-	if (!isAuthenticated && authPaths.includes(pathname)) {
+	if (!isAuthenticated && protectedPaths.includes(pathname)) {
 		console.log(
 			`Unauthenticated user accessing protected path ${pathname}. Redirecting to /sign-in.`,
 		);

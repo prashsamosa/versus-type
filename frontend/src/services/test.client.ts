@@ -1,6 +1,6 @@
 import type { Settings, TestStats } from "@versus-type/types";
+import { url } from "./const";
 
-const url = "http://localhost:3001/api/test";
 export async function completeTest(data: TestStats): Promise<Settings> {
 	try {
 		const response = await fetch(`${url}/`, {

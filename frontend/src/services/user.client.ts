@@ -1,6 +1,6 @@
-import { type Settings, SettingsSchema } from "@versus-type/types";
+import type { Settings, SettingsSchema } from "@versus-type/types";
+import { url } from "./const";
 
-const url = "http://localhost:3001/api/user";
 export async function updateUserSettings(settings: Settings) {
 	SettingsSchema.parse(settings);
 	try {

@@ -1,7 +1,7 @@
 import type { Settings, Stats } from "@versus-type/types";
 import { headers } from "next/headers";
+import { url } from "./const";
 
-const url = "http://localhost:3001/api/user";
 export async function getUserSettings(): Promise<Settings> {
 	try {
 		const response = await fetch(`${url}/settings`, {
