@@ -38,6 +38,7 @@ PATCH {{server}}/user/settings
   "typingSoundEnabled": true
 }
 
+
 ### Complete test
 POST {{server}}/test/
 
@@ -56,4 +57,11 @@ DELETE {{server}}/test/
 
 {
   "testId": "yo123"
+}
+
+### Host
+POST {{server}}/pvp/host
+
+{
+  "private": true,
 }

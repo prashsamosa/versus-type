@@ -1,11 +1,10 @@
 import { SettingsSchema } from "@versus-type/types";
-import { TestStatsSchema } from "@versus-type/types/src/test.zod";
 import { fromNodeHeaders } from "better-auth/node";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Router } from "express";
 import { auth } from "../auth/auth";
 import { db } from "../db";
-import { tests, userSettings, userStats } from "../db/schema";
+import { userSettings, userStats } from "../db/schema";
 
 const userRouter = Router();
 

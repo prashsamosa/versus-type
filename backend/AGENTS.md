@@ -22,3 +22,6 @@ const fun = () => {...}
 And this doesn't apply for inline functions, use arrow functions for inline functions.
 
 Use 'type' instead of 'interface' for defining types.
+
+(am using pnpm)
+DO NOT do pnpm build/dev coz am running pnpm dev server already

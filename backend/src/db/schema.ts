@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import {
 	check,
@@ -122,33 +122,41 @@ export const matches = sqliteTable(
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
 			.$defaultFn(() => new Date()),
-		participantsDetails: text()
-			.notNull()
-			.references(() => matchParticipants.id),
 	},
 	(table) => [
 		// index("idx_matchType").on(table.matchType),
 		check(
 			"chk_status",
-			sql`${table.status} IN ('inProgress', 'completed', 'cancelled')`,
+			sql`${table.status} IN ('waiting', 'inProgress', 'completed', 'cancelled')`,
 		),
+		index("idx_matchCode").on(table.matchCode),
+		index("idx_status").on(table.status), // for matchmaking faster
 	],
 );
 
-export const matchParticipants = sqliteTable("matchParticipants", {
-	id: text()
-		.primaryKey()
-		.notNull()
-		.$defaultFn(() => randomUUID()),
-	matchId: text()
-		.notNull()
-		.references(() => matches.id, { onDelete: "cascade" }),
-	userId: text().notNull(),
-	wpm: real().notNull(),
-	accuracy: real().notNull(),
-	isWinner: integer({ mode: "boolean" }).notNull(),
-	disconnected: integer({ mode: "boolean" }).notNull(),
-});
+export const matchParticipants = sqliteTable(
+	"matchParticipants",
+	{
+		id: text()
+			.primaryKey()
+			.notNull()
+			.$defaultFn(() => randomUUID()),
+		matchId: text()
+			.notNull()
+			.references(() => matches.id, { onDelete: "cascade" }),
+		userId: text()
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		wpm: real().notNull(),
+		accuracy: real().notNull(),
+		isWinner: integer({ mode: "boolean" }).notNull(),
+		disconnected: integer({ mode: "boolean" }).notNull(),
+	},
+	(table) => [
+		index("idx_matchId").on(table.matchId),
+		index("idx_userId").on(table.userId),
+	],
+);
 
 export const tests = sqliteTable(
 	"tests",
