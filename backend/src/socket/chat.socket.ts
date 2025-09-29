@@ -1,29 +1,16 @@
-import type { Server, Socket } from "socket.io";
 import type {
+	ChatMessage,
 	ClientToServerEvents,
 	ServerToClientEvents,
-	InterServerEvents,
 	SocketData,
 } from "@versus-type/types";
+import type { Server, Socket } from "socket.io";
 
-const chatMessages = new Map<
-	string,
-	Array<{ username: string; message: string }>
->();
+export const chatMessages = new Map<string, Array<ChatMessage>>();
 
 export function registerChatHandlers(
-	io: Server<
-		ClientToServerEvents,
-		ServerToClientEvents,
-		InterServerEvents,
-		SocketData
-	>,
-	socket: Socket<
-		ClientToServerEvents,
-		ServerToClientEvents,
-		InterServerEvents,
-		SocketData
-	>,
+	io: Server<ClientToServerEvents, ServerToClientEvents, SocketData>,
+	socket: Socket<ClientToServerEvents, ServerToClientEvents, SocketData>,
 ) {
 	socket.on("chat:send-message", (data) => {
 		console.log("chat:send-message", data);
@@ -40,26 +27,29 @@ export function registerChatHandlers(
 		if (!matchCode) {
 			return socket.emit("chat:error", { message: "Not in a match room" });
 		}
-		if (!chatMessages.has(matchCode)) {
-			chatMessages.set(matchCode, []);
-		}
-		const newMessage = { username, message: message.trim() };
-		const messages = chatMessages.get(matchCode);
-		messages?.push(newMessage);
-
-		io.to(matchCode).emit("chat:new-message", newMessage);
+		emitNewMessage(io, matchCode, { username, message });
 	});
 }
 
 export function sendChatHistory(
-	socket: Socket<
-		ClientToServerEvents,
-		ServerToClientEvents,
-		InterServerEvents,
-		SocketData
-	>,
+	socket: Socket<ClientToServerEvents, ServerToClientEvents, SocketData>,
 	matchCode: string,
 ) {
 	const messages = chatMessages.get(matchCode) || [];
 	socket.emit("chat:history", messages);
+}
+
+export function emitNewMessage(
+	io: Server<ClientToServerEvents, ServerToClientEvents, SocketData>,
+	matchCode: string,
+	newMessage: ChatMessage,
+) {
+	console.log("Emitting message to", matchCode, newMessage);
+	if (!chatMessages.has(matchCode)) {
+		chatMessages.set(matchCode, []);
+	}
+	const messages = chatMessages.get(matchCode);
+	messages?.push(newMessage);
+
+	io.to(matchCode).emit("chat:new-message", newMessage);
 }

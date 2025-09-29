@@ -1,11 +1,14 @@
-// Server to Client Events (what server sends to client)
+export type ChatMessage = {
+	username: string;
+	message: string;
+	system?: boolean;
+};
+
 export interface ServerToClientEvents {
-	// PvP events
 	"pvp:player-joined": (data: { socketId: string; username: string }) => void;
+	"pvp:player-left": (data: { socketId: string; username: string }) => void;
 
-	// Chat events
-	"chat:new-message": (data: { username: string; message: string }) => void;
-
+	"chat:new-message": (data: ChatMessage) => void;
 	"chat:history": (
 		messages: Array<{
 			username: string;
@@ -16,9 +19,7 @@ export interface ServerToClientEvents {
 	"chat:error": (data: { message: string }) => void;
 }
 
-// Client to Server Events (what client sends to server)
 export interface ClientToServerEvents {
-	// PvP events
 	"pvp:join-as-host": (
 		data: {
 			matchCode: string;
@@ -35,21 +36,15 @@ export interface ClientToServerEvents {
 		callback: (response: SocketResponse) => void,
 	) => void;
 
-	// Chat events
 	"chat:send-message": (data: { message: string }) => void;
 }
 
-// Inter-server events (for scaling across multiple servers)
-export interface InterServerEvents {
-	ping: () => void;
-}
-
-// Socket data (stored on each socket instance)
 export interface SocketData {
 	username?: string;
+	matchCode?: string;
 }
 
-// Common response type for socket operations
+// ack response type
 export interface SocketResponse {
 	success: boolean;
 	message: string;
