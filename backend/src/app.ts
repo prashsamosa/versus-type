@@ -3,6 +3,12 @@ import { toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
 import { Server } from "socket.io";
+import type {
+	ClientToServerEvents,
+	ServerToClientEvents,
+	InterServerEvents,
+	SocketData,
+} from "@versus-type/types";
 import { auth } from "./auth/auth";
 import env from "./env";
 import errorHandler from "./middlewares/error.middleware";
@@ -30,7 +36,12 @@ app.use("/api/pvp", pvpRouter);
 app.use(errorHandler);
 
 export const httpServer = createServer(app);
-export const io = new Server(httpServer, {
+export const io = new Server<
+	ClientToServerEvents,
+	ServerToClientEvents,
+	InterServerEvents,
+	SocketData
+>(httpServer, {
 	cors: { origin: env.CORS_ORIGIN.split(" ") },
 });
 

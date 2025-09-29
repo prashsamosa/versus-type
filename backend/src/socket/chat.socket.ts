@@ -1,20 +1,39 @@
 import type { Server, Socket } from "socket.io";
+import type {
+	ClientToServerEvents,
+	ServerToClientEvents,
+	InterServerEvents,
+	SocketData,
+} from "@versus-type/types";
 
 const chatMessages = new Map<
 	string,
 	Array<{ username: string; message: string }>
 >();
 
-export function registerChatHandlers(io: Server, socket: Socket) {
+export function registerChatHandlers(
+	io: Server<
+		ClientToServerEvents,
+		ServerToClientEvents,
+		InterServerEvents,
+		SocketData
+	>,
+	socket: Socket<
+		ClientToServerEvents,
+		ServerToClientEvents,
+		InterServerEvents,
+		SocketData
+	>,
+) {
 	socket.on("chat:send-message", (data) => {
 		console.log("chat:send-message", data);
 		const username = socket.data.username;
 		if (!username) {
 			return socket.emit("chat:error", { message: "Username not set" });
 		}
-		const message = data.message;
-		if (typeof message !== "string" || message.trim().length === 0) {
-			return socket.emit("chat:error", { message: "Invalid message" });
+		const { message } = data;
+		if (message.trim().length === 0) {
+			return socket.emit("chat:error", { message: "Empty message" });
 		}
 		const matchCode =
 			socket.rooms.size > 1 ? Array.from(socket.rooms)[1] : null;
@@ -32,7 +51,15 @@ export function registerChatHandlers(io: Server, socket: Socket) {
 	});
 }
 
-export function sendChatHistory(socket: Socket, matchCode: string) {
+export function sendChatHistory(
+	socket: Socket<
+		ClientToServerEvents,
+		ServerToClientEvents,
+		InterServerEvents,
+		SocketData
+	>,
+	matchCode: string,
+) {
 	const messages = chatMessages.get(matchCode) || [];
 	socket.emit("chat:history", messages);
 }

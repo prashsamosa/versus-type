@@ -1,17 +1,29 @@
 import type { Server, Socket } from "socket.io";
+import type {
+	ClientToServerEvents,
+	ServerToClientEvents,
+	InterServerEvents,
+	SocketData,
+} from "@versus-type/types";
 import { sendChatHistory } from "./chat.socket";
 
-export function registerPvpSessionHandlers(io: Server, socket: Socket) {
+export function registerPvpSessionHandlers(
+	io: Server<
+		ClientToServerEvents,
+		ServerToClientEvents,
+		InterServerEvents,
+		SocketData
+	>,
+	socket: Socket<
+		ClientToServerEvents,
+		ServerToClientEvents,
+		InterServerEvents,
+		SocketData
+	>,
+) {
 	socket.on("pvp:join-as-host", (data, callback) => {
 		console.log("pvp:join-as-host", data);
-		const matchCode = data.matchCode;
-		const username = data.username;
-		if (typeof matchCode !== "string" || matchCode.length === 0) {
-			return callback({ success: false, message: "Invalid match code" });
-		}
-		if (typeof username !== "string" || username.length === 0) {
-			return callback({ success: false, message: "Invalid username" });
-		}
+		const { matchCode, username } = data;
 		if (io.sockets.adapter.rooms.has(matchCode)) {
 			return callback({
 				success: false,
@@ -27,14 +39,7 @@ export function registerPvpSessionHandlers(io: Server, socket: Socket) {
 
 	socket.on("pvp:join", (data, callback) => {
 		console.log("pvp:join", data);
-		const matchCode = data.matchCode;
-		const username = data.username;
-		if (typeof matchCode !== "string" || matchCode.length === 0) {
-			return callback({ success: false, message: "Invalid match code" });
-		}
-		if (typeof username !== "string" || username.length === 0) {
-			return callback({ success: false, message: "Invalid username" });
-		}
+		const { matchCode, username } = data;
 		const room = io.sockets.adapter.rooms.get(matchCode);
 		if (!room) {
 			return callback({ success: false, message: "Match not found" });

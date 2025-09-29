@@ -1,18 +1,19 @@
-import { io } from "socket.io-client";
+import { io, type Socket } from "socket.io-client";
+import type {
+	ServerToClientEvents,
+	ClientToServerEvents,
+	SocketResponse,
+} from "@versus-type/types";
 import { SERVER_URL } from "@/const";
 
-export let socket: ReturnType<typeof io> | null = null;
-
-type socketResponse = {
-	success: boolean;
-	message: string;
-};
+export let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null =
+	null;
 
 export async function setupSocketAndJoin(
 	username: string,
 	matchCode: string,
 	isHost: boolean,
-): Promise<socketResponse> {
+): Promise<SocketResponse> {
 	return new Promise((resolve, reject) => {
 		socket = io(SERVER_URL);
 
@@ -27,7 +28,7 @@ export async function setupSocketAndJoin(
 				const response = (await socket?.emitWithAck(event, {
 					username,
 					matchCode,
-				})) as socketResponse;
+				})) as SocketResponse;
 				resolve(response);
 			} catch (error) {
 				reject(error);
