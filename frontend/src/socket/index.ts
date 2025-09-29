@@ -1,9 +1,9 @@
-import { io, type Socket } from "socket.io-client";
 import type {
-	ServerToClientEvents,
 	ClientToServerEvents,
+	ServerToClientEvents,
 	SocketResponse,
 } from "@versus-type/types";
+import { io, type Socket } from "socket.io-client";
 import { SERVER_URL } from "@/const";
 
 export let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null =

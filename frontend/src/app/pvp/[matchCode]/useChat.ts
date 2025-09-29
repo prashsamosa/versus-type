@@ -1,41 +1,53 @@
+import type { ChatMessage, ServerToClientEvents } from "@versus-type/types";
 import { useEffect, useState } from "react";
 import { socket } from "@/socket";
 
-export type Message = { username: string; message: string; system?: boolean };
-
 export function useChat() {
-	const [messages, setMessages] = useState<Message[]>([]);
+	const [messages, setMessages] = useState<ChatMessage[]>([]);
+
 	useEffect(() => {
 		if (!socket) return;
-		function handleNewMessage(data: { username: string; message: string }) {
-			setMessages((prev) => [
-				...prev,
-				{ username: data.username, message: data.message },
-			]);
+
+		function handleNewMessage(data: ChatMessage) {
+			setMessages((prev) => [...prev, data]);
 		}
+
 		function handleHistory(
 			messages: Array<{ username: string; message: string }>,
 		) {
 			setMessages(messages);
 		}
-		function handleNewJoin(data: { socketId: string; username: string }) {
-			console.log("Player joined:", data);
+
+		function handleChatError(data: { message: string }) {
 			setMessages((prev) => [
 				...prev,
 				{
-					username: "System",
+					username: "",
 					system: true,
-					message: `${data.username} in da house`,
+					message: `Chat error: ${data.message}`,
 				},
 			]);
 		}
-		socket.on("pvp:player-joined", handleNewJoin);
-		socket.on("chat:history", handleHistory);
-		socket.on("chat:new-message", handleNewMessage);
+
+		const eventHandlers: Partial<
+			Record<keyof ServerToClientEvents, (...args: any[]) => void>
+		> = {
+			"chat:new-message": handleNewMessage,
+			"chat:history": handleHistory,
+			"chat:error": handleChatError,
+			// chat:new-message respond to these already
+			// "pvp:player-joined": handleNewJoin,
+			// "pvp:player-left": handlePlayerLeft,
+		};
+
+		Object.entries(eventHandlers).forEach(([event, handler]) => {
+			socket?.on(event as keyof ServerToClientEvents, handler);
+		});
+
 		return () => {
-			socket?.off("chat:new-message", handleNewMessage);
-			socket?.off("chat:history", handleHistory);
-			socket?.off("pvp:player-joined", handleNewJoin);
+			Object.entries(eventHandlers).forEach(([event, handler]) => {
+				socket?.off(event as keyof ServerToClientEvents, handler);
+			});
 		};
 	}, []);
 
@@ -44,5 +56,6 @@ export function useChat() {
 			socket.emit("chat:send-message", { message });
 		}
 	}
+
 	return { messages, sendMessage };
 }
