@@ -85,4 +85,12 @@
 	body {
 		@apply bg-background text-foreground;
 	}
+
+	button:not([disabled]),
+	[role="button"]:not([disabled]),
+	a:not([disabled]),
+	summary,
+	[tabindex]:not([tabindex="-1"]) {
+		cursor: pointer;
+	}
 }

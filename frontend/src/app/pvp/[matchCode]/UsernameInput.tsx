@@ -28,7 +28,7 @@ export function UsernameInput({
 		<div className="flex min-h-screen items-center justify-center bg-background">
 			<Card>
 				<form onSubmit={handleSubmit}>
-					<div className="flex">
+					<div className="flex gap-2 px-4">
 						<Input placeholder="Username" name="username" />
 						<Button type="submit">Set</Button>
 					</div>

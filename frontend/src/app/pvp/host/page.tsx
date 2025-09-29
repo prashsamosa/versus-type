@@ -9,10 +9,19 @@ import { hostMatch } from "@/services/pvp.client";
 
 export default function HostPage() {
 	const [isPrivate, setIsPrivate] = useState(false);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 	const router = useRouter();
-	async function handleSubmit() {
-		const matchCode = await hostMatch(isPrivate);
-		router.push(`/pvp/${matchCode}?isHost=true`);
+	function handleSubmit() {
+		setLoading(true);
+		hostMatch(isPrivate)
+			.then((matchCode) => {
+				router.push(`/pvp/${matchCode}?isHost=true`);
+			})
+			.catch((err) => {
+				setError(`Error: ${err.message}`);
+				setLoading(false);
+			});
 	}
 
 	return (
@@ -28,7 +37,10 @@ export default function HostPage() {
 							onCheckedChange={(checked) => setIsPrivate(!!checked)}
 						/>
 					</div>
-					<Button onClick={handleSubmit} />
+					<Button onClick={handleSubmit} disabled={loading} className="w-full">
+						{loading ? "Hosting..." : "Host Match"}
+					</Button>
+					{error && <p className="text-destructive text-center">{error}</p>}
 				</div>
 			</Card>
 		</div>

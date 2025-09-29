@@ -20,7 +20,7 @@ export default function Chat() {
 		};
 		socket.on("chat:new-message", handleNewMessage);
 		return () => {
-			socket.off("chat:new-message", handleNewMessage);
+			socket?.off("chat:new-message", handleNewMessage);
 		};
 	}, []);
 
@@ -42,14 +42,14 @@ export default function Chat() {
 			)}
 			<CardHeader>Chat</CardHeader>
 			<CardContent>
-				<div className="border rounded p-4 mb-4 h-64 overflow-y-auto">
+				<div className="border rounded p-4 mb-4 h-64 overflow-y-auto md:w-xl">
 					{messages.map((msg, index) => (
-						<div key={index} className="mb-2">
+						<div key={index} className="mb-2 wrap-anywhere">
 							<strong>{msg.username}:</strong> {msg.message}
 						</div>
 					))}
 				</div>
-				<form onSubmit={handleSubmit} className="flex">
+				<form onSubmit={handleSubmit} className="flex gap-2">
 					<Input
 						type="text"
 						name="inputMessage"

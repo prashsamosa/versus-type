@@ -1,9 +1,9 @@
 import type { Settings, TestStats } from "@versus-type/types";
-import { url } from "./const";
+import { API_URL } from "@/const";
 
 export async function completeTest(data: TestStats): Promise<Settings> {
 	try {
-		const response = await fetch(`${url}/`, {
+		const response = await fetch(`${API_URL}/`, {
 			method: "POST",
 			credentials: "include",
 			headers: { "Content-Type": "application/json" },

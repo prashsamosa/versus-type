@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { url } from "./const";
+import { API_URL } from "@/const";
 
 const MatchStatusResponseSchema = z.object({
 	matchStatus: z.enum(["notFound", "inProgress", "expired", "waiting"]),
@@ -8,7 +8,7 @@ type MatchStatus = "notFound" | "inProgress" | "expired" | "waiting";
 
 export async function getMatchStatus(matchCode: string): Promise<MatchStatus> {
 	try {
-		const response = await fetch(`${url}/pvp/match-status`, {
+		const response = await fetch(`${API_URL}/pvp/match-status`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

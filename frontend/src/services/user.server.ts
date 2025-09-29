@@ -1,10 +1,10 @@
 import type { Settings, Stats } from "@versus-type/types";
 import { headers } from "next/headers";
-import { url } from "./const";
+import { API_URL } from "@/const";
 
 export async function getUserSettings(): Promise<Settings> {
 	try {
-		const response = await fetch(`${url}/settings`, {
+		const response = await fetch(`${API_URL}/settings`, {
 			headers: await headers(),
 		});
 		if (!response.ok) {
@@ -19,7 +19,7 @@ export async function getUserSettings(): Promise<Settings> {
 
 export async function getUserStats(): Promise<Stats> {
 	try {
-		const response = await fetch(`${url}/stats`, {
+		const response = await fetch(`${API_URL}/stats`, {
 			headers: await headers(),
 		});
 		if (!response.ok) {

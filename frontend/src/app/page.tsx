@@ -25,11 +25,26 @@ export default function Home() {
 						<Card>
 							<CardHeader className="pb-3">
 								<CardTitle className="text-lg">Quick Start</CardTitle>
-								<CardDescription>Jump right into the action</CardDescription>
 							</CardHeader>
 							<CardContent>
 								<Button className="w-full" size="lg" asChild>
-									<Link href="/solo">Start Game</Link>
+									<Link href="/solo">Solo</Link>
+								</Button>
+								<Button
+									className="w-full mt-2"
+									size="lg"
+									variant="secondary"
+									asChild
+								>
+									<Link href="/pvp/host">Host</Link>
+								</Button>
+								<Button
+									className="w-full mt-2"
+									size="lg"
+									variant="outline"
+									asChild
+								>
+									<Link href="/pvp/join">Join</Link>
 								</Button>
 							</CardContent>
 						</Card>

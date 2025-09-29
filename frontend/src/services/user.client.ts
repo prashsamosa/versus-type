@@ -1,10 +1,10 @@
 import type { Settings, SettingsSchema } from "@versus-type/types";
-import { url } from "./const";
+import { API_URL } from "@/const";
 
 export async function updateUserSettings(settings: Settings) {
 	SettingsSchema.parse(settings);
 	try {
-		const response = await fetch(`${url}/settings`, {
+		const response = await fetch(`${API_URL}/settings`, {
 			method: "PATCH",
 			credentials: "include",
 			headers: { "Content-Type": "application/json" },

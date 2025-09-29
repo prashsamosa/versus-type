@@ -1,8 +1,8 @@
-import { url } from "./const";
+import { API_URL } from "@/const";
 
 export async function hostMatch(isPrivate: boolean) {
 	try {
-		const response = await fetch(`${url}/pvp/host`, {
+		const response = await fetch(`${API_URL}/pvp/host`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

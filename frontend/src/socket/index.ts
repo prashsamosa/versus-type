@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
+import { SERVER_URL } from "@/const";
 
-const SOCKET_SERVER_URL = "http://localhost:4000";
 export let socket: ReturnType<typeof io> | null = null;
 
 type socketResponse = {
@@ -14,7 +14,7 @@ export async function setupSocketAndJoin(
 	isHost: boolean,
 ): Promise<socketResponse> {
 	return new Promise((resolve, reject) => {
-		socket = io(SOCKET_SERVER_URL);
+		socket = io(SERVER_URL);
 
 		socket.on("connect", async () => {
 			try {
