@@ -23,7 +23,6 @@ export async function setupSocketAndJoin(
 					matchCode,
 					isHost,
 				});
-				console.log(socket);
 				const event = isHost ? "pvp:join-as-host" : "pvp:join";
 				const response = (await socket?.emitWithAck(event, {
 					username,

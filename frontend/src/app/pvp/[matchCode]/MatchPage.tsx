@@ -28,7 +28,6 @@ export function MatchPage({
 				setLoading(false);
 				setError(`Failed to connect to server: ${err.message}`);
 			});
-		console.log(socket);
 		return disconnectSocket;
 	}, [username]);
 

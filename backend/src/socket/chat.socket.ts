@@ -1,4 +1,10 @@
 import type { Server, Socket } from "socket.io";
+
+const chatMessages = new Map<
+	string,
+	Array<{ username: string; message: string }>
+>();
+
 export function registerChatHandlers(io: Server, socket: Socket) {
 	socket.on("chat:send-message", (data) => {
 		console.log("chat:send-message", data);
@@ -15,10 +21,18 @@ export function registerChatHandlers(io: Server, socket: Socket) {
 		if (!matchCode) {
 			return socket.emit("chat:error", { message: "Not in a match room" });
 		}
+		if (!chatMessages.has(matchCode)) {
+			chatMessages.set(matchCode, []);
+		}
+		const newMessage = { username, message: message.trim() };
+		const messages = chatMessages.get(matchCode);
+		messages?.push(newMessage);
 
-		io.to(matchCode).emit("chat:new-message", {
-			username,
-			message: message.trim(),
-		});
+		io.to(matchCode).emit("chat:new-message", newMessage);
 	});
+}
+
+export function sendChatHistory(socket: Socket, matchCode: string) {
+	const messages = chatMessages.get(matchCode) || [];
+	socket.emit("chat:history", messages);
 }

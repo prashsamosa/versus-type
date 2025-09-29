@@ -1,4 +1,5 @@
 import type { Server, Socket } from "socket.io";
+import { sendChatHistory } from "./chat.socket";
 
 export function registerPvpSessionHandlers(io: Server, socket: Socket) {
 	socket.on("pvp:join-as-host", (data, callback) => {
@@ -21,6 +22,7 @@ export function registerPvpSessionHandlers(io: Server, socket: Socket) {
 		socket.join(matchCode);
 		console.log(`Match hosted with code ${matchCode} by player ${socket.id}`);
 		callback({ success: true, message: `Match hosted with code ${matchCode}` });
+		sendChatHistory(socket, matchCode);
 	});
 
 	socket.on("pvp:join", (data, callback) => {
@@ -51,5 +53,6 @@ export function registerPvpSessionHandlers(io: Server, socket: Socket) {
 			socketId: socket.id,
 			username,
 		});
+		sendChatHistory(socket, matchCode);
 	});
 }

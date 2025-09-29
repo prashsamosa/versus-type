@@ -1,44 +1,52 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
-	"vcs": {
-		"enabled": false,
-		"clientKind": "git",
-		"useIgnoreFile": false
-	},
-	"files": {
-		"ignoreUnknown": true,
-		"includes": ["**", "!**/.next/**", "!**/components/ui/**"]
-	},
-	"formatter": {
-		"enabled": true,
-		"indentStyle": "tab"
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"correctness": {
-				"useExhaustiveDependencies": "off",
-				"useUniqueElementIds": "off"
-			},
-			"suspicious": {
-				"noArrayIndexKey": "off",
-				"noUnknownAtRules": "off"
-			},
-			"a11y": "off",
-			"recommended": true
-		}
-	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "double"
-		}
-	},
-	"assist": {
-		"enabled": true,
-		"actions": {
-			"source": {
-				"organizeImports": "on"
-			}
-		}
-	}
+  "$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": false
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!**/.next/**",
+      "!**/components/ui/**"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "useExhaustiveDependencies": "off",
+        "useUniqueElementIds": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noUnknownAtRules": "off",
+        "noExplicitAny": "off"
+      },
+      "a11y": "off",
+      "recommended": true
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
 }
