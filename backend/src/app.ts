@@ -31,10 +31,11 @@ app.use(errorHandler);
 
 export const httpServer = createServer(app);
 export const io = new Server(httpServer, {
-	cors: { origin: "http://localhost:3000" },
+	cors: { origin: env.CORS_ORIGIN.split(" ") },
 });
 
 import { initializeSocket } from "./socket";
+
 initializeSocket(io);
 
 export default app;
