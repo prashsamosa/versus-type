@@ -1,5 +1,6 @@
 import type {
 	ClientToServerEvents,
+	InterServerEvents,
 	ServerToClientEvents,
 	SocketData,
 } from "@versus-type/types";
@@ -10,8 +11,18 @@ import { matches } from "../db/schema";
 import { emitNewMessage, sendChatHistory } from "./chat.socket";
 
 export function registerPvpSessionHandlers(
-	io: Server<ClientToServerEvents, ServerToClientEvents, SocketData>,
-	socket: Socket<ClientToServerEvents, ServerToClientEvents, SocketData>,
+	io: Server<
+		ClientToServerEvents,
+		ServerToClientEvents,
+		InterServerEvents,
+		SocketData
+	>,
+	socket: Socket<
+		ClientToServerEvents,
+		ServerToClientEvents,
+		InterServerEvents,
+		SocketData
+	>,
 ) {
 	socket.on("pvp:join-as-host", (data, callback) => {
 		console.log("pvp:join-as-host", data);
@@ -24,12 +35,12 @@ export function registerPvpSessionHandlers(
 		}
 		socket.data.username = username;
 		socket.data.matchCode = matchCode;
+		socket.data.isHost = true;
 		socket.join(matchCode);
 		console.log(`Match hosted with code ${matchCode} by player ${socket.id}`);
 		callback({ success: true, message: `Match hosted with code ${matchCode}` });
 		sendChatHistory(socket, matchCode);
 	});
-
 	socket.on("pvp:join", (data, callback) => {
 		console.log("pvp:join", data);
 		const { matchCode, username } = data;
@@ -78,6 +89,35 @@ export function registerPvpSessionHandlers(
 				console.log(`Match with code ${matchCode} has ended`);
 				// TODO: decide cancelled or completed instead of always cancelled
 				updateMatchStatus(matchCode, "cancelled");
+			} else {
+				if (socket.data.isHost) {
+					// change host
+					let newHostId: string | null = null;
+					for (const memberId of room) {
+						if (memberId !== socket.id) {
+							newHostId = memberId;
+							break;
+						}
+					}
+					if (!newHostId) return;
+
+					const newHostSocket = io.sockets.sockets.get(newHostId);
+					if (newHostSocket) {
+						newHostSocket.data.isHost = true;
+						console.log(
+							`Player ${newHostSocket.id}(${newHostSocket.data.username}) is the new host of match ${matchCode}`,
+						);
+						emitNewMessage(io, matchCode, {
+							username: "",
+							message: `${newHostSocket.data.username ?? "<Unknown>"} is the new host`,
+							system: true,
+						});
+						io.to(matchCode).emit("pvp:new-host", {
+							socketId: newHostSocket.id,
+							username: newHostSocket.data.username,
+						});
+					}
+				}
 			}
 		}
 		console.log(`Player ${socket.id}(${username}) disconnected`);

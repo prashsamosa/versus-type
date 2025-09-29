@@ -5,8 +5,9 @@ export type ChatMessage = {
 };
 
 export interface ServerToClientEvents {
-	"pvp:player-joined": (data: { socketId: string; username: string }) => void;
-	"pvp:player-left": (data: { socketId: string; username: string }) => void;
+	"pvp:player-joined": (data: { socketId: string; username?: string }) => void;
+	"pvp:player-left": (data: { socketId: string; username?: string }) => void;
+	"pvp:new-host": (data: { socketId: string; username?: string }) => void;
 
 	"chat:new-message": (data: ChatMessage) => void;
 	"chat:history": (
@@ -39,9 +40,12 @@ export interface ClientToServerEvents {
 	"chat:send-message": (data: { message: string }) => void;
 }
 
+export interface InterServerEvents {}
+
 export interface SocketData {
 	username?: string;
 	matchCode?: string;
+	isHost?: boolean;
 }
 
 // ack response type

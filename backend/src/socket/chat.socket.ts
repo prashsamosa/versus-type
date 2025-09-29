@@ -1,6 +1,7 @@
 import type {
 	ChatMessage,
 	ClientToServerEvents,
+	InterServerEvents,
 	ServerToClientEvents,
 	SocketData,
 } from "@versus-type/types";
@@ -9,8 +10,18 @@ import type { Server, Socket } from "socket.io";
 export const chatMessages = new Map<string, Array<ChatMessage>>();
 
 export function registerChatHandlers(
-	io: Server<ClientToServerEvents, ServerToClientEvents, SocketData>,
-	socket: Socket<ClientToServerEvents, ServerToClientEvents, SocketData>,
+	io: Server<
+		ClientToServerEvents,
+		ServerToClientEvents,
+		InterServerEvents,
+		SocketData
+	>,
+	socket: Socket<
+		ClientToServerEvents,
+		ServerToClientEvents,
+		InterServerEvents,
+		SocketData
+	>,
 ) {
 	socket.on("chat:send-message", (data) => {
 		console.log("chat:send-message", data);
@@ -32,7 +43,12 @@ export function registerChatHandlers(
 }
 
 export function sendChatHistory(
-	socket: Socket<ClientToServerEvents, ServerToClientEvents, SocketData>,
+	socket: Socket<
+		ClientToServerEvents,
+		ServerToClientEvents,
+		InterServerEvents,
+		SocketData
+	>,
 	matchCode: string,
 ) {
 	const messages = chatMessages.get(matchCode) || [];
@@ -40,7 +56,12 @@ export function sendChatHistory(
 }
 
 export function emitNewMessage(
-	io: Server<ClientToServerEvents, ServerToClientEvents, SocketData>,
+	io: Server<
+		ClientToServerEvents,
+		ServerToClientEvents,
+		InterServerEvents,
+		SocketData
+	>,
 	matchCode: string,
 	newMessage: ChatMessage,
 ) {

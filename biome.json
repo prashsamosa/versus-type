@@ -30,7 +30,8 @@
       "suspicious": {
         "noArrayIndexKey": "off",
         "noUnknownAtRules": "off",
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noEmptyInterface": "off"
       },
       "a11y": "off",
       "recommended": true

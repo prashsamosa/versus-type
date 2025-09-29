@@ -1,10 +1,10 @@
-import type { Server } from "socket.io";
 import type {
 	ClientToServerEvents,
-	ServerToClientEvents,
 	InterServerEvents,
+	ServerToClientEvents,
 	SocketData,
 } from "@versus-type/types";
+import type { Server } from "socket.io";
 import { registerChatHandlers } from "./chat.socket";
 import { registerPvpSessionHandlers } from "./pvp.socket";
 

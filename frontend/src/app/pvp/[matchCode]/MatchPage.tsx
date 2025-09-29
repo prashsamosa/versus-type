@@ -5,12 +5,13 @@ import Chat from "./Chat";
 import { UsernameInput } from "./UsernameInput";
 
 export function MatchPage({
-	isHost,
+	isHost: isHostFromParams,
 	matchCode,
 }: {
 	isHost: boolean;
 	matchCode: string;
 }) {
+	const [isHost, setIsHost] = useState(isHostFromParams);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [username, setUsername] = useState("");
@@ -28,7 +29,18 @@ export function MatchPage({
 				setLoading(false);
 				setError(`Failed to connect to server: ${err.message}`);
 			});
-		return disconnectSocket;
+
+		// TODO: move it somewhere else
+		function handleNewHost(data: { socketId: string }) {
+			if (socket && data.socketId === socket.id) {
+				setIsHost(true);
+			}
+		}
+		socket?.on("pvp:new-host", handleNewHost);
+		return () => {
+			disconnectSocket();
+			socket?.off("pvp:new-host", handleNewHost);
+		};
 	}, [username]);
 
 	if (!username) {
