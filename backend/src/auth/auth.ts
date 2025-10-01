@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
-import { anonymous } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { anonymous } from "better-auth/plugins";
 import { db } from "../db/index";
 import * as schema from "../db/schema";
 import { afterSignUpHook } from "./afterSignUp.middleware";

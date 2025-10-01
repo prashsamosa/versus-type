@@ -7,6 +7,7 @@ export async function hostMatch(isPrivate: boolean) {
 			headers: {
 				"Content-Type": "application/json",
 			},
+			credentials: "include",
 			body: JSON.stringify({ private: isPrivate }),
 		});
 		if (!response.ok) {

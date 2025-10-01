@@ -1,17 +1,28 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 export default function JoinPage() {
 	const ref = useRef<HTMLInputElement>(null);
 	const router = useRouter();
+	const [loading, setLoading] = useState(false);
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
-		const matchCode = ref.current?.value.trim();
-		router.push(`/pvp/${matchCode}`);
+		setLoading(true);
+		try {
+			const session = await authClient.getSession();
+			if (!session.data) {
+				await authClient.signIn.anonymous();
+			}
+			const matchCode = ref.current?.value.trim();
+			router.push(`/pvp/${matchCode}`);
+		} catch (err) {
+			setLoading(false);
+		}
 	}
 
 	return (
@@ -19,8 +30,8 @@ export default function JoinPage() {
 			<Card className="w-[350px] mx-auto mb-4 p-4">
 				<form onSubmit={handleSubmit}>
 					<Input placeholder="Match Code" ref={ref} />
-					<Button type="submit" className="w-full mt-4">
-						Join Match
+					<Button type="submit" className="w-full mt-4" disabled={loading}>
+						{loading ? "Joining..." : "Join Match"}
 					</Button>
 				</form>
 			</Card>

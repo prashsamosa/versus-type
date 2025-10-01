@@ -6,22 +6,26 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { hostMatch } from "@/services/pvp.client";
+import { authClient } from "@/lib/auth-client";
 
 export default function HostPage() {
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const router = useRouter();
-	function handleSubmit() {
+	async function handleSubmit() {
 		setLoading(true);
-		hostMatch(isPrivate)
-			.then((matchCode) => {
-				router.push(`/pvp/${matchCode}?isHost=true`);
-			})
-			.catch((err) => {
-				setError(`Error: ${err.message}`);
-				setLoading(false);
-			});
+		try {
+			const session = await authClient.getSession();
+			if (!session.data) {
+				await authClient.signIn.anonymous();
+			}
+			const matchCode = await hostMatch(isPrivate);
+			router.push(`/pvp/${matchCode}?isHost=true`);
+		} catch (err: any) {
+			setError(`Error: ${err.message}`);
+			setLoading(false);
+		}
 	}
 
 	return (

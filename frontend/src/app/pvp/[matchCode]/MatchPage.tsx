@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { authClient } from "@/lib/auth-client";
 import { disconnectSocket, setupSocketAndJoin, socket } from "@/socket";
 import Chat from "./Chat";
 import { UsernameInput } from "./UsernameInput";
@@ -14,10 +15,24 @@ export function MatchPage({
 	const [isHost, setIsHost] = useState(isHostFromParams);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [username, setUsername] = useState("");
+	const [username, setUsername] = useState(() => {
+		if (typeof window !== "undefined") {
+			return localStorage.getItem("anonymousUsername") || "";
+		}
+		return "";
+	});
+	const { data: session, isPending } = authClient.useSession();
 
 	useEffect(() => {
-		if (!username) return;
+		if (session?.user && !session?.user.isAnonymous) {
+			const displayName =
+				session.user.name ?? session.user.email?.split("@")[0] ?? "User";
+			setUsername(displayName);
+		}
+	}, [session]);
+
+	useEffect(() => {
+		if (!username || isPending) return;
 		setupSocketAndJoin(username, matchCode, isHost)
 			.then((response) => {
 				setLoading(false);
@@ -41,7 +56,15 @@ export function MatchPage({
 			disconnectSocket();
 			socket?.off("pvp:new-host", handleNewHost);
 		};
-	}, [username]);
+	}, [username, isPending]);
+
+	if (isPending) {
+		return (
+			<div className="flex flex-col items-center justify-center min-h-screen py-2">
+				<h1 className="text-4xl font-bold mb-4">Loading...</h1>
+			</div>
+		);
+	}
 
 	if (!username) {
 		return <UsernameInput setUsername={setUsername} />;

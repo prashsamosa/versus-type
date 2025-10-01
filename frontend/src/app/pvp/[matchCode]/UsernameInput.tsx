@@ -22,6 +22,7 @@ export function UsernameInput({
 			setError("Username cannot be longer than 20 characters");
 			return;
 		}
+		localStorage.setItem("anonymousUsername", username);
 		setUsername(username);
 	}
 	return (
