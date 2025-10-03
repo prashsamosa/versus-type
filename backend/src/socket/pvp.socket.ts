@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import type { Server, Socket } from "socket.io";
 import { db } from "../db";
 import { matches } from "../db/schema";
+import { matchStatus } from "../routes/pvp.router";
 import { emitNewMessage, sendChatHistory } from "./chat.socket";
 
 export function registerPvpSessionHandlers(
@@ -24,13 +25,20 @@ export function registerPvpSessionHandlers(
 		SocketData
 	>,
 ) {
-	socket.on("pvp:join-as-host", (data, callback) => {
+	socket.on("pvp:join-as-host", async (data, callback) => {
 		console.log("pvp:join-as-host", data);
 		const { matchCode, username } = data;
 		if (io.sockets.adapter.rooms.has(matchCode)) {
 			return callback({
 				success: false,
 				message: `Match with code: ${matchCode} is already hosted`,
+			});
+		}
+		const status = await matchStatus(matchCode);
+		if (status !== "waiting") {
+			return callback({
+				success: false,
+				message: `Match ${matchCode} is not available (${status})`,
 			});
 		}
 		socket.data.username = username;
@@ -41,7 +49,7 @@ export function registerPvpSessionHandlers(
 		callback({ success: true, message: `Match hosted with code ${matchCode}` });
 		sendChatHistory(socket, matchCode);
 	});
-	socket.on("pvp:join", (data, callback) => {
+	socket.on("pvp:join", async (data, callback) => {
 		console.log("pvp:join", data);
 		const { matchCode, username } = data;
 		const room = io.sockets.adapter.rooms.get(matchCode);
@@ -50,6 +58,14 @@ export function registerPvpSessionHandlers(
 		}
 		if (room.size >= 2) {
 			return callback({ success: false, message: "Room is full" });
+		}
+
+		const status = await matchStatus(matchCode);
+		if (status !== "waiting") {
+			return callback({
+				success: false,
+				message: `Match ${matchCode} is not available (${status})`,
+			});
 		}
 
 		socket.join(matchCode);

@@ -44,12 +44,16 @@ pvpRouter.post("/host", async (req, res) => {
 });
 
 pvpRouter.post("/match-status", async (req, res) => {
-	let matchStatus: MatchStatus;
 	const matchCode = req.body.matchCode;
+	const status = await matchStatus(matchCode);
+	res.json({ status });
+});
+
+export async function matchStatus(matchCode: string): Promise<MatchStatus> {
+	let matchStatus: MatchStatus;
 	if (typeof matchCode !== "string" || matchCode.length !== MATCH_CODE_LENGTH) {
 		matchStatus = "notFound";
-		res.json({ matchStatus });
-		return;
+		return matchStatus;
 	}
 	const match = await db
 		.select()
@@ -66,5 +70,5 @@ pvpRouter.post("/match-status", async (req, res) => {
 	} else {
 		matchStatus = "expired";
 	}
-	res.json({ matchStatus });
-});
+	return matchStatus;
+}
