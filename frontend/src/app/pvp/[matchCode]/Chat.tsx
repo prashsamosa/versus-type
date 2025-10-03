@@ -1,13 +1,33 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { socket } from "@/socket";
 import { useChat } from "./useChat";
 
 export default function Chat() {
 	const { messages, sendMessage } = useChat();
+	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
+	const shouldAutoScroll = useRef(true);
+
+	function handleScroll() {
+		if (!scrollContainerRef.current) return;
+		const { scrollTop, scrollHeight, clientHeight } =
+			scrollContainerRef.current;
+		// enable auto-scroll within 50px of the bottom
+		shouldAutoScroll.current = scrollTop + clientHeight >= scrollHeight - 50;
+	}
+
+	useEffect(() => {
+		const container = scrollContainerRef.current;
+		if (container && shouldAutoScroll.current) {
+			messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+		}
+	}, [messages]);
+
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		const formData = new FormData(e.currentTarget);
@@ -16,34 +36,32 @@ export default function Chat() {
 		e.currentTarget.reset();
 	}
 	return (
-		<Card>
+		<Card className="h-full p-4 flex flex-col gap-2">
 			{!socket && (
 				<div className="text-destructive p-2">Socket not connected</div>
 			)}
-			<CardHeader>Chat</CardHeader>
-			<CardContent>
-				<div className="border rounded p-4 mb-4 h-64 overflow-y-auto md:w-xl">
-					{messages.map((msg, index) => (
-						<div key={index} className="mb-2 wrap-anywhere">
-							{msg.system ? (
-								<em className="opacity-70">{msg.message}</em>
-							) : (
-								<>
-									<strong>{msg.username}:</strong> {msg.message}
-								</>
-							)}
-						</div>
-					))}
-				</div>
-				<form onSubmit={handleSubmit} className="flex gap-2">
-					<Input
-						type="text"
-						name="inputMessage"
-						className="flex-grow border rounded-l p-2"
-					/>
-					<Button type="submit">Send</Button>
-				</form>
-			</CardContent>
+			<div
+				ref={scrollContainerRef}
+				className="overflow-y-auto flex-1"
+				onScroll={handleScroll}
+			>
+				{messages.map((msg, index) => (
+					<div key={index} className="mb-2 wrap-anywhere">
+						{msg.system ? (
+							<em className="opacity-70">{msg.message}</em>
+						) : (
+							<>
+								<strong>{msg.username}:</strong> {msg.message}
+							</>
+						)}
+					</div>
+				))}
+				<div ref={messagesEndRef} />
+			</div>
+			<form onSubmit={handleSubmit} className="flex gap-2">
+				<Input type="text" name="inputMessage" className="grow border p-2" />
+				<Button type="submit">Send</Button>
+			</form>
 		</Card>
 	);
 }
