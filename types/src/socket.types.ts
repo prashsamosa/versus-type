@@ -1,6 +1,7 @@
 export type ChatMessage = {
 	username: string;
 	message: string;
+	socketId?: string;
 	system?: boolean;
 };
 
@@ -10,12 +11,7 @@ export interface ServerToClientEvents {
 	"pvp:new-host": (data: { socketId: string; username?: string }) => void;
 
 	"chat:new-message": (data: ChatMessage) => void;
-	"chat:history": (
-		messages: Array<{
-			username: string;
-			message: string;
-		}>,
-	) => void;
+	"chat:history": (messages: ChatMessage[]) => void;
 
 	"chat:error": (data: { message: string }) => void;
 }

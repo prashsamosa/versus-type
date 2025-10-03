@@ -38,7 +38,7 @@ export function registerChatHandlers(
 		if (!matchCode) {
 			return socket.emit("chat:error", { message: "Not in a match room" });
 		}
-		emitNewMessage(io, matchCode, { username, message });
+		emitNewMessage(io, matchCode, { username, message, socketId: socket.id });
 	});
 }
 
