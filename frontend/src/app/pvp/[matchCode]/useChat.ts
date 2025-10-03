@@ -12,9 +12,7 @@ export function useChat() {
 			setMessages((prev) => [...prev, data]);
 		}
 
-		function handleHistory(
-			messages: Array<{ username: string; message: string }>,
-		) {
+		function handleHistory(messages: ChatMessage[]) {
 			setMessages(messages);
 		}
 
@@ -25,6 +23,7 @@ export function useChat() {
 					username: "",
 					system: true,
 					message: `Chat error: ${data.message}`,
+					socketId: socket?.id ?? "",
 				},
 			]);
 		}

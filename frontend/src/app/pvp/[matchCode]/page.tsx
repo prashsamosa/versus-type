@@ -1,6 +1,9 @@
 "use client";
+import { Check, Copy } from "lucide-react";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { disconnectSocket, setupSocketAndJoin, socket } from "@/socket";
 import Chat from "./Chat";
@@ -14,6 +17,7 @@ export default function PvpPage() {
 	const [isHost, setIsHost] = useState(isHostFromParams);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [copied, setCopied] = useState(false);
 	const [username, setUsername] = useState(() => {
 		if (typeof window !== "undefined") {
 			return localStorage.getItem("anonymousUsername") || "";
@@ -78,12 +82,44 @@ export default function PvpPage() {
 	if (error) {
 		return <SocketErrorPage message={error} />;
 	}
+
+	function copyMatchLink() {
+		const url = `${window.location.origin}/pvp/${matchCode}`;
+		navigator.clipboard.writeText(url);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 2000);
+	}
+
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen">
-			<h1 className="font-bold mb-4">Match Code: {matchCode}</h1>
-			<p className="text-lg mb-8">
-				{isHost ? "You are the host" : "You are a participant"}
-			</p>
+		<div className="flex flex-col items-center justify-start min-h-screen">
+			<div className="px-2 flex justify-between items-center w-full mb-4">
+				<div className="p-2 rounded-md border flex justify-center items-center gap-2">
+					<h1 className="font-bold">Code: {matchCode}</h1>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={copyMatchLink}
+						className="gap-2"
+					>
+						{copied ? (
+							<>
+								<Check className="size-4" />
+								Copied!
+							</>
+						) : (
+							<>
+								<Copy className="size-4" />
+								Copy Invite Link
+							</>
+						)}
+					</Button>
+				</div>
+				{isHost ? (
+					<Badge className="font-bold">Host</Badge>
+				) : (
+					<Badge variant="secondary">Participant</Badge>
+				)}
+			</div>
 			<div className="flex flex-col justify-center items-center gap-4 h-full w-full">
 				<PvpGame />
 				<div className="flex gap-4 p-4 w-full">

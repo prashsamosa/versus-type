@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { socket } from "@/socket";
 import { useChat } from "./useChat";
@@ -45,17 +45,29 @@ export default function Chat() {
 				className="overflow-y-auto flex-1"
 				onScroll={handleScroll}
 			>
-				{messages.map((msg, index) => (
-					<div key={index} className="mb-2 wrap-anywhere">
-						{msg.system ? (
-							<em className="opacity-70">{msg.message}</em>
-						) : (
-							<>
-								<strong>{msg.username}:</strong> {msg.message}
-							</>
-						)}
+				{messages.length === 0 ? (
+					<div className="flex items-center justify-center h-full text-muted-foreground text-xl">
+						No messages yet
 					</div>
-				))}
+				) : (
+					messages.map((msg, index) => {
+						const isOwnMessage = msg.socketId === socket?.id;
+						return (
+							<div key={index} className="mb-2 wrap-anywhere">
+								{msg.system ? (
+									<em className="opacity-70">{msg.message}</em>
+								) : (
+									<>
+										<strong className={isOwnMessage ? "underline" : ""}>
+											{msg.username}:
+										</strong>{" "}
+										{msg.message}
+									</>
+								)}
+							</div>
+						);
+					})
+				)}
 				<div ref={messagesEndRef} />
 			</div>
 			<form onSubmit={handleSubmit} className="flex gap-2">
