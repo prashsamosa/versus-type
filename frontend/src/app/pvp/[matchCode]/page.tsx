@@ -1,68 +1,28 @@
 "use client";
-import { Check, Copy } from "lucide-react";
-import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Activity, Check, Copy } from "lucide-react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
-import { disconnectSocket, setupSocketAndJoin, socket } from "@/socket";
 import Chat from "./Chat";
+import { usePvpSession } from "./hooks/usePvpSession";
 import { Lobby } from "./Lobby";
 import { PvpGame } from "./PvpGame";
 import SocketErrorPage from "./SocketErrorPage";
 import { UsernameInput } from "./UsernameInput";
 
 export default function PvpPage() {
-	const { matchCode } = useParams<{ matchCode: string }>();
-	const isHostFromParams = useSearchParams().get("isHost") === "true";
-	const [isHost, setIsHost] = useState(isHostFromParams);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const {
+		isHost,
+		loading,
+		socketError,
+		username,
+		setUsername,
+		isPending,
+		matchCode,
+		latency,
+	} = usePvpSession();
+
 	const [copied, setCopied] = useState(false);
-	const [username, setUsername] = useState(() => {
-		if (typeof window !== "undefined") {
-			return localStorage.getItem("anonymousUsername") || "";
-		}
-		return "";
-	});
-	const { data: session, isPending } = authClient.useSession();
-
-	useEffect(() => {
-		if (session?.user && !session?.user.isAnonymous) {
-			const displayName =
-				session.user.name ?? session.user.email?.split("@")[0] ?? "User";
-			setUsername(displayName);
-		} else if (!session?.user.isAnonymous) {
-			authClient.signIn.anonymous();
-		}
-	}, [session]);
-
-	useEffect(() => {
-		if (!username || isPending) return;
-		setupSocketAndJoin(username, matchCode, isHost)
-			.then((response) => {
-				setLoading(false);
-				if (!response.success) {
-					setError(response.message);
-				}
-			})
-			.catch((err) => {
-				setLoading(false);
-				setError(`Failed to connect to server: ${err.message}`);
-			});
-
-		// TODO: move it somewhere else
-		function handleNewHost(data: { socketId: string }) {
-			if (socket && data.socketId === socket.id) {
-				setIsHost(true);
-			}
-		}
-		socket?.on("pvp:new-host", handleNewHost);
-		return () => {
-			disconnectSocket();
-			socket?.off("pvp:new-host", handleNewHost);
-		};
-	}, [username, isPending]);
 
 	if (isPending) {
 		return (
@@ -82,8 +42,8 @@ export default function PvpPage() {
 			</div>
 		);
 	}
-	if (error) {
-		return <SocketErrorPage message={error} />;
+	if (socketError) {
+		return <SocketErrorPage message={socketError} />;
 	}
 
 	function copyMatchLink() {
@@ -117,11 +77,13 @@ export default function PvpPage() {
 						)}
 					</Button>
 				</div>
-				{isHost ? (
-					<Badge>Host</Badge>
-				) : (
-					<Badge variant="secondary">Participant</Badge>
-				)}
+
+				{latency ? (
+					<Badge variant="outline">
+						<Activity className="size-4" />
+						<span className="text-sm">{latency}ms</span>
+					</Badge>
+				) : null}
 			</div>
 			<div className="flex flex-col justify-center items-center gap-4 h-full w-full">
 				<PvpGame />

@@ -13,5 +13,8 @@ export function initializeSocket(io: ioServer) {
 		socket.on("disconnect", () => {
 			console.log("user disconnected", socket.id);
 		});
+		socket.on("ping", (callback) => {
+			callback();
+		});
 	});
 }

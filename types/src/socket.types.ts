@@ -14,7 +14,7 @@ export type PlayerInfo = {
 };
 
 export interface ServerToClientEvents {
-	"pvp:lobby-update": (data: { players: PlayerInfo[] }) => void;
+	"pvp:lobby-update": (players: PlayerInfo[]) => void;
 	"pvp:player-joined": (data: { socketId: string; username?: string }) => void;
 	"pvp:player-left": (data: { socketId: string; username?: string }) => void;
 	"pvp:new-host": (data: { socketId: string; username?: string }) => void;
@@ -26,6 +26,7 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
+	ping: (callback: () => void) => void;
 	"pvp:join-as-host": (
 		data: {
 			matchCode: string;

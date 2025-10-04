@@ -1,7 +1,7 @@
 import type { PlayerInfo } from "@versus-type/types";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
 
@@ -10,8 +10,8 @@ export function Lobby() {
 	useEffect(() => {
 		if (!socket) return;
 		const unregister = registerSocketHandlers(socket, {
-			"pvp:lobby-update": (data) => {
-				setPlayers(data.players);
+			"pvp:lobby-update": (players) => {
+				setPlayers(players);
 			},
 		});
 		return unregister;

@@ -171,5 +171,5 @@ function sendLobbyUpdate(io: ioServer, matchCode: string) {
 			} as PlayerInfo);
 		}
 	}
-	io.to(matchCode).emit("pvp:lobby-update", { players });
+	io.to(matchCode).emit("pvp:lobby-update", players);
 }
