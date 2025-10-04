@@ -1,5 +1,9 @@
-import type { ChatMessage, ServerToClientEvents } from "@versus-type/types";
+import type { ChatMessage } from "@versus-type/types";
 import { useEffect, useState } from "react";
+import {
+	type EventHandlers,
+	registerSocketHandlers,
+} from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
 
 export function useChat() {
@@ -8,46 +12,29 @@ export function useChat() {
 	useEffect(() => {
 		if (!socket) return;
 
-		function handleNewMessage(data: ChatMessage) {
-			setMessages((prev) => [...prev, data]);
-		}
-
-		function handleHistory(messages: ChatMessage[]) {
-			setMessages(messages);
-		}
-
-		function handleChatError(data: { message: string }) {
-			setMessages((prev) => [
-				...prev,
-				{
-					username: "",
-					system: true,
-					message: `Chat error: ${data.message}`,
-					socketId: socket?.id ?? "",
-				},
-			]);
-		}
-
-		const eventHandlers: Partial<
-			Record<keyof ServerToClientEvents, (...args: any[]) => void>
-		> = {
-			"chat:new-message": handleNewMessage,
-			"chat:history": handleHistory,
-			"chat:error": handleChatError,
+		const eventHandlers: EventHandlers = {
+			"chat:new-message": (data) => {
+				setMessages((prev) => [...prev, data]);
+			},
+			"chat:history": (data) => {
+				setMessages(data);
+			},
+			"chat:error": (data) => {
+				setMessages((prev) => [
+					...prev,
+					{
+						username: "",
+						system: true,
+						message: `Chat error: ${data.message}`,
+					},
+				]);
+			},
 			// chat:new-message respond to these already
 			// "pvp:player-joined": handleNewJoin,
 			// "pvp:player-left": handlePlayerLeft,
 		};
-
-		Object.entries(eventHandlers).forEach(([event, handler]) => {
-			socket?.on(event as keyof ServerToClientEvents, handler);
-		});
-
-		return () => {
-			Object.entries(eventHandlers).forEach(([event, handler]) => {
-				socket?.off(event as keyof ServerToClientEvents, handler);
-			});
-		};
+		const unregister = registerSocketHandlers(socket, eventHandlers);
+		return unregister;
 	}, []);
 
 	function sendMessage(message: string) {

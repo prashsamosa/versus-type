@@ -73,5 +73,3 @@ export type ioSocket = Socket<
 	InterServerEvents,
 	SocketData
 >;
-
-export type ioSocketClient = Socket<ServerToClientEvents, ClientToServerEvents>;

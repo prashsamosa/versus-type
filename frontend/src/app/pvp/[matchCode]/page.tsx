@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { disconnectSocket, setupSocketAndJoin, socket } from "@/socket";
 import Chat from "./Chat";
+import { Lobby } from "./Lobby";
 import { PvpGame } from "./PvpGame";
 import SocketErrorPage from "./SocketErrorPage";
 import { UsernameInput } from "./UsernameInput";
@@ -31,6 +32,8 @@ export default function PvpPage() {
 			const displayName =
 				session.user.name ?? session.user.email?.split("@")[0] ?? "User";
 			setUsername(displayName);
+		} else if (!session?.user.isAnonymous) {
+			authClient.signIn.anonymous();
 		}
 	}, [session]);
 
@@ -115,7 +118,7 @@ export default function PvpPage() {
 					</Button>
 				</div>
 				{isHost ? (
-					<Badge className="font-bold">Host</Badge>
+					<Badge>Host</Badge>
 				) : (
 					<Badge variant="secondary">Participant</Badge>
 				)}
@@ -123,7 +126,9 @@ export default function PvpPage() {
 			<div className="flex flex-col justify-center items-center gap-4 h-full w-full">
 				<PvpGame />
 				<div className="flex gap-4 p-4 w-full">
-					<div className="w-[50vw] border" />
+					<div className="flex-1 min-h-[30vh] max-h-[30vh]">
+						<Lobby />
+					</div>
 					<div className="flex-1 min-h-[30vh] max-h-[30vh]">
 						<Chat />
 					</div>

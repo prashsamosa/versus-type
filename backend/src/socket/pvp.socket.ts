@@ -5,6 +5,8 @@ import { matches, matchParticipants } from "../db/schema";
 import { matchInfo } from "../routes/pvp.router";
 import { emitNewMessage, sendChatHistory } from "./chat.socket";
 
+const MAX_ROOM_SIZE = 2;
+
 export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("pvp:join-as-host", async (data, callback) => {
 		console.log("pvp:join-as-host", data);
@@ -120,7 +122,7 @@ async function handleJoin(
 
 	socket.join(matchCode);
 	const room = io.sockets.adapter.rooms.get(matchCode);
-	if (!isHost && room && room.size > 2) {
+	if (!isHost && room && room.size > MAX_ROOM_SIZE) {
 		// why not just join AFTER check? coz it will make race conditions, if 2 join at the same time, both will pass the check
 		socket.leave(matchCode);
 		return callback({ success: false, message: "Room is full" });
@@ -149,7 +151,7 @@ async function handleJoin(
 			message: `${username ?? "<Unknown>"} in da house`,
 			system: true,
 		});
-		await updateMatchStatus(matchCode, "inProgress");
+		// await updateMatchStatus(matchCode, "inProgress");
 	}
 
 	sendChatHistory(socket, matchCode);
