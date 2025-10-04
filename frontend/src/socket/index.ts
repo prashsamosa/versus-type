@@ -15,7 +15,7 @@ export async function setupSocketAndJoin(
 	isHost: boolean,
 ): Promise<SocketResponse> {
 	return new Promise((resolve, reject) => {
-		socket = io(SERVER_URL);
+		socket = io(SERVER_URL, { withCredentials: true });
 
 		socket.on("connect", async () => {
 			try {

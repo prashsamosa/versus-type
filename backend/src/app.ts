@@ -1,20 +1,21 @@
 import { createServer } from "node:http";
+import type {
+	ClientToServerEvents,
+	InterServerEvents,
+	ServerToClientEvents,
+	SocketData,
+} from "@versus-type/types";
 import { toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
 import { Server } from "socket.io";
-import type {
-	ClientToServerEvents,
-	ServerToClientEvents,
-	InterServerEvents,
-	SocketData,
-} from "@versus-type/types";
 import { auth } from "./auth/auth";
 import env from "./env";
 import errorHandler from "./middlewares/error.middleware";
 import { pvpRouter } from "./routes/pvp.router";
 import testRouter from "./routes/test.router";
 import userRouter from "./routes/user.router";
+import { initializeSocket } from "./socket";
 
 const app = express();
 app.use(
@@ -42,10 +43,19 @@ export const io = new Server<
 	InterServerEvents,
 	SocketData
 >(httpServer, {
-	cors: { origin: env.CORS_ORIGIN.split(" ") },
+	cors: { origin: env.CORS_ORIGIN.split(" "), credentials: true },
 });
 
-import { initializeSocket } from "./socket";
+// socket auth middleware
+io.use(async (socket, next) => {
+	const session = await auth.api.getSession({
+		headers: new Headers(socket.handshake.headers as Record<string, string>),
+	});
+	if (!session) {
+		return next(new Error("Unauthorized"));
+	}
+	next();
+});
 
 initializeSocket(io);
 

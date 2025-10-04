@@ -41,6 +41,7 @@ export function registerPvpSessionHandlers(
 				message: `Match ${matchCode} is not available (${status})`,
 			});
 		}
+
 		socket.data.username = username;
 		socket.data.matchCode = matchCode;
 		socket.data.isHost = true;

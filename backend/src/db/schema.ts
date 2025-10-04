@@ -166,8 +166,8 @@ export const matchParticipants = sqliteTable(
 		userId: text()
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
-		wpm: real().notNull(),
-		accuracy: real().notNull(),
+		wpm: real(),
+		accuracy: real(),
 		isWinner: integer({ mode: "boolean" }).notNull(),
 		disconnected: integer({ mode: "boolean" }).notNull(),
 	},

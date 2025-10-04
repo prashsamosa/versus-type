@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { socket } from "@/socket";
-import { useChat } from "./useChat";
+import { useChat } from "./hooks/useChat";
 
 export default function Chat() {
 	const { messages, sendMessage } = useChat();
