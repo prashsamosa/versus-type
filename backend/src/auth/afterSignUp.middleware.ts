@@ -7,11 +7,10 @@ export const afterSignUpHook = createAuthMiddleware(async (ctx) => {
 		const newSession = ctx.context.newSession;
 		if (newSession) {
 			const id = newSession.user.id;
-			Promise.all([
+			await Promise.all([
 				db.insert(userSettings).values({ userId: id }),
 				db.insert(userStats).values({ userId: id }),
 			]);
-			// other values are set by database defaults
 		}
 	}
 });

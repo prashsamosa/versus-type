@@ -21,14 +21,6 @@ async function handleJoin(
 				message: `Match with code: ${matchCode} is already hosted`,
 			});
 		}
-	} else {
-		const room = io.sockets.adapter.rooms.get(matchCode);
-		if (!room) {
-			return callback({ success: false, message: "Match not found" });
-		}
-		if (room.size >= 2) {
-			return callback({ success: false, message: "Room is full" });
-		}
 	}
 
 	const { id: matchId, status } = await matchInfo(matchCode);
@@ -48,7 +40,14 @@ async function handleJoin(
 	socket.data.username = username;
 	socket.data.matchCode = matchCode;
 	if (isHost) socket.data.isHost = true;
+
 	socket.join(matchCode);
+	const room = io.sockets.adapter.rooms.get(matchCode);
+	if (!isHost && room && room.size > 2) {
+		// why not just join AFTER check? coz it will make race conditions, if 2 join at the same time, both will pass the check
+		socket.leave(matchCode);
+		return callback({ success: false, message: "Room is full" });
+	}
 
 	console.log(
 		isHost
@@ -73,7 +72,7 @@ async function handleJoin(
 			message: `${username ?? "<Unknown>"} in da house`,
 			system: true,
 		});
-		updateMatchStatus(matchCode, "inProgress");
+		await updateMatchStatus(matchCode, "inProgress");
 	}
 
 	sendChatHistory(socket, matchCode);
@@ -145,5 +144,8 @@ async function updateMatchStatus(
 	matchCode: string,
 	status: "waiting" | "inProgress" | "completed" | "cancelled",
 ) {
-	db.update(matches).set({ status }).where(eq(matches.matchCode, matchCode));
+	await db
+		.update(matches)
+		.set({ status })
+		.where(eq(matches.matchCode, matchCode));
 }

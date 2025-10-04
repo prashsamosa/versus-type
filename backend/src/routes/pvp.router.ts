@@ -68,15 +68,16 @@ export async function matchInfo(matchCode: string): Promise<MatchInfo> {
 		.then((r) => r[0]);
 	if (!match) {
 		matchStatus = "notFound";
-	} else {
-		matchStatus =
-			match.status === "completed" || match.status === "cancelled"
-				? "expired"
-				: match.status;
+		return { status: matchStatus, id: "" };
 	}
 
+	matchStatus =
+		match.status === "completed" || match.status === "cancelled"
+			? "expired"
+			: match.status;
+
 	return {
-		id: match?.id,
+		id: match.id,
 		status: matchStatus,
 	};
 }
