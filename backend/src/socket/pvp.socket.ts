@@ -1,8 +1,8 @@
 import type { ioServer, ioSocket } from "@versus-type/types";
 import { eq } from "drizzle-orm";
 import { db } from "../db";
-import { matches } from "../db/schema";
-import { matchStatus } from "../routes/pvp.router";
+import { matches, matchParticipants } from "../db/schema";
+import { matchInfo } from "../routes/pvp.router";
 import { emitNewMessage, sendChatHistory } from "./chat.socket";
 
 async function handleJoin(
@@ -31,14 +31,20 @@ async function handleJoin(
 		}
 	}
 
-	const status = await matchStatus(matchCode);
-	if (status !== "waiting") {
+	const { id: matchId, status } = await matchInfo(matchCode);
+	if (status !== "waiting" || !matchId) {
 		return callback({
 			success: false,
 			message: `Match ${matchCode} is not available (${status})`,
 		});
 	}
 
+	await db.insert(matchParticipants).values({
+		matchId,
+		disconnected: false,
+		isWinner: false,
+		userId: socket.data.userId,
+	});
 	socket.data.username = username;
 	socket.data.matchCode = matchCode;
 	if (isHost) socket.data.isHost = true;

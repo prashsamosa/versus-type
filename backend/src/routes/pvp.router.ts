@@ -9,6 +9,11 @@ const alphabet =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 const nanoid = customAlphabet(alphabet, MATCH_CODE_LENGTH);
 
+type MatchInfo = {
+	id: string;
+	status: MatchStatus;
+};
+
 type MatchStatus = "notFound" | "inProgress" | "expired" | "waiting";
 
 export const pvpRouter = Router();
@@ -45,15 +50,15 @@ pvpRouter.post("/host", async (req, res) => {
 
 pvpRouter.post("/match-status", async (req, res) => {
 	const matchCode = req.body.matchCode;
-	const status = await matchStatus(matchCode);
+	const status = await matchInfo(matchCode);
 	res.json({ status });
 });
 
-export async function matchStatus(matchCode: string): Promise<MatchStatus> {
+export async function matchInfo(matchCode: string): Promise<MatchInfo> {
 	let matchStatus: MatchStatus;
 	if (typeof matchCode !== "string" || matchCode.length !== MATCH_CODE_LENGTH) {
 		matchStatus = "notFound";
-		return matchStatus;
+		return { status: matchStatus, id: "" };
 	}
 	const match = await db
 		.select()
@@ -63,12 +68,15 @@ export async function matchStatus(matchCode: string): Promise<MatchStatus> {
 		.then((r) => r[0]);
 	if (!match) {
 		matchStatus = "notFound";
-	} else if (match.status === "waiting") {
-		matchStatus = "waiting";
-	} else if (match.status === "inProgress") {
-		matchStatus = "inProgress";
 	} else {
-		matchStatus = "expired";
+		matchStatus =
+			match.status === "completed" || match.status === "cancelled"
+				? "expired"
+				: match.status;
 	}
-	return matchStatus;
+
+	return {
+		id: match?.id,
+		status: matchStatus,
+	};
 }
