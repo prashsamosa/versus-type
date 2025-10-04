@@ -1,3 +1,5 @@
+import type { Server, Socket } from "socket.io";
+
 export type ChatMessage = {
 	username: string;
 	message: string;
@@ -42,6 +44,7 @@ export interface SocketData {
 	username?: string;
 	matchCode?: string;
 	isHost?: boolean;
+	userId: string;
 }
 
 // ack response type
@@ -49,3 +52,19 @@ export interface SocketResponse {
 	success: boolean;
 	message: string;
 }
+
+export type ioServer = Server<
+	ClientToServerEvents,
+	ServerToClientEvents,
+	InterServerEvents,
+	SocketData
+>;
+
+export type ioSocket = Socket<
+	ClientToServerEvents,
+	ServerToClientEvents,
+	InterServerEvents,
+	SocketData
+>;
+
+export type ioSocketClient = Socket<ServerToClientEvents, ClientToServerEvents>;

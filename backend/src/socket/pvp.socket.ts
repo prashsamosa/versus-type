@@ -1,58 +1,27 @@
-import type {
-	ClientToServerEvents,
-	InterServerEvents,
-	ServerToClientEvents,
-	SocketData,
-} from "@versus-type/types";
+import type { ioServer, ioSocket } from "@versus-type/types";
 import { eq } from "drizzle-orm";
-import type { Server, Socket } from "socket.io";
 import { db } from "../db";
 import { matches } from "../db/schema";
 import { matchStatus } from "../routes/pvp.router";
 import { emitNewMessage, sendChatHistory } from "./chat.socket";
 
-export function registerPvpSessionHandlers(
-	io: Server<
-		ClientToServerEvents,
-		ServerToClientEvents,
-		InterServerEvents,
-		SocketData
-	>,
-	socket: Socket<
-		ClientToServerEvents,
-		ServerToClientEvents,
-		InterServerEvents,
-		SocketData
-	>,
+async function handleJoin(
+	io: ioServer,
+	socket: ioSocket,
+	data: { matchCode: string; username: string },
+	callback: (response: { success: boolean; message: string }) => void,
+	isHost: boolean,
 ) {
-	socket.on("pvp:join-as-host", async (data, callback) => {
-		console.log("pvp:join-as-host", data);
-		const { matchCode, username } = data;
+	const { matchCode, username } = data;
+
+	if (isHost) {
 		if (io.sockets.adapter.rooms.has(matchCode)) {
 			return callback({
 				success: false,
 				message: `Match with code: ${matchCode} is already hosted`,
 			});
 		}
-		const status = await matchStatus(matchCode);
-		if (status !== "waiting") {
-			return callback({
-				success: false,
-				message: `Match ${matchCode} is not available (${status})`,
-			});
-		}
-
-		socket.data.username = username;
-		socket.data.matchCode = matchCode;
-		socket.data.isHost = true;
-		socket.join(matchCode);
-		console.log(`Match hosted with code ${matchCode} by player ${socket.id}`);
-		callback({ success: true, message: `Match hosted with code ${matchCode}` });
-		sendChatHistory(socket, matchCode);
-	});
-	socket.on("pvp:join", async (data, callback) => {
-		console.log("pvp:join", data);
-		const { matchCode, username } = data;
+	} else {
 		const room = io.sockets.adapter.rooms.get(matchCode);
 		if (!room) {
 			return callback({ success: false, message: "Match not found" });
@@ -60,22 +29,35 @@ export function registerPvpSessionHandlers(
 		if (room.size >= 2) {
 			return callback({ success: false, message: "Room is full" });
 		}
+	}
 
-		const status = await matchStatus(matchCode);
-		if (status !== "waiting") {
-			return callback({
-				success: false,
-				message: `Match ${matchCode} is not available (${status})`,
-			});
-		}
+	const status = await matchStatus(matchCode);
+	if (status !== "waiting") {
+		return callback({
+			success: false,
+			message: `Match ${matchCode} is not available (${status})`,
+		});
+	}
 
-		socket.join(matchCode);
-		socket.data.username = username;
-		socket.data.matchCode = matchCode;
-		callback({ success: true, message: `Joined match with code ${matchCode}` });
-		console.log(
-			`Player ${socket.id}(${username}) joined match with code ${matchCode}`,
-		);
+	socket.data.username = username;
+	socket.data.matchCode = matchCode;
+	if (isHost) socket.data.isHost = true;
+	socket.join(matchCode);
+
+	console.log(
+		isHost
+			? `Match hosted with code ${matchCode} by player ${socket.id}`
+			: `Player ${socket.id}(${username}) joined match with code ${matchCode}`,
+	);
+
+	callback({
+		success: true,
+		message: isHost
+			? `Match hosted with code ${matchCode}`
+			: `Joined match with code ${matchCode}`,
+	});
+
+	if (!isHost) {
 		io.to(matchCode).emit("pvp:player-joined", {
 			socketId: socket.id,
 			username,
@@ -86,7 +68,19 @@ export function registerPvpSessionHandlers(
 			system: true,
 		});
 		updateMatchStatus(matchCode, "inProgress");
-		sendChatHistory(socket, matchCode);
+	}
+
+	sendChatHistory(socket, matchCode);
+}
+
+export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
+	socket.on("pvp:join-as-host", async (data, callback) => {
+		console.log("pvp:join-as-host", data);
+		await handleJoin(io, socket, data, callback, true);
+	});
+	socket.on("pvp:join", async (data, callback) => {
+		console.log("pvp:join", data);
+		await handleJoin(io, socket, data, callback, false);
 	});
 	socket.on("disconnecting", () => {
 		const matchCode = socket.data.matchCode;

@@ -54,6 +54,7 @@ io.use(async (socket, next) => {
 	if (!session) {
 		return next(new Error("Unauthorized"));
 	}
+	socket.data.userId = session.user.id;
 	next();
 });
 

@@ -1,28 +1,8 @@
-import type {
-	ChatMessage,
-	ClientToServerEvents,
-	InterServerEvents,
-	ServerToClientEvents,
-	SocketData,
-} from "@versus-type/types";
-import type { Server, Socket } from "socket.io";
+import type { ChatMessage, ioServer, ioSocket } from "@versus-type/types";
 
 export const chatMessages = new Map<string, Array<ChatMessage>>();
 
-export function registerChatHandlers(
-	io: Server<
-		ClientToServerEvents,
-		ServerToClientEvents,
-		InterServerEvents,
-		SocketData
-	>,
-	socket: Socket<
-		ClientToServerEvents,
-		ServerToClientEvents,
-		InterServerEvents,
-		SocketData
-	>,
-) {
+export function registerChatHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("chat:send-message", (data) => {
 		console.log("chat:send-message", data);
 		const username = socket.data.username;
@@ -42,26 +22,13 @@ export function registerChatHandlers(
 	});
 }
 
-export function sendChatHistory(
-	socket: Socket<
-		ClientToServerEvents,
-		ServerToClientEvents,
-		InterServerEvents,
-		SocketData
-	>,
-	matchCode: string,
-) {
+export function sendChatHistory(socket: ioSocket, matchCode: string) {
 	const messages = chatMessages.get(matchCode) || [];
 	socket.emit("chat:history", messages);
 }
 
 export function emitNewMessage(
-	io: Server<
-		ClientToServerEvents,
-		ServerToClientEvents,
-		InterServerEvents,
-		SocketData
-	>,
+	io: ioServer,
 	matchCode: string,
 	newMessage: ChatMessage,
 ) {

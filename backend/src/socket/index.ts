@@ -1,21 +1,8 @@
-import type {
-	ClientToServerEvents,
-	InterServerEvents,
-	ServerToClientEvents,
-	SocketData,
-} from "@versus-type/types";
-import type { Server } from "socket.io";
+import type { ioServer } from "@versus-type/types";
 import { registerChatHandlers } from "./chat.socket";
 import { registerPvpSessionHandlers } from "./pvp.socket";
 
-export function initializeSocket(
-	io: Server<
-		ClientToServerEvents,
-		ServerToClientEvents,
-		InterServerEvents,
-		SocketData
-	>,
-) {
+export function initializeSocket(io: ioServer) {
 	io.on("connection", (socket) => {
 		console.log("user connected: ", socket.id);
 		// registerMatchmakingHandlers(socket, io);
