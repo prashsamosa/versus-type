@@ -5,7 +5,9 @@
 		"lib": ["ES2022"],
 		"module": "ESNext",
 		"paths": {
-			"@versus-type/*": ["../*/src"]
+			"@versus-type/shared/*": ["../shared/src/*"],
+			"@versus-type/*": ["../*/src"],
+			"@/*": ["./src/*"]
 		}
 	},
 	"include": ["**/*.ts"],

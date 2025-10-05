@@ -1,23 +1,39 @@
 import type { ioServer, ioSocket, PlayerInfo } from "@versus-type/shared";
+import {
+	type GeneratorConfig,
+	generateWords,
+} from "@versus-type/shared/passage-generator";
 import { eq } from "drizzle-orm";
+import { matchInfo } from "@/routes/pvp.router";
 import { db } from "../db";
 import { matches, matchParticipants } from "../db/schema";
-import { matchInfo } from "../routes/pvp.router";
 import { emitNewMessage, sendChatHistory } from "./chat.socket";
 
-const MAX_ROOM_SIZE = 2;
+const MAX_ROOM_SIZE = 10;
+const COUNTDOWN_SECONDS = 3;
+
+type MatchStatus = "waiting" | "inProgress" | "completed" | "cancelled";
+
+type MatchState = {
+	status: MatchStatus;
+	passage: string;
+	hostId: string | null;
+	isStarted?: boolean;
+};
+const matchStates: Record<string, MatchState> = {};
+const passageConfig: GeneratorConfig = {
+	punctuation: false,
+	numbers: false,
+	wordCount: 50,
+};
 
 export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("pvp:join-as-host", async (data, callback) => {
-		console.log("pvp:join-as-host", data);
 		await handleJoin(io, socket, data, callback, true);
-		sendLobbyUpdate(io, data.matchCode);
 	});
 
 	socket.on("pvp:join", async (data, callback) => {
-		console.log("pvp:join", data);
 		await handleJoin(io, socket, data, callback, false);
-		sendLobbyUpdate(io, data.matchCode);
 	});
 
 	socket.on("disconnect", () => {
@@ -37,8 +53,9 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			const room = io.sockets.adapter.rooms.get(matchCode);
 			if (!room || room.size === 0) {
 				console.log(`Match with code ${matchCode} has ended`);
-				// TODO: decide cancelled or completed instead of always cancelled
-				updateMatchStatus(matchCode, "cancelled");
+				if (matchStates[matchCode]?.status !== "completed") {
+					updateMatchStatus(matchCode, "cancelled");
+				}
 			} else {
 				if (socket.data.isHost) {
 					// change host
@@ -72,16 +89,49 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		}
 		console.log(`Player ${socket.id}(${username}) disconnected`);
 	});
+
+	socket.on("pvp:start-match", async (callback) => {
+		const matchCode = socket.data.matchCode;
+		if (!matchCode) {
+			callback({
+				success: false,
+				message: "Error starting match, join the match again",
+			});
+			console.warn(
+				"MatchCode not found in socket.data (Some sent start-match without joining)",
+			);
+			return;
+		}
+		await updateMatchStatus(matchCode, "inProgress");
+		callback({
+			success: true,
+			message: "Starting countdown",
+		});
+		startCountdown(io, matchCode);
+	});
 }
 
-async function updateMatchStatus(
-	matchCode: string,
-	status: "waiting" | "inProgress" | "completed" | "cancelled",
-) {
+async function startCountdown(io: ioServer, matchCode: string) {
+	let countdown = COUNTDOWN_SECONDS + 1;
+	const countdownInterval = setInterval(() => {
+		countdown--;
+		io.to(matchCode).emit("pvp:countdown", countdown);
+		if (countdown === 0) {
+			matchStates[matchCode].isStarted = true;
+			clearInterval(countdownInterval);
+		}
+	}, 1000);
+}
+
+async function updateMatchStatus(matchCode: string, status: MatchStatus) {
 	await db
 		.update(matches)
 		.set({ status })
-		.where(eq(matches.matchCode, matchCode));
+		.where(eq(matches.matchCode, matchCode))
+		.catch((err) => {
+			console.error("Error updating match status in DB:", err);
+		});
+	matchStates[matchCode].status = status;
 }
 
 async function handleJoin(
@@ -93,11 +143,26 @@ async function handleJoin(
 ) {
 	const { matchCode, username } = data;
 
+	// matchState is non-primitive type(object), so changes will reflect in matchStates
+	let matchState = matchStates[matchCode];
 	if (isHost) {
 		if (io.sockets.adapter.rooms.has(matchCode)) {
 			return callback({
 				success: false,
 				message: `Match with code: ${matchCode} is already hosted`,
+			});
+		} else {
+			matchState = {
+				status: "waiting",
+				passage: "",
+				hostId: socket.data.userId,
+			};
+		}
+	} else {
+		if (!matchState || matchState.status !== "waiting" || !matchState.hostId) {
+			return callback({
+				success: false,
+				message: `Match with code: ${matchCode} is not hosted yet`,
 			});
 		}
 	}
@@ -151,10 +216,13 @@ async function handleJoin(
 			message: `${username ?? "<Unknown>"} in da house`,
 			system: true,
 		});
-		// await updateMatchStatus(matchCode, "inProgress");
+	} else {
+		matchState.passage = generateWords(passageConfig).join(" ");
 	}
 
 	sendChatHistory(socket, matchCode);
+	sendLobbyUpdate(io, matchCode);
+	sendPassage(io, matchCode);
 }
 
 function sendLobbyUpdate(io: ioServer, matchCode: string) {
@@ -172,4 +240,14 @@ function sendLobbyUpdate(io: ioServer, matchCode: string) {
 		}
 	}
 	io.to(matchCode).emit("pvp:lobby-update", players);
+}
+
+function sendPassage(io: ioServer, matchCode: string) {
+	const passage = matchStates[matchCode].passage;
+	if (!passage) {
+		throw new Error(
+			`No passage in map for ${matchCode}. How did this happen lol`,
+		);
+	}
+	io.to(matchCode).emit("pvp:passage", passage);
 }
