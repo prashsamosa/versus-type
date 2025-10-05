@@ -25,7 +25,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		const username = socket.data.username;
 		if (matchCode) {
 			io.to(matchCode).emit("pvp:player-left", {
-				socketId: socket.id,
+				userId: socket.data.userId || socket.id,
 				username,
 			});
 			emitNewMessage(io, matchCode, {
@@ -63,7 +63,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 							system: true,
 						});
 						io.to(matchCode).emit("pvp:new-host", {
-							socketId: newHostSocket.id,
+							userId: newHostSocket.data.userId || newHostSocket.id,
 							username: newHostSocket.data.username,
 						});
 					}
@@ -143,7 +143,7 @@ async function handleJoin(
 
 	if (!isHost) {
 		io.to(matchCode).emit("pvp:player-joined", {
-			socketId: socket.id,
+			userId: socket.data.userId || socket.id,
 			username,
 		});
 		emitNewMessage(io, matchCode, {
@@ -165,7 +165,7 @@ function sendLobbyUpdate(io: ioServer, matchCode: string) {
 		const memberSocket = io.sockets.sockets.get(memberId);
 		if (memberSocket) {
 			players.push({
-				socketId: memberSocket.id,
+				userId: memberSocket.data.userId || memberSocket.id,
 				username: memberSocket.data.username,
 				isHost: memberSocket.data.isHost || false,
 			} as PlayerInfo);

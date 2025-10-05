@@ -3,21 +3,21 @@ import type { Server, Socket } from "socket.io";
 export type ChatMessage = {
 	username: string;
 	message: string;
-	socketId?: string;
+	userId?: string;
 	system?: boolean;
 };
 
 export type PlayerInfo = {
-	socketId: string;
+	userId: string;
 	username: string;
 	isHost: boolean;
 };
 
 export interface ServerToClientEvents {
 	"pvp:lobby-update": (players: PlayerInfo[]) => void;
-	"pvp:player-joined": (data: { socketId: string; username?: string }) => void;
-	"pvp:player-left": (data: { socketId: string; username?: string }) => void;
-	"pvp:new-host": (data: { socketId: string; username?: string }) => void;
+	"pvp:player-joined": (data: { userId: string; username?: string }) => void;
+	"pvp:player-left": (data: { userId: string; username?: string }) => void;
+	"pvp:new-host": (data: { userId: string; username?: string }) => void;
 
 	"chat:new-message": (data: ChatMessage) => void;
 	"chat:history": (messages: ChatMessage[]) => void;

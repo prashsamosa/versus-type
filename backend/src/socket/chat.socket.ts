@@ -18,7 +18,11 @@ export function registerChatHandlers(io: ioServer, socket: ioSocket) {
 		if (!matchCode) {
 			return socket.emit("chat:error", { message: "Not in a match room" });
 		}
-		emitNewMessage(io, matchCode, { username, message, socketId: socket.id });
+		emitNewMessage(io, matchCode, {
+			username,
+			message,
+			userId: socket.data.userId || socket.id,
+		});
 	});
 }
 
