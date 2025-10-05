@@ -14,11 +14,21 @@ const COUNTDOWN_SECONDS = 3;
 
 type MatchStatus = "waiting" | "inProgress" | "completed" | "cancelled";
 
+type PlayerState = {
+	isHost?: boolean;
+	username?: string;
+	index: number;
+	spectator: boolean;
+	completed?: boolean;
+	disconnected?: boolean;
+};
+
 type MatchState = {
 	status: MatchStatus;
 	passage: string;
 	hostId: string | null;
-	isStarted?: boolean;
+	isStarted: boolean;
+	players: { [userId: string]: PlayerState };
 };
 const matchStates: Record<string, MatchState> = {};
 const passageConfig: GeneratorConfig = {
@@ -49,7 +59,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				message: `${username ?? "<Unknown>"} disconnected`,
 				system: true,
 			});
-			sendLobbyUpdate(io, matchCode);
+			updateLobby(io, matchCode, socket.data.userId);
 			const room = io.sockets.adapter.rooms.get(matchCode);
 			if (!room || room.size === 0) {
 				console.log(`Match with code ${matchCode} has ended`);
@@ -109,6 +119,20 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		});
 		startCountdown(io, matchCode);
 	});
+
+	socket.on("pvp:key-press", (key: string) => {
+		const matchCode = socket.data.matchCode;
+		if (!matchCode || !matchStates[matchCode]?.isStarted) {
+			console.warn(
+				`lol ${socket.data.userId} tryna cheat by sending key-press before starting match`,
+			);
+			return;
+		}
+		io.to(matchCode).emit("pvp:progress-update", {
+			userId: socket.data.userId || socket.id,
+			index: key.charCodeAt(0),
+		});
+	});
 }
 
 async function startCountdown(io: ioServer, matchCode: string) {
@@ -144,6 +168,7 @@ async function handleJoin(
 	const { matchCode, username } = data;
 
 	// matchState is non-primitive type(object), so changes will reflect in matchStates
+	// UNTIL ITS UNDEFINED, so have to reassign when creating new matchState
 	let matchState = matchStates[matchCode];
 	if (isHost) {
 		if (io.sockets.adapter.rooms.has(matchCode)) {
@@ -156,7 +181,17 @@ async function handleJoin(
 				status: "waiting",
 				passage: "",
 				hostId: socket.data.userId,
+				isStarted: false,
+				players: {
+					[socket.data.userId]: {
+						index: 0,
+						isHost: true,
+						username,
+						spectator: false,
+					},
+				},
 			};
+			matchStates[matchCode] = matchState; // have to reassign, coz its undefined before
 		}
 	} else {
 		if (!matchState || matchState.status !== "waiting" || !matchState.hostId) {
@@ -198,15 +233,16 @@ async function handleJoin(
 			? `Match hosted with code ${matchCode} by player ${socket.id}`
 			: `Player ${socket.id}(${username}) joined match with code ${matchCode}`,
 	);
-
 	callback({
 		success: true,
 		message: isHost
 			? `Match hosted with code ${matchCode}`
 			: `Joined match with code ${matchCode}`,
 	});
-
-	if (!isHost) {
+	if (isHost) {
+		matchState.passage = generateWords(passageConfig).join(" ");
+		console.log(matchStates[matchCode]);
+	} else {
 		io.to(matchCode).emit("pvp:player-joined", {
 			userId: socket.data.userId || socket.id,
 			username,
@@ -216,38 +252,51 @@ async function handleJoin(
 			message: `${username ?? "<Unknown>"} in da house`,
 			system: true,
 		});
-	} else {
-		matchState.passage = generateWords(passageConfig).join(" ");
 	}
 
 	sendChatHistory(socket, matchCode);
-	sendLobbyUpdate(io, matchCode);
+	updateLobby(io, matchCode);
 	sendPassage(io, matchCode);
 }
 
-function sendLobbyUpdate(io: ioServer, matchCode: string) {
+function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
 	const room = io.sockets.adapter.rooms.get(matchCode);
 	if (!room) return;
-	const players: PlayerInfo[] = [];
 	for (const memberId of room) {
 		const memberSocket = io.sockets.sockets.get(memberId);
 		if (memberSocket) {
-			players.push({
-				userId: memberSocket.data.userId || memberSocket.id,
-				username: memberSocket.data.username,
-				isHost: memberSocket.data.isHost || false,
-			} as PlayerInfo);
+			if (!matchStates[matchCode].players[memberSocket.data.userId]) {
+				matchStates[matchCode].players[memberSocket.data.userId] = {
+					index: 0,
+					isHost: memberSocket.data.isHost || false,
+					username: memberSocket.data.username || "<Unknown>",
+					spectator: matchStates[matchCode].isStarted ?? false,
+				};
+			}
 		}
 	}
-	io.to(matchCode).emit("pvp:lobby-update", players);
+	if (disconnectedId) {
+		matchStates[matchCode].players[disconnectedId].disconnected = true;
+	}
+	io.to(matchCode).emit(
+		"pvp:lobby-update",
+		Object.entries(matchStates[matchCode].players).map(
+			([userId, state]) =>
+				({
+					userId,
+					isHost: state.isHost || false,
+					username: state.username || "<Unknown>",
+					disconnected: state.disconnected || false,
+				}) as PlayerInfo,
+		),
+	);
 }
 
 function sendPassage(io: ioServer, matchCode: string) {
-	const passage = matchStates[matchCode].passage;
+	const passage = matchStates[matchCode]?.passage;
 	if (!passage) {
-		throw new Error(
-			`No passage in map for ${matchCode}. How did this happen lol`,
-		);
+		console.warn(`No passage in map for ${matchCode}. How did this happen lol`);
+		return;
 	}
 	io.to(matchCode).emit("pvp:passage", passage);
 }

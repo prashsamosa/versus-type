@@ -11,6 +11,7 @@ export type PlayerInfo = {
 	userId: string;
 	username: string;
 	isHost: boolean;
+	disconnected?: boolean;
 };
 
 export interface ServerToClientEvents {
