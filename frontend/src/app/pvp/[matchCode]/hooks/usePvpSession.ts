@@ -5,6 +5,8 @@ import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { disconnectSocket, setupSocketAndJoin, socket } from "@/socket";
 
+export const DISCONNECT_LATENCY = 6969;
+
 export function usePvpSession() {
 	const { matchCode } = useParams<{ matchCode: string }>();
 	const isHostFromParams = useSearchParams().get("isHost") === "true";
@@ -50,7 +52,7 @@ export function usePvpSession() {
 			.then((response) => {
 				setLoading(false);
 				if (!response.success) {
-					setSocketError(response.message);
+					setSocketError(response.message ?? "Failed to join match");
 				}
 			})
 			.catch((err) => {
@@ -80,7 +82,12 @@ export function usePvpSession() {
 		const timeoutId = setInterval(async () => {
 			if (socket) {
 				const start = Date.now();
-				await socket.emitWithAck("ping");
+				await socket
+					.timeout(4000)
+					.emitWithAck("ping")
+					.catch(() => {
+						setLatency(DISCONNECT_LATENCY);
+					});
 				const latency = Date.now() - start;
 				setLatency(latency);
 			}

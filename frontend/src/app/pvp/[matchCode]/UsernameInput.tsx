@@ -22,6 +22,10 @@ export function UsernameInput({
 			setError("Username cannot be longer than 20 characters");
 			return;
 		}
+		if (username === "<Unknown>") {
+			setError('Username cannot be "<Unknown>"');
+			return;
+		}
 		localStorage.setItem("anonymousUsername", username);
 		setUsername(username);
 	}

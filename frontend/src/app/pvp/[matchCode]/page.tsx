@@ -1,10 +1,10 @@
 "use client";
-import { Activity, Check, Copy } from "lucide-react";
+import { Activity, Check, Copy, WifiOff } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Chat from "./Chat";
-import { usePvpSession } from "./hooks/usePvpSession";
+import { DISCONNECT_LATENCY, usePvpSession } from "./hooks/usePvpSession";
 import { Lobby } from "./Lobby";
 import { PvpGame } from "./PvpGame";
 import SocketErrorPage from "./SocketErrorPage";
@@ -57,34 +57,12 @@ export default function PvpPage() {
 	return (
 		<div className="flex flex-col items-center justify-start min-h-screen">
 			<div className="px-2 flex justify-between items-center w-full mb-4">
-				<div className="p-2 rounded-md border flex justify-center items-center gap-2">
-					<h1 className="font-bold">Code: {matchCode}</h1>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={copyMatchLink}
-						className="gap-2"
-					>
-						{copied ? (
-							<>
-								<Check className="size-4" />
-								Copied!
-							</>
-						) : (
-							<>
-								<Copy className="size-4" />
-								Copy Invite Link
-							</>
-						)}
-					</Button>
-				</div>
-
-				{latency ? (
-					<Badge variant="outline">
-						<Activity className="size-4" />
-						<span className="text-sm">{latency}ms</span>
-					</Badge>
-				) : null}
+				<CodeCopy
+					matchCode={matchCode}
+					copied={copied}
+					copyMatchLink={copyMatchLink}
+				/>
+				<LatencyStatus latency={latency} />
 			</div>
 			<div className="flex flex-col justify-center items-center gap-4 h-full w-full">
 				<PvpGame />
@@ -98,5 +76,72 @@ export default function PvpPage() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+function CodeCopy({
+	matchCode,
+	copied,
+	copyMatchLink,
+}: {
+	matchCode: string;
+	copied: boolean;
+	copyMatchLink: () => void;
+}) {
+	return (
+		<div className="p-2 rounded-md border flex justify-center items-center gap-2">
+			<h1 className="font-bold">Code: {matchCode}</h1>
+			<Button
+				variant="outline"
+				size="sm"
+				onClick={copyMatchLink}
+				className="gap-2"
+			>
+				{copied ? (
+					<>
+						<Check className="size-4" />
+						Copied!
+					</>
+				) : (
+					<>
+						<Copy className="size-4" />
+						Copy Invite Link
+					</>
+				)}
+			</Button>
+		</div>
+	);
+}
+
+function LatencyStatus({ latency }: { latency: number | null }) {
+	if (!latency) return null;
+	if (latency === DISCONNECT_LATENCY) {
+		return (
+			<Badge variant="outline">
+				<WifiOff className="size-4 text-destructive" />
+			</Badge>
+		);
+	}
+	if (latency < 300) {
+		return (
+			<Badge variant="outline">
+				<Activity className="size-4" />
+				<span className="text-sm">{latency}ms</span>
+			</Badge>
+		);
+	}
+	if (latency < 700) {
+		return (
+			<Badge variant="outline">
+				<Activity className="size-4" />
+				<span className="text-sm text-orange-300">{latency}ms</span>
+			</Badge>
+		);
+	}
+	return (
+		<Badge variant="outline">
+			<Activity className="size-4" />
+			<span className="text-sm text-destructive">{latency}ms</span>
+		</Badge>
 	);
 }
