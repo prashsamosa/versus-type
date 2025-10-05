@@ -1,5 +1,5 @@
 "use client";
-import type { Settings } from "@versus-type/types";
+import type { Settings } from "@versus-type/shared";
 import { use, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {

@@ -1,4 +1,4 @@
-import { SettingsSchema } from "@versus-type/types";
+import { SettingsSchema } from "@versus-type/shared";
 import { fromNodeHeaders } from "better-auth/node";
 import { eq } from "drizzle-orm";
 import { Router } from "express";

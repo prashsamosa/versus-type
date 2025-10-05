@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { GeneratorConfig } from "@/lib/passage-generator";
+import type { GeneratorConfig } from "@versus-type/shared";
 import Cursor from "./Cursor";
 import FinishedStats from "./FinishedStats";
 import { useCursorPosition } from "./hooks/useCursorPosition";

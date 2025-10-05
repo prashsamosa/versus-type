@@ -1,4 +1,4 @@
-import type { Settings, Stats } from "@versus-type/types";
+import type { Settings, Stats } from "@versus-type/shared";
 import { headers } from "next/headers";
 import { API_URL } from "@/const";
 

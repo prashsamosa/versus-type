@@ -1,4 +1,4 @@
-import type { ChatMessage, ioServer, ioSocket } from "@versus-type/types";
+import type { ChatMessage, ioServer, ioSocket } from "@versus-type/shared";
 
 export const chatMessages = new Map<string, Array<ChatMessage>>();
 

@@ -2,7 +2,7 @@ import type {
 	ClientToServerEvents,
 	ServerToClientEvents,
 	SocketResponse,
-} from "@versus-type/types";
+} from "@versus-type/shared";
 import { io, type Socket } from "socket.io-client";
 import { SERVER_URL } from "@/const";
 

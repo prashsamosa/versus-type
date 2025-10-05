@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { getAccuracy, getErrorCount } from "@/lib/accuracy";
+import { getAccuracy, getErrorCount } from "@versus-type/shared";
 import { authClient } from "@/lib/auth-client";
-import { computeStats } from "@/lib/stats";
+import { computeStats } from "@versus-type/shared";
 import { completeTest } from "@/services/test.client";
 
 type TestStats = {

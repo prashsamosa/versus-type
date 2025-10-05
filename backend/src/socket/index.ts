@@ -1,4 +1,4 @@
-import type { ioServer } from "@versus-type/types";
+import type { ioServer } from "@versus-type/shared";
 import { registerChatHandlers } from "./chat.socket";
 import { registerPvpSessionHandlers } from "./pvp.socket";
 

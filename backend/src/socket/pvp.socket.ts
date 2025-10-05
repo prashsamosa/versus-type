@@ -1,4 +1,4 @@
-import type { ioServer, ioSocket, PlayerInfo } from "@versus-type/types";
+import type { ioServer, ioSocket, PlayerInfo } from "@versus-type/shared";
 import { eq } from "drizzle-orm";
 import { db } from "../db";
 import { matches, matchParticipants } from "../db/schema";

@@ -1,4 +1,4 @@
-import type { ChatMessage } from "@versus-type/types";
+import type { ChatMessage } from "@versus-type/shared";
 import { useEffect, useState } from "react";
 import {
 	type EventHandlers,

@@ -4,7 +4,7 @@ import type {
 	InterServerEvents,
 	ServerToClientEvents,
 	SocketData,
-} from "@versus-type/types";
+} from "@versus-type/shared";
 import { toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";

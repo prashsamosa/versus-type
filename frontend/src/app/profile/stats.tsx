@@ -1,4 +1,4 @@
-import type { Stats } from "@versus-type/types";
+import type { Stats } from "@versus-type/shared";
 import {
 	Card,
 	CardContent,

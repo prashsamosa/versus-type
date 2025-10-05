@@ -12,7 +12,6 @@ import { UsernameInput } from "./UsernameInput";
 
 export default function PvpPage() {
 	const {
-		isHost,
 		loading,
 		socketError,
 		username,

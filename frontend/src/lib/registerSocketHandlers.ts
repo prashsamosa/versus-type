@@ -1,7 +1,7 @@
 import type {
 	ClientToServerEvents,
 	ServerToClientEvents,
-} from "@versus-type/types";
+} from "@versus-type/shared";
 import type { Socket } from "socket.io-client";
 
 export type EventHandlers = Partial<ServerToClientEvents>;

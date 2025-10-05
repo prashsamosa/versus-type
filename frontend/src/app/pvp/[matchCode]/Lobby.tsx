@@ -1,4 +1,4 @@
-import type { PlayerInfo } from "@versus-type/types";
+import type { PlayerInfo } from "@versus-type/shared";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";

@@ -1,4 +1,4 @@
-import type { Settings, TestStats } from "@versus-type/types";
+import type { Settings, TestStats } from "@versus-type/shared";
 import { API_URL } from "@/const";
 
 export async function completeTest(data: TestStats): Promise<Settings> {

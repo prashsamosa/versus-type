@@ -8,7 +8,7 @@ export type CharCount = {
 	correctSpaces: number;
 };
 
-export type Stats = {
+export type TypingStats = {
 	wpm: number;
 	rawWpm: number;
 	correctChars: number;
@@ -98,7 +98,7 @@ export function computeStats(
 	nowOrEndTs: number,
 	inputWords: string[],
 	targetWords: string[],
-): Stats {
+): TypingStats {
 	const secs = calculateSeconds(startTs, nowOrEndTs);
 	const t = secs <= 0 ? 1e-6 : secs;
 

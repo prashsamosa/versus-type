@@ -1,4 +1,4 @@
-import { TestStatsSchema } from "@versus-type/types/src/test.zod";
+import { TestStatsSchema } from "@versus-type/shared";
 import { fromNodeHeaders } from "better-auth/node";
 import { sql } from "drizzle-orm";
 import { and, eq } from "drizzle-orm/sqlite-core/expressions";

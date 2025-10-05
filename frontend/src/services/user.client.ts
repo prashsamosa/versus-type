@@ -1,4 +1,5 @@
-import type { Settings, SettingsSchema } from "@versus-type/types";
+import { SettingsSchema } from "@versus-type/shared";
+import type { Settings } from "@versus-type/shared";
 import { API_URL } from "@/const";
 
 export async function updateUserSettings(settings: Settings) {
