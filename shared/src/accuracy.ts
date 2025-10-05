@@ -8,7 +8,7 @@ export function resetAccuracy(): void {
 }
 
 export function recordKey(typed: string, expected?: string): void {
-	if (!typed) return;
+	if (typed.length > 1) throw new Error("Only single characters are allowed");
 	if (expected && typed === expected) state.correct++;
 	else state.incorrect++;
 }

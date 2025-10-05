@@ -1,4 +1,4 @@
-import english from "../wordlist/english.json";
+import english from "./wordlist/english.json";
 
 const wordList = english.words;
 const punctuations1 = [",", "."];

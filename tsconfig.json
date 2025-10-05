@@ -11,6 +11,16 @@
 		"moduleResolution": "bundler",
 		"resolveJsonModule": true,
 		"isolatedModules": true,
-		"incremental": true
+		"jsx": "preserve",
+		"incremental": true,
+		"plugins": [
+			{
+				"name": "next"
+			}
+		],
+		"paths": {
+			"@versus-type/shared/*": ["./shared/src/*"],
+			"@versus-type/*": ["./*/src"]
+		}
 	}
 }

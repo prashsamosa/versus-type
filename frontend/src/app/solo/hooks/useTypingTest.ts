@@ -1,8 +1,11 @@
 "use client";
 
+import { recordKey, resetAccuracy } from "@versus-type/shared/accuracy";
+import {
+	type GeneratorConfig,
+	generateWords,
+} from "@versus-type/shared/passage-generator";
 import { useRef, useState } from "react";
-import { recordKey, resetAccuracy } from "@versus-type/shared";
-import { type GeneratorConfig, generateWords } from "@versus-type/shared";
 
 export function useTypingTest(config: GeneratorConfig, initialWords: string[]) {
 	const [words, setWords] = useState(initialWords);
