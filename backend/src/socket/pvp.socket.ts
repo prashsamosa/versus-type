@@ -20,7 +20,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		sendLobbyUpdate(io, data.matchCode);
 	});
 
-	socket.on("disconnecting", () => {
+	socket.on("disconnect", () => {
 		const matchCode = socket.data.matchCode;
 		const username = socket.data.username;
 		if (matchCode) {

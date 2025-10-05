@@ -4,14 +4,20 @@ import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
 import { useChat } from "./hooks/useChat";
 
-export default function Chat() {
+export default function Chat({
+	playerColors,
+}: {
+	playerColors: Record<string, string>;
+}) {
 	const { messages, sendMessage } = useChat();
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const shouldAutoScroll = useRef(true);
+	const userId = authClient.useSession().data?.user.id;
 
 	function handleScroll() {
 		if (!scrollContainerRef.current) return;
@@ -51,14 +57,16 @@ export default function Chat() {
 					</div>
 				) : (
 					messages.map((msg, index) => {
-						const isOwnMessage = msg.socketId === socket?.id;
+						const isOwnMessage = msg.userId === userId;
 						return (
 							<div key={index} className="mb-2 wrap-anywhere">
 								{msg.system ? (
 									<em className="opacity-70">{msg.message}</em>
 								) : (
 									<>
-										<strong className={isOwnMessage ? "underline" : ""}>
+										<strong
+											className={`${isOwnMessage ? "underline" : ""} ${msg.userId ? (playerColors[msg.userId] ?? "") : ""}`}
+										>
 											{msg.username}:
 										</strong>{" "}
 										{msg.message}

@@ -46,18 +46,6 @@ export const io = new Server<
 	cors: { origin: env.CORS_ORIGIN.split(" "), credentials: true },
 });
 
-// socket auth middleware
-io.use(async (socket, next) => {
-	const session = await auth.api.getSession({
-		headers: new Headers(socket.handshake.headers as Record<string, string>),
-	});
-	if (!session) {
-		return next(new Error("Unauthorized"));
-	}
-	socket.data.userId = session.user.id;
-	next();
-});
-
 initializeSocket(io);
 
 export default app;
