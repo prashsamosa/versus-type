@@ -16,12 +16,16 @@ export type GeneratorConfig = {
 
 export function generateWords(config: GeneratorConfig = {}) {
 	const { wordCount = 50, punctuation = true, numbers = true } = config;
+	if (wordCount <= 0) {
+		return [];
+	}
 
 	const generatedWords = [];
 	let lastWord = "";
 
 	for (let i = 0; i < wordCount; i++) {
 		let word = getRandomElement(wordList);
+		if (word === "I" && !config.punctuation) word = "i";
 
 		// capitalize the first word or words after a period/question mark/exclamation point
 		if (punctuation && (i === 0 || /[.?!]/.test(lastWord.slice(-1)))) {
