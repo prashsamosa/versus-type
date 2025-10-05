@@ -35,16 +35,21 @@ export function usePvpSession() {
 	const playerColorsRef = useRef<Record<string, string>>({});
 	const { data: session, isPending } = authClient.useSession();
 	useEffect(() => {
+		console.log("Session changed:", session);
 		if (isPending) return;
+		console.log("Session data:", session);
 		if (session?.user && !session.user.isAnonymous) {
 			const displayName =
 				session.user.name ?? session.user.email?.split("@")[0] ?? "User";
 			setUsername(displayName);
 			return;
 		} else if (!session?.user?.isAnonymous) {
+			console.log("Signing in anonymously");
 			authClient.signIn.anonymous();
+		} else {
+			console.log("Anonymous user");
 		}
-	}, [session]);
+	}, [session, isPending]);
 
 	useEffect(() => {
 		if (!username || isPending) return;

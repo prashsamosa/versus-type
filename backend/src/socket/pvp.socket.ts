@@ -59,7 +59,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				message: `${username ?? "<Unknown>"} disconnected`,
 				system: true,
 			});
-			updateLobby(io, matchCode, socket.data.userId);
 			const room = io.sockets.adapter.rooms.get(matchCode);
 			if (!room || room.size === 0) {
 				console.log(`Match with code ${matchCode} has ended`);
@@ -89,6 +88,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 							message: `${newHostSocket.data.username ?? "<Unknown>"} is the new host`,
 							system: true,
 						});
+						// TODO: is this necessary? coz we already are updating Lobby which pushes isHost info
 						io.to(matchCode).emit("pvp:new-host", {
 							userId: newHostSocket.data.userId || newHostSocket.id,
 							username: newHostSocket.data.username,
@@ -96,6 +96,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					}
 				}
 			}
+			updateLobby(io, matchCode, socket.data.userId);
 		}
 		console.log(`Player ${socket.id}(${username}) disconnected`);
 	});

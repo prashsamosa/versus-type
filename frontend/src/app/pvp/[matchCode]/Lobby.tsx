@@ -21,13 +21,18 @@ export function Lobby({
 					<div key={player.userId} className="flex items-center gap-2">
 						<div className="flex gap-2">
 							<span
-								className={`${player.userId === userId ? "font-bold" : ""} ${player.userId ? (playerColors[player.userId] ?? "") : ""}`}
+								className={`${player.userId === userId ? "font-bold" : ""} ${player.userId ? (playerColors[player.userId] ?? "") : ""} ${player.disconnected ? " text-gray-500" : ""}`}
 							>
 								{player.username}{" "}
 							</span>
 							{player.isHost ? (
 								<Badge variant="secondary" className="mt-1">
 									Host
+								</Badge>
+							) : null}
+							{player.disconnected ? (
+								<Badge variant="secondary" className="mt-1">
+									Disconnected
 								</Badge>
 							) : null}
 						</div>
