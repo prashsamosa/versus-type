@@ -1,11 +1,8 @@
 export type CharCount = {
-	spaces: number;
-	correctWordChars: number;
-	allCorrectChars: number;
+	correctChars: number; // includes correct spaces
 	incorrectChars: number;
-	extraChars: number;
-	missedChars: number;
-	correctSpaces: number;
+	// extraChars: number;
+	// missedChars: number;
 };
 
 export type TypingStats = {
@@ -13,15 +10,11 @@ export type TypingStats = {
 	rawWpm: number;
 	correctChars: number;
 	incorrectChars: number;
-	missedChars: number;
-	extraChars: number;
 	allChars: number;
 	time: number;
-	spaces: number;
-	correctSpaces: number;
 };
 
-export function round2(n: number) {
+export function fmtTime(n: number) {
 	return Math.round(n * 100) / 100;
 }
 
@@ -31,104 +24,56 @@ export function calculateSeconds(start: number, endOrNow?: number) {
 }
 
 export function countChars(
-	inputWords: string[],
-	targetWords: string[],
+	inputString: string,
+	targetString: string,
 ): CharCount {
-	let correctWordChars = 0;
+	// Char-level sequential comparison (includes spaces)
+	const minLen = Math.min(inputString.length, targetString.length);
 	let correctChars = 0;
 	let incorrectChars = 0;
-	let extraChars = 0;
-	let missedChars = 0;
-	let spaces = 0;
-	let correctSpaces = 0;
-
-	const max = Math.max(inputWords.length, targetWords.length);
-	for (let i = 0; i < max; i++) {
-		const inputWord = inputWords[i] ?? "";
-		const targetWord = targetWords[i] ?? "";
-
-		if (inputWord.length === 0 && targetWord.length > 0) {
-			missedChars += targetWord.length;
-		} else if (inputWord === targetWord) {
-			correctWordChars += targetWord.length;
-			correctChars += targetWord.length;
-			if (i < max - 1 && targetWord.length > 0) correctSpaces++;
-		} else if (inputWord.length >= targetWord.length) {
-			for (let c = 0; c < inputWord.length; c++) {
-				if (c < targetWord.length) {
-					if (inputWord[c] === targetWord[c]) correctChars++;
-					else incorrectChars++;
-				} else {
-					extraChars++;
-				}
-			}
+	for (let i = 0; i < minLen; i++) {
+		if (inputString[i] === targetString[i]) {
+			correctChars++;
 		} else {
-			let localCorrect = 0;
-			let localIncorrect = 0;
-			let localMissed = 0;
-			for (let c = 0; c < targetWord.length; c++) {
-				if (c < inputWord.length) {
-					if (inputWord[c] === targetWord[c]) localCorrect++;
-					else localIncorrect++;
-				} else {
-					localMissed++;
-				}
-			}
-			correctChars += localCorrect;
-			incorrectChars += localIncorrect;
-			missedChars += localMissed;
+			incorrectChars++;
 		}
-
-		if (i < max - 1) spaces++;
 	}
+	const extraChars = inputString.length - minLen;
+	// const missedChars = targetString.length - minLen;
+	incorrectChars += extraChars;
 
 	return {
-		spaces,
-		correctWordChars,
-		allCorrectChars: correctChars,
+		correctChars,
 		incorrectChars,
-		extraChars,
-		missedChars,
-		correctSpaces,
 	};
 }
 
 export function computeStats(
 	startTs: number,
 	nowOrEndTs: number,
-	inputWords: string[],
-	targetWords: string[],
-): TypingStats {
-	const secs = calculateSeconds(startTs, nowOrEndTs);
-	const t = secs <= 0 ? 1e-6 : secs;
+	inputString: string,
+	targetString: string,
+): TypingStats | null {
+	const secs = calculateSeconds(startTs, nowOrEndTs || undefined);
+	if (secs <= 0) {
+		console.warn("computeStats called with non-positive time");
+		return null;
+	}
 
-	const chars = countChars(inputWords, targetWords);
+	const chars = countChars(inputString, targetString);
 
-	const gross =
-		((chars.allCorrectChars +
-			chars.spaces +
-			chars.incorrectChars +
-			chars.extraChars) *
-			(60 / t)) /
-		5;
-	const net = ((chars.correctWordChars + chars.correctSpaces) * (60 / t)) / 5;
+	// Raw WPM: all typed chars (direct from string length)
+	const gross = (inputString.length * (60 / secs)) / 5;
 
-	const all =
-		chars.allCorrectChars +
-		chars.spaces +
-		chars.incorrectChars +
-		chars.extraChars;
+	// Net WPM: correct chars
+	const net = (chars.correctChars * (60 / secs)) / 5;
 
 	return {
-		wpm: Number.isFinite(net) ? round2(net) : 0,
-		rawWpm: Number.isFinite(gross) ? round2(gross) : 0,
-		correctChars: chars.correctWordChars,
+		wpm: Number.isFinite(net) ? fmtTime(net) : 0,
+		rawWpm: Number.isFinite(gross) ? fmtTime(gross) : 0,
+		correctChars: chars.correctChars,
 		incorrectChars: chars.incorrectChars,
-		missedChars: chars.missedChars,
-		extraChars: chars.extraChars,
-		allChars: all,
-		time: round2(t),
-		spaces: chars.spaces,
-		correctSpaces: chars.correctSpaces,
+		allChars: inputString.length,
+		time: fmtTime(secs),
 	};
 }

@@ -1,11 +1,11 @@
 "use client";
 
+import { getAccuracy, getErrorCount } from "@versus-type/shared/accuracy";
+import { computeStats } from "@versus-type/shared/stats";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { getAccuracy, getErrorCount } from "@versus-type/shared";
 import { authClient } from "@/lib/auth-client";
-import { computeStats } from "@versus-type/shared";
 import { completeTest } from "@/services/test.client";
 
 type TestStats = {
@@ -32,9 +32,7 @@ export default function FinishedStats({
 	target: string;
 	onRestartAction: () => void;
 }) {
-	const inputWords = input.trim().split(/\s+/);
-	const targetWords = target.trim().split(/\s+/);
-	const stats = computeStats(startTs, endTs, inputWords, targetWords);
+	const stats = computeStats(startTs, endTs, input, target);
 	const acc = getAccuracy();
 	const errors = getErrorCount();
 	const [saving, setSaving] = useState(true);
@@ -46,14 +44,18 @@ export default function FinishedStats({
 			setSaving(false);
 			return;
 		}
+		if (!stats) {
+			setSaving(false);
+			return;
+		}
 		const testStats: TestStats = {
 			wpm: stats.wpm,
 			rawWpm: stats.rawWpm,
 			accuracy: acc.acc,
 			correctChars: stats.correctChars,
-			errorChars: stats.incorrectChars + stats.extraChars + stats.missedChars,
+			errorChars: stats.incorrectChars,
 			time: stats.time,
-			wordsTyped: inputWords.length,
+			wordsTyped: input.trim().split(/\s+/).length,
 			mode: "words",
 		};
 		const callComplete = async () => {
@@ -68,6 +70,21 @@ export default function FinishedStats({
 		};
 		callComplete();
 	}, [session]);
+
+	if (!stats) {
+		return (
+			<Card className="max-w-3xl mx-auto mt-10">
+				<CardContent>
+					<div className="text-center text-destructive">
+						Failed to compute stats
+					</div>
+				</CardContent>
+				<CardFooter className="justify-center gap-3">
+					<Button onClick={onRestartAction}>Restart</Button>
+				</CardFooter>
+			</Card>
+		);
+	}
 
 	return (
 		<Card className="max-w-3xl mx-auto mt-10">
@@ -103,7 +120,9 @@ export default function FinishedStats({
 						Saving result...
 					</div>
 				)}
-				{error && <div className="text-center text-red-500 mt-4">{error}</div>}
+				{error && (
+					<div className="text-center text-destructive mt-4">{error}</div>
+				)}
 			</CardContent>
 			<CardFooter className="justify-center gap-3">
 				<Button onClick={onRestartAction}>Restart</Button>

@@ -1,4 +1,7 @@
-import { type GeneratorConfig, generateWords } from "@versus-type/shared";
+import {
+	type GeneratorConfig,
+	generateWords,
+} from "@versus-type/shared/passage-generator";
 import Passage from "./Passage";
 
 const config: GeneratorConfig = {
