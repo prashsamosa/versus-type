@@ -39,7 +39,7 @@ export function Lobby({
 							>
 								{player.username}{" "}
 							</span>
-							{player.isHost && !countdownStarted ? (
+							{player.isHost ? (
 								<Badge variant="secondary" className="mt-1">
 									Host
 								</Badge>

@@ -3,6 +3,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@keyframes charBounce {
+	0% {
+		transform: translateX(0);
+	}
+	50% {
+		transform: translateX(-2px);
+	}
+	100% {
+		transform: translateX(0);
+	}
+}
+
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);

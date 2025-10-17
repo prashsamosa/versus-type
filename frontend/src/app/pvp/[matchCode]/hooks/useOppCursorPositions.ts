@@ -11,6 +11,7 @@ export function useOppCursorPositions(
 	typingIndexes: Record<string, number>,
 	containerRef: React.RefObject<HTMLDivElement | null>,
 	charRefs: React.RefObject<HTMLSpanElement[]>,
+	scrollOffset: number,
 ) {
 	const [oppCursorPoses, setOppCursorPoses] = useState<
 		Record<string, CursorData>
@@ -46,14 +47,13 @@ export function useOppCursorPositions(
 			const visibleHeight = Math.min(totalHeight, lineHeight * 4 + pt + pb);
 
 			container.style.height = `${Math.max(visibleHeight, lineHeight * 4 + pt + pb)}px`;
+
 			const stableOffsetTop =
 				Math.round(span.offsetTop / lineHeight) * lineHeight;
 
-			const targetOffset = Math.max(stableOffsetTop - lineHeight, 0);
-
 			const raf = requestAnimationFrame(() => {
 				const x = pl + span.offsetLeft;
-				const y = pt + (stableOffsetTop - targetOffset);
+				const y = pt + stableOffsetTop - scrollOffset;
 
 				setOppCursorPoses((prev) => {
 					const updated = { ...prev };
@@ -68,7 +68,7 @@ export function useOppCursorPositions(
 		return () => {
 			for (const cleanup of cleanups) cleanup();
 		};
-	}, [typingIndexes, containerRef, charRefs]);
+	}, [typingIndexes, containerRef, charRefs, scrollOffset]);
 
 	return {
 		oppCursorPoses,

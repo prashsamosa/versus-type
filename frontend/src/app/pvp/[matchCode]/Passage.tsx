@@ -23,7 +23,7 @@ export default function Passage({
 		if (!socket) return;
 		const unregister = registerSocketHandlers(socket, {
 			"pvp:progress-update": (data) => {
-				setOppIndexes((prev) => ({ ...prev, [data.userId]: data.index }));
+				setOppIndexes((prev) => ({ ...prev, [data.userId]: data.typingIndex }));
 			},
 		});
 		return unregister;
@@ -45,6 +45,7 @@ export default function Passage({
 		oppIndexes,
 		containerRef,
 		charRefs,
+		scrollOffset,
 	);
 	const userId = authClient.useSession()?.data?.user?.id;
 	const color = playerColors[userId || ""] || "grey";
@@ -93,12 +94,12 @@ export default function Passage({
 				scrollOffset={scrollOffset}
 			/>
 
-			{focused && !disabled ? (
+			{!disabled ? (
 				<Cursor
 					x={cursorPos.x}
 					y={cursorPos.y}
-					height={charRefs.current?.[0]?.offsetHeight ?? 0}
 					color={color}
+					disabled={!focused}
 				/>
 			) : null}
 			{!disabled
@@ -109,7 +110,6 @@ export default function Passage({
 								key={oppId}
 								x={pos.x}
 								y={pos.y}
-								height={charRefs.current?.[0]?.offsetHeight ?? 0}
 								color={playerColors[oppId] || "grey"}
 							/>
 						);
