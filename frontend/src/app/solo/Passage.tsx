@@ -3,10 +3,10 @@
 import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { useEffect, useRef, useState } from "react";
 import { useCursorPosition } from "@/app/hooks/useCursorPosition";
-import Cursor from "./Cursor";
+import Cursor from "@/app/passage-components/Cursor";
+import PassageDisplay from "@/app/passage-components/PassageDisplay";
 import FinishedStats from "./FinishedStats";
 import { useTypingTest } from "./hooks/useTypingTest";
-import PassageDisplay from "./PassageDisplay";
 
 export default function Passage({
 	initialWords,
@@ -88,21 +88,13 @@ export default function Passage({
 				onFocus={() => setFocused(true)}
 				onBlur={() => setFocused(false)}
 			/>
-
 			<PassageDisplay
 				words={words}
 				typedText={typedText}
 				charRefs={charRefs}
 				scrollOffset={scrollOffset}
 			/>
-
-			{focused ? (
-				<Cursor
-					x={cursorPos.x}
-					y={cursorPos.y}
-					height={charRefs.current?.[0]?.offsetHeight ?? 0}
-				/>
-			) : null}
+			<Cursor x={cursorPos.x} y={cursorPos.y} disabled={!focused} />
 		</div>
 	);
 }

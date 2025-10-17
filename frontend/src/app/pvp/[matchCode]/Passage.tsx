@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useCursorPosition } from "@/app/hooks/useCursorPosition";
+import Cursor from "@/app/passage-components/Cursor";
+import PassageDisplay from "@/app/passage-components/PassageDisplay";
 import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
-import Cursor from "./Cursor";
 import { useOppCursorPositions } from "./hooks/useOppCursorPositions";
 import { usePvpTypingState } from "./hooks/usePvpTypingState";
-import PassageDisplay from "./PassageDisplay";
 
 export default function Passage({
 	words,
