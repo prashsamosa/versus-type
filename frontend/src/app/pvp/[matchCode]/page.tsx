@@ -20,7 +20,6 @@ export default function PvpPage() {
 		matchCode,
 		latency,
 		players,
-		playerColors,
 	} = usePvpSession();
 
 	const [copied, setCopied] = useState(false);
@@ -66,14 +65,14 @@ export default function PvpPage() {
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
 				<div className="p-16">
-					<PvpGame playerColors={playerColors} />
+					<PvpGame players={players} />
 				</div>
 				<div className="flex gap-4 p-4 w-full absolute bottom-0 left-0">
 					<div className="flex-1 min-h-[30vh] max-h-[30vh]">
-						<Lobby players={players} playerColors={playerColors} />
+						<Lobby players={players} />
 					</div>
 					<div className="flex-1 min-h-[30vh] max-h-[30vh]">
-						<Chat playerColors={playerColors} />
+						<Chat players={players} />
 					</div>
 				</div>
 			</div>

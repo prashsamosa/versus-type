@@ -1,6 +1,6 @@
-import type { PlayerInfo } from "@versus-type/shared/index";
+import type { PlayersInfo } from "@versus-type/shared/index";
 import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { disconnectSocket, setupSocketAndJoin, socket } from "@/socket";
@@ -15,32 +15,13 @@ export function usePvpSession() {
 	const [socketError, setSocketError] = useState<string | null>(null);
 	const [latency, setLatency] = useState<number | null>(null);
 	const userId = authClient.useSession().data?.user.id;
-	const [players, setPlayers] = useState<PlayerInfo[]>([]);
+	const [players, setPlayers] = useState<PlayersInfo>({});
 	const [username, setUsername] = useState(() => {
 		if (typeof window !== "undefined") {
 			return localStorage.getItem("anonymousUsername") || "";
 		}
 		return "";
 	});
-	const colors = [
-		// "text-blue-300",
-		// "text-green-300",
-		// "text-yellow-300",
-		// "text-purple-300",
-		// "text-pink-300",
-		// "text-red-300",
-		// "text-indigo-300",
-		// "text-teal-300",
-		"#60A5FA",
-		"#34D399",
-		"#FBBF24",
-		"#A78BFA",
-		"#F472B6",
-		"#F87171",
-		"#818CF8",
-		"#14B8A6",
-	];
-	const playerColorsRef = useRef<Record<string, string>>({});
 	const { data: session, isPending } = authClient.useSession();
 	useEffect(() => {
 		console.log("Session changed:", session);
@@ -83,12 +64,6 @@ export function usePvpSession() {
 
 			"pvp:lobby-update": (players) => {
 				setPlayers(players);
-				players.forEach((player, index) => {
-					if (!playerColorsRef.current[player.userId]) {
-						playerColorsRef.current[player.userId] =
-							colors[index % colors.length];
-					}
-				});
 			},
 		});
 
@@ -123,6 +98,5 @@ export function usePvpSession() {
 		isPending,
 		latency,
 		players,
-		playerColors: playerColorsRef.current,
 	};
 }

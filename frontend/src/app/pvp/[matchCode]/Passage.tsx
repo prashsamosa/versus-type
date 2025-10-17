@@ -1,5 +1,6 @@
 "use client";
 
+import type { PlayersInfo } from "@versus-type/shared/index";
 import { useEffect, useRef, useState } from "react";
 import { useCursorPosition } from "@/app/hooks/useCursorPosition";
 import Cursor from "@/app/passage-components/Cursor";
@@ -13,11 +14,11 @@ import { usePvpTypingState } from "./hooks/usePvpTypingState";
 export default function Passage({
 	words,
 	disabled,
-	playerColors,
+	players,
 }: {
 	words: string[];
 	disabled?: boolean;
-	playerColors: Record<string, string>;
+	players: PlayersInfo;
 }) {
 	useEffect(() => {
 		if (!socket) return;
@@ -48,7 +49,7 @@ export default function Passage({
 		scrollOffset,
 	);
 	const userId = authClient.useSession()?.data?.user?.id;
-	const color = playerColors[userId || ""] || "grey";
+	const color = players[userId || ""]?.color || "black";
 
 	const hiddenInputRef = useRef<HTMLInputElement>(null);
 
@@ -110,7 +111,7 @@ export default function Passage({
 								key={oppId}
 								x={pos.x}
 								y={pos.y}
-								color={playerColors[oppId] || "grey"}
+								color={players[oppId]?.color || "gray"}
 							/>
 						);
 					})

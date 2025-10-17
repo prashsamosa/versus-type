@@ -7,11 +7,18 @@ export type ChatMessage = {
 	system?: boolean;
 };
 
-export type PlayerInfo = {
-	userId: string;
-	username: string;
-	isHost: boolean;
+export type PlayerState = {
+	isHost?: boolean;
+	username?: string;
+	typingIndex: number;
+	spectator: boolean;
+	completed?: boolean;
+	color: string;
 	disconnected?: boolean;
+};
+
+export type PlayersInfo = {
+	[userId: string]: PlayerState;
 };
 
 export interface ServerToClientEvents {
@@ -21,7 +28,7 @@ export interface ServerToClientEvents {
 		typingIndex: number;
 	}) => void;
 
-	"pvp:lobby-update": (players: PlayerInfo[]) => void;
+	"pvp:lobby-update": (players: PlayersInfo) => void;
 	"pvp:player-joined": (data: { userId: string; username?: string }) => void;
 	"pvp:player-left": (data: { userId: string; username?: string }) => void;
 	"pvp:new-host": (data: { userId: string; username?: string }) => void;

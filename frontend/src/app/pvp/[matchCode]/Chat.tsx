@@ -1,5 +1,6 @@
 "use client";
 
+import type { PlayersInfo } from "@versus-type/shared/index";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,11 +9,7 @@ import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
 import { useChat } from "./hooks/useChat";
 
-export default function Chat({
-	playerColors,
-}: {
-	playerColors: Record<string, string>;
-}) {
+export default function Chat({ players }: { players: PlayersInfo }) {
 	const { messages, sendMessage } = useChat();
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -67,7 +64,7 @@ export default function Chat({
 										<strong
 											className={isOwnMessage ? "underline" : ""}
 											style={
-												msg.userId ? { color: playerColors[msg.userId] } : {}
+												msg.userId ? { color: players[msg.userId]?.color } : {}
 											}
 										>
 											{msg.username}:

@@ -1,13 +1,10 @@
+import type { PlayersInfo } from "@versus-type/shared/index";
 import { useEffect, useState } from "react";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
 import Passage from "./Passage";
 
-export function PvpGame({
-	playerColors,
-}: {
-	playerColors: Record<string, string>;
-}) {
+export function PvpGame({ players }: { players: PlayersInfo }) {
 	const [passage, setPassage] = useState<string>("");
 	const [loading, setLoading] = useState(true);
 	const [countdown, setCountdown] = useState<number | null>(null);
@@ -39,7 +36,7 @@ export function PvpGame({
 			<Passage
 				words={passage.split(" ")}
 				disabled={!gameStarted}
-				playerColors={playerColors}
+				players={players}
 			/>
 			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
 				{!gameStarted ? (

@@ -1,4 +1,4 @@
-import type { ioServer, ioSocket, PlayerInfo } from "@versus-type/shared";
+import type { ioServer, ioSocket, PlayerState } from "@versus-type/shared";
 import {
 	type GeneratorConfig,
 	generateWords,
@@ -13,15 +13,6 @@ const MAX_ROOM_SIZE = 10;
 const COUNTDOWN_SECONDS = 3;
 
 type MatchStatus = "waiting" | "inProgress" | "completed" | "cancelled";
-
-type PlayerState = {
-	isHost?: boolean;
-	username?: string;
-	typingIndex: number;
-	spectator: boolean;
-	completed?: boolean;
-	disconnected?: boolean;
-};
 
 type MatchState = {
 	status: MatchStatus;
@@ -61,11 +52,10 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			});
 			const room = io.sockets.adapter.rooms.get(matchCode);
 			if (!room || room.size === 0) {
-				// TEMP
-				// console.log(`Match with code ${matchCode} has ended`);
-				// if (matchStates[matchCode]?.status !== "completed") {
-				// 	updateMatchStatus(matchCode, "cancelled");
-				// }
+				console.log(`Match with code ${matchCode} has ended`);
+				if (matchStates[matchCode]?.status !== "completed") {
+					updateMatchStatus(matchCode, "cancelled");
+				}
 			} else {
 				if (socket.data.isHost) {
 					// change host
@@ -114,8 +104,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
-		// TEMP
-		// await updateMatchStatus(matchCode, "inProgress");
+		await updateMatchStatus(matchCode, "inProgress");
 		callback({
 			success: true,
 			message: "Starting countdown",
@@ -138,13 +127,13 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
-		if (matchStates[matchCode].passage[pstate.typingIndex + 1] === key) {
+		if (matchStates[matchCode].passage[pstate.typingIndex] === key) {
 			pstate.typingIndex++;
+			io.to(matchCode).emit("pvp:progress-update", {
+				userId: socket.data.userId || socket.id,
+				typingIndex: pstate.typingIndex,
+			});
 		}
-		io.to(matchCode).emit("pvp:progress-update", {
-			userId: socket.data.userId || socket.id,
-			typingIndex: pstate.typingIndex,
-		});
 	});
 
 	socket.on("pvp:get-passage", (callback) => {
@@ -208,6 +197,7 @@ async function handleJoin(
 						isHost: true,
 						username,
 						spectator: false,
+						color: getRandomColor(matchCode),
 					},
 				},
 			};
@@ -290,6 +280,7 @@ function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
 					isHost: memberSocket.data.isHost || false,
 					username: memberSocket.data.username || "<Unknown>",
 					spectator: matchStates[matchCode].isStarted ?? false,
+					color: getRandomColor(matchCode),
 				};
 			}
 		}
@@ -297,16 +288,30 @@ function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
 	if (disconnectedId) {
 		matchStates[matchCode].players[disconnectedId].disconnected = true;
 	}
-	io.to(matchCode).emit(
-		"pvp:lobby-update",
-		Object.entries(matchStates[matchCode].players).map(
-			([userId, state]) =>
-				({
-					userId,
-					isHost: state.isHost || false,
-					username: state.username || "<Unknown>",
-					disconnected: state.disconnected || false,
-				}) as PlayerInfo,
-		),
-	);
+	io.to(matchCode).emit("pvp:lobby-update", matchStates[matchCode].players);
+}
+
+function getRandomColor(matchCode: string) {
+	const colors = [
+		"#60A5FA",
+		"#34D399",
+		"#FBBF24",
+		"#A78BFA",
+		"#F472B6",
+		"#F87171",
+		"#818CF8",
+		"#14B8A6",
+	];
+	let notUsed = colors.slice();
+	if (matchStates[matchCode]) {
+		for (const userId in matchStates[matchCode].players) {
+			notUsed = notUsed.filter(
+				(c) => c !== matchStates[matchCode].players[userId].color,
+			);
+		}
+		if (notUsed.length === 0) {
+			return colors[Math.floor(Math.random() * colors.length)];
+		}
+	}
+	return notUsed[Math.floor(Math.random() * notUsed.length)];
 }
