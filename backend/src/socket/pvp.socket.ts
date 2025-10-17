@@ -134,6 +134,13 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			index: key.charCodeAt(0),
 		});
 	});
+
+	socket.on("pvp:get-passage", (callback) => {
+		console.log("pvp:get-passage called by", socket.data.userId);
+		const matchCode = socket.data.matchCode;
+		if (!matchCode || !matchStates[matchCode]) return callback("");
+		callback(matchStates[matchCode].passage);
+	});
 }
 
 async function startCountdown(io: ioServer, matchCode: string) {
@@ -257,7 +264,6 @@ async function handleJoin(
 
 	sendChatHistory(socket, matchCode);
 	updateLobby(io, matchCode);
-	sendPassage(io, matchCode);
 }
 
 function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
@@ -291,13 +297,4 @@ function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
 				}) as PlayerInfo,
 		),
 	);
-}
-
-function sendPassage(io: ioServer, matchCode: string) {
-	const passage = matchStates[matchCode]?.passage;
-	if (!passage) {
-		console.warn(`No passage in map for ${matchCode}. How did this happen lol`);
-		return;
-	}
-	io.to(matchCode).emit("pvp:passage", passage);
 }
