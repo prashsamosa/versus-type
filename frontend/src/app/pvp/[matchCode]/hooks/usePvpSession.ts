@@ -23,14 +23,22 @@ export function usePvpSession() {
 		return "";
 	});
 	const colors = [
-		"text-blue-300",
-		"text-green-300",
-		"text-yellow-300",
-		"text-purple-300",
-		"text-pink-300",
-		"text-red-300",
-		"text-indigo-300",
-		"text-teal-300",
+		// "text-blue-300",
+		// "text-green-300",
+		// "text-yellow-300",
+		// "text-purple-300",
+		// "text-pink-300",
+		// "text-red-300",
+		// "text-indigo-300",
+		// "text-teal-300",
+		"#60A5FA",
+		"#34D399",
+		"#FBBF24",
+		"#A78BFA",
+		"#F472B6",
+		"#F87171",
+		"#818CF8",
+		"#14B8A6",
 	];
 	const playerColorsRef = useRef<Record<string, string>>({});
 	const { data: session, isPending } = authClient.useSession();

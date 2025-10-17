@@ -1,22 +1,36 @@
 import { useEffect, useState } from "react";
+import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
 import Passage from "./Passage";
 
-export function PvpGame() {
+export function PvpGame({
+	playerColors,
+}: {
+	playerColors: Record<string, string>;
+}) {
 	const [passage, setPassage] = useState<string>("");
 	const [loading, setLoading] = useState(true);
+	const [countdown, setCountdown] = useState<number | null>(null);
+	const gameStarted = countdown === 0;
+	const userId = authClient.useSession().data?.user.id;
+	const color = userId ? (playerColors[userId] ?? "") : "";
+	console.log(playerColors, color);
+
 	useEffect(() => {
 		if (!socket) return;
-		// TODO: if no passage received(should not happen), demand again?
+		// TODO: if passage missed, demand again?
+		socket.emitWithAck("pvp:get-passage").then((receivedPassage) => {
+			setPassage(receivedPassage);
+			setLoading(false);
+		});
 		const unregister = registerSocketHandlers(socket, {
-			"pvp:passage": (newPassage) => {
-				setPassage(newPassage);
-				setLoading(false);
+			"pvp:countdown": (num) => {
+				setCountdown(num);
 			},
 		});
 		return unregister;
-	}, []);
+	}, [socket]);
 	if (loading) {
 		return (
 			<div className="border rounded p-4 mb-4 h-[50vh] w-[70vw] flex items-center justify-center">
@@ -24,5 +38,20 @@ export function PvpGame() {
 			</div>
 		);
 	}
-	return <Passage words={passage.split(" ")} />;
+	return (
+		<div className="relative">
+			<Passage
+				words={passage.split(" ")}
+				disabled={!gameStarted}
+				color={color}
+			/>
+			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+				{!gameStarted ? (
+					<div className="text-white flex items-center justify-center text-5xl font-bold">
+						{countdown}
+					</div>
+				) : null}
+			</div>
+		</div>
+	);
 }

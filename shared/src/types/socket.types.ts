@@ -17,7 +17,6 @@ export type PlayerInfo = {
 export interface ServerToClientEvents {
 	"pvp:countdown": (seconds: number) => void;
 	"pvp:progress-update": (data: { userId: string; index: number }) => void;
-	"pvp:passage": (passage: string) => void;
 
 	"pvp:lobby-update": (players: PlayerInfo[]) => void;
 	"pvp:player-joined": (data: { userId: string; username?: string }) => void;
@@ -33,6 +32,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
 	"pvp:start-match": (callback: (response: SocketResponse) => void) => void;
 	"pvp:key-press": (key: string) => void;
+	"pvp:get-passage": (callback: (passage: string) => void) => void;
 	ping: (callback: () => void) => void;
 	"pvp:join-as-host": (
 		data: {

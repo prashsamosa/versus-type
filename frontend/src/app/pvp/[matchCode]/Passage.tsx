@@ -9,9 +9,11 @@ import PassageDisplay from "./PassageDisplay";
 export default function Passage({
 	words,
 	disabled,
+	color,
 }: {
 	words: string[];
 	disabled?: boolean;
+	color?: string;
 }) {
 	const { typedText, finished, startRef, endRef, handleInputChange } =
 		usePvpTypingState(words);
@@ -34,7 +36,10 @@ export default function Passage({
 	return (
 		<div
 			ref={containerRef}
-			className="max-w-3xl min-h-48 border overflow-hidden mx-auto mt-20 p-4 bg-card rounded-md relative cursor-text"
+			className={
+				"max-w-3xl min-h-48 border overflow-hidden mx-auto mt-20 p-4 bg-card rounded-md relative cursor-text " +
+				(disabled ? "opacity-80" : "")
+			}
 			onClick={() => {
 				hiddenInputRef.current?.focus();
 			}}
@@ -50,7 +55,7 @@ export default function Passage({
 				type="text"
 				className="absolute opacity-0 -z-10"
 				value={typedText}
-				onChange={handleInputChange}
+				onChange={disabled ? () => {} : handleInputChange}
 				onFocus={() => setFocused(true)}
 				onBlur={() => setFocused(false)}
 			/>
@@ -67,6 +72,7 @@ export default function Passage({
 					x={cursorPos.x}
 					y={cursorPos.y}
 					height={charRefs.current?.[0]?.offsetHeight ?? 0}
+					color={color}
 				/>
 			) : null}
 		</div>

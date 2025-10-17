@@ -65,7 +65,10 @@ export default function Chat({
 								) : (
 									<>
 										<strong
-											className={`${isOwnMessage ? "underline" : ""} ${msg.userId ? (playerColors[msg.userId] ?? "") : ""}`}
+											className={isOwnMessage ? "underline" : ""}
+											style={
+												msg.userId ? { color: playerColors[msg.userId] } : {}
+											}
 										>
 											{msg.username}:
 										</strong>{" "}
