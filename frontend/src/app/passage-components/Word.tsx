@@ -59,11 +59,10 @@ export default function Word({
 						className={charClassName}
 						style={{
 							display: "inline-block",
-							transition: "transform 0.25s cubic-bezier(0,1.61,.78,1.77)",
-							transform:
+							animation:
 								isWordTyped && isWordCorrect
 									? // ? passageTransforms[wordIndex][charIndex]
-										"translateX(-2px)"
+										"charBounce 0.3s"
 									: "none",
 							willChange: "transform",
 						}}

@@ -65,7 +65,7 @@ export default function Passage({
 		<div
 			ref={containerRef}
 			className={
-				"max-w-3xl min-h-48 border overflow-hidden mx-auto mt-20 p-4 bg-card rounded-md relative cursor-text " +
+				"max-w-3xl min-h-48 overflow-hidden mx-auto mt-20 p-4 bg-background rounded-md relative cursor-text " +
 				(disabled ? "opacity-80" : "")
 			}
 			onClick={() => {
@@ -75,7 +75,14 @@ export default function Passage({
 			<div
 				className="absolute bottom-0 left-0 w-full h-14 z-10 select-none"
 				style={{
-					background: "linear-gradient(to bottom, transparent, var(--card))",
+					background: "linear-gradient(to top, var(--background), transparent)",
+				}}
+			/>
+			<div
+				className="absolute top-0 left-0 w-full h-14 z-10 select-none"
+				style={{
+					background:
+						"linear-gradient(to bottom, var(--background), transparent)",
 				}}
 			/>
 			<input

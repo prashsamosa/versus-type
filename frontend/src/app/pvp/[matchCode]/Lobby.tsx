@@ -24,7 +24,7 @@ export function Lobby({ players }: { players: PlayersInfo }) {
 					<div key={userId} className="flex items-center gap-2">
 						<div className="flex gap-2">
 							<span
-								className={`${userId === myUserId ? "font-bold" : ""} ${player.disconnected ? " text-gray-500" : ""}`}
+								className={`${userId === myUserId ? "font-bold" : ""} ${player.disconnected ? "line-through" : ""}`}
 								style={{ color: player.color }}
 							>
 								{player.username}{" "}
