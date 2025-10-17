@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
+import Passage from "./Passage";
 
 export function PvpGame() {
 	const [passage, setPassage] = useState<string>("");
@@ -16,15 +17,12 @@ export function PvpGame() {
 		});
 		return unregister;
 	}, []);
-	return (
-		<div className="border rounded p-4 mb-4 h-[50vh] w-[70vw] flex items-center justify-center">
-			{loading ? (
+	if (loading) {
+		return (
+			<div className="border rounded p-4 mb-4 h-[50vh] w-[70vw] flex items-center justify-center">
 				<p className="text-center text-gray-500">Loading...</p>
-			) : (
-				<p className="text-center text-gray-500">
-					{passage ? passage : "Internal Server Error"}
-				</p>
-			)}
-		</div>
-	);
+			</div>
+		);
+	}
+	return <Passage words={passage.split(" ")} />;
 }

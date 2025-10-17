@@ -2,9 +2,9 @@
 
 import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { useEffect, useRef, useState } from "react";
+import { useCursorPosition } from "@/app/hooks/useCursorPosition";
 import Cursor from "./Cursor";
 import FinishedStats from "./FinishedStats";
-import { useCursorPosition } from "./hooks/useCursorPosition";
 import { useTypingTest } from "./hooks/useTypingTest";
 import PassageDisplay from "./PassageDisplay";
 
@@ -27,8 +27,9 @@ export default function Passage({
 		handleKeyDown,
 	} = useTypingTest(config, initialWords);
 
-	const { scrollOffset, cursorPos, containerRef, charRefs } =
-		useCursorPosition(typedText);
+	const { scrollOffset, cursorPos, containerRef, charRefs } = useCursorPosition(
+		typedText.length,
+	);
 	const [focused, setFocused] = useState(false);
 
 	const hiddenInputRef = useRef<HTMLInputElement>(null);
@@ -61,7 +62,7 @@ export default function Passage({
 	return (
 		<div
 			ref={containerRef}
-			className="max-w-3xl h-32 overflow-hidden mx-auto mt-20 p-4 bg-card rounded-md relative cursor-text"
+			className="max-w-3xl h-64 overflow-hidden mx-auto mt-20 p-4 bg-card rounded-md relative cursor-text"
 			onClick={() => {
 				hiddenInputRef.current?.focus();
 			}}

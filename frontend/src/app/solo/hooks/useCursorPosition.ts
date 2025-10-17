@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 
-export function useCursorPosition(typedText: string) {
+export function useCursorPosition(index: number) {
 	const [scrollOffset, setScrollOffset] = useState(0);
 	const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({
 		x: 0,
@@ -14,7 +14,6 @@ export function useCursorPosition(typedText: string) {
 	const lineHeightRef = useRef<number>(0);
 
 	useLayoutEffect(() => {
-		const index = typedText.length;
 		const span = charRefs.current[index];
 		const container = containerRef.current;
 		if (!span || !container) return;
@@ -51,7 +50,7 @@ export function useCursorPosition(typedText: string) {
 		});
 
 		return () => cancelAnimationFrame(raf);
-	}, [typedText, scrollOffset]);
+	}, [index, scrollOffset]);
 
 	return {
 		scrollOffset,

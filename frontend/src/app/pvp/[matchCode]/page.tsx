@@ -64,9 +64,11 @@ export default function PvpPage() {
 				/>
 				<LatencyStatus latency={latency} />
 			</div>
-			<div className="flex flex-col justify-center items-center gap-4 h-full w-full">
-				<PvpGame />
-				<div className="flex gap-4 p-4 w-full">
+			<div className="flex flex-col justify-center items-center h-full w-full">
+				<div className="p-16">
+					<PvpGame />
+				</div>
+				<div className="flex gap-4 p-4 w-full absolute bottom-0 left-0">
 					<div className="flex-1 min-h-[30vh] max-h-[30vh]">
 						<Lobby players={players} playerColors={playerColors} />
 					</div>
