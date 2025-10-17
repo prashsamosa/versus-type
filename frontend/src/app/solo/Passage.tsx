@@ -15,6 +15,9 @@ export default function Passage({
 	initialWords: string[];
 	config: GeneratorConfig;
 }) {
+	const containerRef = useRef<HTMLDivElement>(null);
+	const charRefs = useRef<HTMLSpanElement[]>([]);
+
 	const {
 		words,
 		passageChars,
@@ -27,8 +30,10 @@ export default function Passage({
 		handleKeyDown,
 	} = useTypingTest(config, initialWords);
 
-	const { scrollOffset, cursorPos, containerRef, charRefs } = useCursorPosition(
+	const { scrollOffset, cursorPos } = useCursorPosition(
 		typedText.length,
+		containerRef,
+		charRefs,
 	);
 	const [focused, setFocused] = useState(false);
 

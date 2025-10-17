@@ -53,7 +53,7 @@ export function Lobby({
 					</div>
 				))}
 			</div>
-			<div className="absolute bottom-3 right-3">
+			<div className="absolute bottom-4 right-4">
 				{isHost && !countdownStarted ? (
 					<Button onClick={handleStartCountdown}>Start Match</Button>
 				) : null}

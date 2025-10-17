@@ -2,26 +2,52 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useCursorPosition } from "@/app/hooks/useCursorPosition";
+import { authClient } from "@/lib/auth-client";
+import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
+import { socket } from "@/socket";
 import Cursor from "./Cursor";
+import { useOppCursorPositions } from "./hooks/useOppCursorPositions";
 import { usePvpTypingState } from "./hooks/usePvpTypingState";
 import PassageDisplay from "./PassageDisplay";
 
 export default function Passage({
 	words,
 	disabled,
-	color,
+	playerColors,
 }: {
 	words: string[];
 	disabled?: boolean;
-	color?: string;
+	playerColors: Record<string, string>;
 }) {
+	useEffect(() => {
+		if (!socket) return;
+		const unregister = registerSocketHandlers(socket, {
+			"pvp:progress-update": (data) => {
+				setOppIndexes((prev) => ({ ...prev, [data.userId]: data.index }));
+			},
+		});
+		return unregister;
+	}, [socket]);
+	const containerRef = useRef<HTMLDivElement>(null);
+	const charRefs = useRef<HTMLSpanElement[]>([]);
+
 	const { typedText, finished, startRef, endRef, handleInputChange } =
 		usePvpTypingState(words);
 
-	const { scrollOffset, cursorPos, containerRef, charRefs } = useCursorPosition(
+	const { scrollOffset, cursorPos } = useCursorPosition(
 		typedText.length,
+		containerRef,
+		charRefs,
 	);
 	const [focused, setFocused] = useState(false);
+	const [oppIndexes, setOppIndexes] = useState<Record<string, number>>({});
+	const { oppCursorPoses } = useOppCursorPositions(
+		oppIndexes,
+		containerRef,
+		charRefs,
+	);
+	const userId = authClient.useSession()?.data?.user?.id;
+	const color = playerColors[userId || ""] || "grey";
 
 	const hiddenInputRef = useRef<HTMLInputElement>(null);
 
@@ -75,6 +101,20 @@ export default function Passage({
 					color={color}
 				/>
 			) : null}
+			{!disabled
+				? Object.entries(oppCursorPoses).map(([oppId, pos]) => {
+						if (oppId === userId) return null;
+						return (
+							<Cursor
+								key={oppId}
+								x={pos.x}
+								y={pos.y}
+								height={charRefs.current?.[0]?.offsetHeight ?? 0}
+								color={playerColors[oppId] || "grey"}
+							/>
+						);
+					})
+				: null}
 		</div>
 	);
 }

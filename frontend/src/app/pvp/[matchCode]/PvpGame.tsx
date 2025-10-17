@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
 import Passage from "./Passage";
@@ -13,9 +12,6 @@ export function PvpGame({
 	const [loading, setLoading] = useState(true);
 	const [countdown, setCountdown] = useState<number | null>(null);
 	const gameStarted = countdown === 0;
-	const userId = authClient.useSession().data?.user.id;
-	const color = userId ? (playerColors[userId] ?? "") : "";
-	console.log(playerColors, color);
 
 	useEffect(() => {
 		if (!socket) return;
@@ -43,7 +39,7 @@ export function PvpGame({
 			<Passage
 				words={passage.split(" ")}
 				disabled={!gameStarted}
-				color={color}
+				playerColors={playerColors}
 			/>
 			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
 				{!gameStarted ? (

@@ -2,19 +2,21 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 
-export function useCursorPosition(index: number) {
+export function useCursorPosition(
+	index: number,
+	containerRef: React.RefObject<HTMLDivElement | null>,
+	charRefs: React.RefObject<HTMLSpanElement[] | null>,
+) {
 	const [scrollOffset, setScrollOffset] = useState(0);
 	const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({
 		x: 0,
 		y: 0,
 	});
 
-	const containerRef = useRef<HTMLDivElement>(null);
-	const charRefs = useRef<HTMLSpanElement[]>([]);
 	const lineHeightRef = useRef<number>(0);
 
 	useLayoutEffect(() => {
-		const span = charRefs.current[index];
+		const span = charRefs.current?.[index];
 		const container = containerRef.current;
 		if (!span || !container) return;
 
@@ -50,12 +52,10 @@ export function useCursorPosition(index: number) {
 		});
 
 		return () => cancelAnimationFrame(raf);
-	}, [index, scrollOffset]);
+	}, [index, scrollOffset, containerRef, charRefs]);
 
 	return {
 		scrollOffset,
 		cursorPos,
-		containerRef,
-		charRefs,
 	};
 }
