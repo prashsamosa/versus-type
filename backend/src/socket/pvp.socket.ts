@@ -17,7 +17,7 @@ type MatchStatus = "waiting" | "inProgress" | "completed" | "cancelled";
 type PlayerState = {
 	isHost?: boolean;
 	username?: string;
-	index: number;
+	typingIndex: number;
 	spectator: boolean;
 	completed?: boolean;
 	disconnected?: boolean;
@@ -61,10 +61,11 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			});
 			const room = io.sockets.adapter.rooms.get(matchCode);
 			if (!room || room.size === 0) {
-				console.log(`Match with code ${matchCode} has ended`);
-				if (matchStates[matchCode]?.status !== "completed") {
-					updateMatchStatus(matchCode, "cancelled");
-				}
+				// TEMP
+				// console.log(`Match with code ${matchCode} has ended`);
+				// if (matchStates[matchCode]?.status !== "completed") {
+				// 	updateMatchStatus(matchCode, "cancelled");
+				// }
 			} else {
 				if (socket.data.isHost) {
 					// change host
@@ -113,7 +114,8 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
-		await updateMatchStatus(matchCode, "inProgress");
+		// TEMP
+		// await updateMatchStatus(matchCode, "inProgress");
 		callback({
 			success: true,
 			message: "Starting countdown",
@@ -129,9 +131,19 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
+		const pstate = matchStates[matchCode].players[socket.data.userId];
+		if (pstate.spectator) {
+			console.warn(
+				`spectator ${socket.data.userId} tryna send key-press during match lmao`,
+			);
+			return;
+		}
+		if (matchStates[matchCode].passage[pstate.typingIndex + 1] === key) {
+			pstate.typingIndex++;
+		}
 		io.to(matchCode).emit("pvp:progress-update", {
 			userId: socket.data.userId || socket.id,
-			index: key.charCodeAt(0),
+			typingIndex: pstate.typingIndex,
 		});
 	});
 
@@ -192,7 +204,7 @@ async function handleJoin(
 				isStarted: false,
 				players: {
 					[socket.data.userId]: {
-						index: 0,
+						typingIndex: 0,
 						isHost: true,
 						username,
 						spectator: false,
@@ -274,7 +286,7 @@ function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
 		if (memberSocket) {
 			if (!matchStates[matchCode].players[memberSocket.data.userId]) {
 				matchStates[matchCode].players[memberSocket.data.userId] = {
-					index: 0,
+					typingIndex: 0,
 					isHost: memberSocket.data.isHost || false,
 					username: memberSocket.data.username || "<Unknown>",
 					spectator: matchStates[matchCode].isStarted ?? false,

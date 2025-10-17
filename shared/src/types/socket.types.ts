@@ -16,7 +16,10 @@ export type PlayerInfo = {
 
 export interface ServerToClientEvents {
 	"pvp:countdown": (seconds: number) => void;
-	"pvp:progress-update": (data: { userId: string; index: number }) => void;
+	"pvp:progress-update": (data: {
+		userId: string;
+		typingIndex: number;
+	}) => void;
 
 	"pvp:lobby-update": (players: PlayerInfo[]) => void;
 	"pvp:player-joined": (data: { userId: string; username?: string }) => void;
