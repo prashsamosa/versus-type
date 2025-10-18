@@ -2,9 +2,9 @@
 
 import type { PlayersInfo } from "@versus-type/shared/index";
 import { useEffect, useRef, useState } from "react";
-import { useCursorPosition } from "@/app/hooks/useCursorPosition";
-import Cursor from "@/app/passage-components/Cursor";
-import PassageDisplay from "@/app/passage-components/PassageDisplay";
+import Cursor from "@/app/_passage/Cursor";
+import { useCursorPosition } from "@/app/_passage/hooks/useCursorPosition";
+import PassageText from "@/app/_passage/PassageText";
 import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
@@ -150,7 +150,7 @@ export default function Passage({
 				onBlur={() => setFocused(false)}
 			/>
 
-			<PassageDisplay
+			<PassageText
 				words={words}
 				typedText={typedText}
 				charRefs={charRefs}

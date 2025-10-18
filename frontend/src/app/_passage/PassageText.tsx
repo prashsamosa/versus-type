@@ -51,7 +51,7 @@ function Space({
 // 	return `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${rot.toFixed(2)}deg)`;
 // }
 
-export default function PassageDisplay({
+export default function PassageText({
 	words,
 	typedText,
 	charRefs,

@@ -2,9 +2,9 @@
 
 import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { useEffect, useRef, useState } from "react";
-import { useCursorPosition } from "@/app/hooks/useCursorPosition";
-import Cursor from "@/app/passage-components/Cursor";
-import PassageDisplay from "@/app/passage-components/PassageDisplay";
+import Cursor from "@/app/_passage/Cursor";
+import { useCursorPosition } from "@/app/_passage/hooks/useCursorPosition";
+import PassageText from "@/app/_passage/PassageText";
 import FinishedStats from "./FinishedStats";
 import { useTypingTest } from "./hooks/useTypingTest";
 
@@ -88,7 +88,7 @@ export default function Passage({
 				onFocus={() => setFocused(true)}
 				onBlur={() => setFocused(false)}
 			/>
-			<PassageDisplay
+			<PassageText
 				words={words}
 				typedText={typedText}
 				charRefs={charRefs}
