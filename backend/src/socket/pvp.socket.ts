@@ -41,10 +41,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		const matchCode = socket.data.matchCode;
 		const username = socket.data.username;
 		if (matchCode) {
-			io.to(matchCode).emit("pvp:player-left", {
-				userId: socket.data.userId || socket.id,
-				username,
-			});
 			emitNewMessage(io, matchCode, {
 				username: "",
 				message: `${username ?? "<Unknown>"} disconnected`,
@@ -248,15 +244,21 @@ async function handleJoin(
 		matchState.passage = generateWords(passageConfig).join(" ");
 		console.log(matchStates[matchCode]);
 	} else {
-		io.to(matchCode).emit("pvp:player-joined", {
-			userId: socket.data.userId || socket.id,
-			username,
-		});
-		emitNewMessage(io, matchCode, {
-			username: "",
-			message: `${username ?? "<Unknown>"} in da house`,
-			system: true,
-		});
+		if (matchStates[matchCode].players[socket.data.userId]) {
+			// reconnecting player
+			matchStates[matchCode].players[socket.data.userId].disconnected = false;
+			emitNewMessage(io, matchCode, {
+				username: "",
+				message: `${username ?? "<Unknown>"} is back`,
+				system: true,
+			});
+		} else {
+			emitNewMessage(io, matchCode, {
+				username: "",
+				message: `${username ?? "<Unknown>"} in da house`,
+				system: true,
+			});
+		}
 	}
 
 	sendChatHistory(socket, matchCode);

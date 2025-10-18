@@ -29,9 +29,6 @@ export function useChat() {
 					},
 				]);
 			},
-			// chat:new-message respond to these already
-			// "pvp:player-joined": handleNewJoin,
-			// "pvp:player-left": handlePlayerLeft,
 		};
 		const unregister = registerSocketHandlers(socket, eventHandlers);
 		return unregister;
