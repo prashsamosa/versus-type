@@ -64,7 +64,6 @@ export default function PassageDisplay({
 	// }, [words]);
 
 	let idx = 0;
-
 	return (
 		<div
 			className="relative text-2xl leading-relaxed font-mono select-none"

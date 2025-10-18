@@ -35,10 +35,15 @@ export default function Passage({
 	const { typedText, finished, startRef, endRef, handleInputChange } =
 		usePvpTypingState(words);
 
+	const [manualScrollOffset, setManualScrollOffset] = useState<number | null>(
+		null,
+	);
+
 	const { scrollOffset, cursorPos } = useCursorPosition(
 		typedText.length,
 		containerRef,
 		charRefs,
+		manualScrollOffset,
 	);
 	const [focused, setFocused] = useState(false);
 	const [oppIndexes, setOppIndexes] = useState<Record<string, number>>({});
@@ -47,6 +52,7 @@ export default function Passage({
 		containerRef,
 		charRefs,
 		scrollOffset,
+		manualScrollOffset,
 	);
 	const userId = authClient.useSession()?.data?.user?.id;
 	const color = players[userId || ""]?.color || "black";
@@ -54,8 +60,31 @@ export default function Passage({
 	const hiddenInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
-		if (!disabled) hiddenInputRef.current?.focus();
+		if (!disabled) {
+			hiddenInputRef.current?.focus();
+			setManualScrollOffset(null);
+		}
 	}, [disabled]);
+
+	useEffect(() => {
+		const container = containerRef.current;
+		if (!container) return;
+
+		function handleWheel(e: WheelEvent) {
+			e.preventDefault();
+			setManualScrollOffset((prev) => {
+				prev = prev === null ? scrollOffset : prev;
+				const maxScrollOffset = Math.max(
+					0,
+					(container?.scrollHeight ?? 0) - (container?.clientHeight ?? 0),
+				);
+				return Math.min(Math.max(0, prev + e.deltaY * 0.2), maxScrollOffset);
+			});
+		}
+
+		container.addEventListener("wheel", handleWheel, { passive: false });
+		return () => container.removeEventListener("wheel", handleWheel);
+	}, [scrollOffset]);
 
 	if (finished && startRef.current && endRef.current) {
 		return <p>finished lol</p>;
@@ -65,7 +94,7 @@ export default function Passage({
 		<div
 			ref={containerRef}
 			className={
-				"max-w-3xl min-h-48 overflow-hidden mx-auto mt-20 p-4 bg-background rounded-md relative cursor-text " +
+				"max-w-3xl min-h-[13rem] overflow-hidden mx-auto mt-20 px-4 py-10 bg-card/50 rounded-md relative cursor-text " +
 				(disabled ? "opacity-80" : "")
 			}
 			onClick={() => {
@@ -73,16 +102,35 @@ export default function Passage({
 			}}
 		>
 			<div
-				className="absolute bottom-0 left-0 w-full h-14 z-10 select-none"
+				className="absolute top-0 left-0 w-full h-14 z-10 select-none"
 				style={{
-					background: "linear-gradient(to top, var(--background), transparent)",
+					background: `
+      linear-gradient(
+        to bottom,
+        var(--background) 20%,
+        rgba(var(--background-rgb), 0.9) 30%,
+        rgba(var(--background-rgb), 0.6) 45%,
+        rgba(var(--background-rgb), 0.3) 70%,
+        rgba(var(--background-rgb), 0.1) 60%,
+        transparent 100%
+      )
+    `,
 				}}
 			/>
 			<div
-				className="absolute top-0 left-0 w-full h-14 z-10 select-none"
+				className="absolute bottom-0 left-0 w-full h-14 z-10 select-none"
 				style={{
-					background:
-						"linear-gradient(to bottom, var(--background), transparent)",
+					background: `
+      linear-gradient(
+        to top,
+        var(--background) 20%,
+        rgba(var(--background-rgb), 0.9) 30%,
+        rgba(var(--background-rgb), 0.6) 45%,
+        rgba(var(--background-rgb), 0.3) 70%,
+        rgba(var(--background-rgb), 0.1) 60%,
+        transparent 100%
+      )
+    `,
 				}}
 			/>
 			<input
@@ -90,7 +138,14 @@ export default function Passage({
 				type="text"
 				className="absolute opacity-0 -z-10"
 				value={typedText}
-				onChange={disabled ? () => {} : handleInputChange}
+				onChange={
+					disabled
+						? () => {}
+						: (e) => {
+								setManualScrollOffset(null);
+								handleInputChange(e);
+							}
+				}
 				onFocus={() => setFocused(true)}
 				onBlur={() => setFocused(false)}
 			/>
@@ -99,7 +154,9 @@ export default function Passage({
 				words={words}
 				typedText={typedText}
 				charRefs={charRefs}
-				scrollOffset={scrollOffset}
+				scrollOffset={
+					manualScrollOffset === null ? scrollOffset : manualScrollOffset
+				}
 			/>
 
 			{!disabled ? (

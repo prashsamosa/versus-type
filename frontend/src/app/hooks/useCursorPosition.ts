@@ -6,6 +6,7 @@ export function useCursorPosition(
 	index: number,
 	containerRef: React.RefObject<HTMLDivElement | null>,
 	charRefs: React.RefObject<HTMLSpanElement[] | null>,
+	manualScrollOffset: number | null = null,
 ) {
 	const [scrollOffset, setScrollOffset] = useState(0);
 	const [cursorPos, setCursorPos] = useState<{ x: number; y: number }>({
@@ -47,12 +48,19 @@ export function useCursorPosition(
 
 		const raf = requestAnimationFrame(() => {
 			const x = pl + span.offsetLeft;
-			const y = pt + (stableOffsetTop - targetOffset);
+			let y: number;
+
+			if (manualScrollOffset !== null) {
+				y = pt + stableOffsetTop - manualScrollOffset;
+			} else {
+				y = pt + (stableOffsetTop - targetOffset);
+			}
+
 			setCursorPos({ x, y });
 		});
 
 		return () => cancelAnimationFrame(raf);
-	}, [index, scrollOffset, containerRef, charRefs]);
+	}, [index, manualScrollOffset, containerRef, charRefs]);
 
 	return {
 		scrollOffset,

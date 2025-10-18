@@ -12,6 +12,7 @@ export function useOppCursorPositions(
 	containerRef: React.RefObject<HTMLDivElement | null>,
 	charRefs: React.RefObject<HTMLSpanElement[]>,
 	scrollOffset: number,
+	manualScrollOffset: number | null = null,
 ) {
 	const [oppCursorPoses, setOppCursorPoses] = useState<
 		Record<string, CursorData>
@@ -25,6 +26,9 @@ export function useOppCursorPositions(
 
 	useLayoutEffect(() => {
 		const cleanups: (() => void)[] = [];
+
+		const activeOffset =
+			manualScrollOffset === null ? scrollOffset : manualScrollOffset;
 
 		for (const [userId, typingPos] of Object.entries(typingIndexes)) {
 			const span = charRefs.current?.[typingPos];
@@ -53,7 +57,7 @@ export function useOppCursorPositions(
 
 			const raf = requestAnimationFrame(() => {
 				const x = pl + span.offsetLeft;
-				const y = pt + stableOffsetTop - scrollOffset;
+				const y = pt + stableOffsetTop - activeOffset;
 
 				setOppCursorPoses((prev) => {
 					const updated = { ...prev };
@@ -68,7 +72,7 @@ export function useOppCursorPositions(
 		return () => {
 			for (const cleanup of cleanups) cleanup();
 		};
-	}, [typingIndexes, containerRef, charRefs, scrollOffset]);
+	}, [typingIndexes, containerRef, charRefs, scrollOffset, manualScrollOffset]);
 
 	return {
 		oppCursorPoses,
