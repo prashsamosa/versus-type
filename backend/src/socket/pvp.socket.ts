@@ -79,11 +79,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 							message: `${newHostSocket.data.username ?? "<Unknown>"} is the new host`,
 							system: true,
 						});
-						// TODO: is this necessary? coz we already are updating Lobby which pushes isHost info
-						io.to(matchCode).emit("pvp:new-host", {
-							userId: newHostSocket.data.userId || newHostSocket.id,
-							username: newHostSocket.data.username,
-						});
 					}
 				}
 			}
@@ -282,11 +277,21 @@ function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
 					spectator: matchStates[matchCode].isStarted ?? false,
 					color: getRandomColor(matchCode),
 				};
+			} else {
+				// things that can update (host change)
+				if (
+					memberSocket.data.isHost !==
+					matchStates[matchCode].players[memberSocket.data.userId].isHost
+				) {
+					matchStates[matchCode].players[memberSocket.data.userId].isHost =
+						memberSocket.data.isHost || false;
+				}
 			}
 		}
 	}
 	if (disconnectedId) {
 		matchStates[matchCode].players[disconnectedId].disconnected = true;
+		matchStates[matchCode].players[disconnectedId].isHost = false;
 	}
 	io.to(matchCode).emit("pvp:lobby-update", matchStates[matchCode].players);
 }

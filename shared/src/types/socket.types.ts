@@ -31,7 +31,6 @@ export interface ServerToClientEvents {
 	"pvp:lobby-update": (players: PlayersInfo) => void;
 	"pvp:player-joined": (data: { userId: string; username?: string }) => void;
 	"pvp:player-left": (data: { userId: string; username?: string }) => void;
-	"pvp:new-host": (data: { userId: string; username?: string }) => void;
 
 	"chat:new-message": (data: ChatMessage) => void;
 	"chat:history": (messages: ChatMessage[]) => void;
