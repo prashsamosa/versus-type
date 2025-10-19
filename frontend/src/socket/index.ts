@@ -12,7 +12,6 @@ export let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null =
 export async function setupSocketAndJoin(
 	username: string,
 	matchCode: string,
-	isHost: boolean,
 ): Promise<SocketResponse> {
 	return new Promise((resolve, reject) => {
 		socket = io(SERVER_URL, { withCredentials: true });
@@ -22,10 +21,8 @@ export async function setupSocketAndJoin(
 				console.log("Connected to server, joining match as ", {
 					username,
 					matchCode,
-					isHost,
 				});
-				const event = isHost ? "pvp:join-as-host" : "pvp:join";
-				const response = (await socket?.emitWithAck(event, {
+				const response = (await socket?.emitWithAck("pvp:join", {
 					username,
 					matchCode,
 				})) as SocketResponse;

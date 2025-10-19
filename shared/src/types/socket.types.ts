@@ -42,14 +42,6 @@ export interface ClientToServerEvents {
 	"pvp:backspace": (amount: number) => void;
 	"pvp:get-passage": (callback: (passage: string) => void) => void;
 	ping: (callback: () => void) => void;
-	"pvp:join-as-host": (
-		data: {
-			matchCode: string;
-			username: string;
-		},
-		callback: (response: SocketResponse) => void,
-	) => void;
-
 	"pvp:join": (
 		data: {
 			matchCode: string;

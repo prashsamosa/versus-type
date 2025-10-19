@@ -1,5 +1,5 @@
 import type { PlayersInfo } from "@versus-type/shared/index";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
@@ -9,12 +9,9 @@ export const DISCONNECT_LATENCY = 6969;
 
 export function usePvpSession() {
 	const { matchCode } = useParams<{ matchCode: string }>();
-	const isHostFromParams = useSearchParams().get("isHost") === "true";
-	const [isHost, setIsHost] = useState(isHostFromParams);
 	const [loading, setLoading] = useState(true);
 	const [socketError, setSocketError] = useState<string | null>(null);
 	const [latency, setLatency] = useState<number | null>(null);
-	const userId = authClient.useSession().data?.user.id;
 	const [players, setPlayers] = useState<PlayersInfo>({});
 	const [username, setUsername] = useState(() => {
 		if (typeof window !== "undefined") {
@@ -45,7 +42,7 @@ export function usePvpSession() {
 
 	useEffect(() => {
 		if (!username || isPending) return;
-		setupSocketAndJoin(username, matchCode, isHost)
+		setupSocketAndJoin(username, matchCode)
 			.then((response) => {
 				setLoading(false);
 				if (!response.success) {
@@ -59,12 +56,6 @@ export function usePvpSession() {
 
 		if (!socket) return;
 		const unregister = registerSocketHandlers(socket, {
-			"pvp:new-host": (data) => {
-				if (data.userId === userId) {
-					setIsHost(true);
-				}
-			},
-
 			"pvp:lobby-update": (players) => {
 				setPlayers(players);
 			},
@@ -94,7 +85,6 @@ export function usePvpSession() {
 	return {
 		loading,
 		socketError,
-		isHost,
 		username,
 		setUsername,
 		matchCode,

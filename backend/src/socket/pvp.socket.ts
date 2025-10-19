@@ -29,12 +29,93 @@ const passageConfig: GeneratorConfig = {
 };
 
 export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
-	socket.on("pvp:join-as-host", async (data, callback) => {
-		await handleJoin(io, socket, data, callback, true);
-	});
-
 	socket.on("pvp:join", async (data, callback) => {
-		await handleJoin(io, socket, data, callback, false);
+		const { matchCode, username } = data;
+
+		// matchState is non-primitive type(object), so changes will reflect in matchStates
+		// UNTIL ITS UNDEFINED, so have to reassign when creating new matchState
+		let matchState = matchStates[matchCode];
+		let isHost = true;
+		if (io.sockets.adapter.rooms.has(matchCode)) isHost = false;
+		if (isHost) {
+			matchState = {
+				status: "waiting",
+				passage: "",
+				hostId: socket.data.userId,
+				isStarted: false,
+				players: {
+					[socket.data.userId]: {
+						typingIndex: 0,
+						isHost: true,
+						username,
+						spectator: false,
+						color: getRandomColor(matchCode),
+					},
+				},
+			};
+			matchStates[matchCode] = matchState; // have to reassign, coz its undefined before
+		}
+
+		const { id: matchId, status } = await matchInfo(matchCode);
+		if (status !== "waiting" || !matchId) {
+			return callback({
+				success: false,
+				message: `Match ${matchCode} is not available (${status})`,
+			});
+		}
+
+		await db.insert(matchParticipants).values({
+			matchId,
+			disconnected: false,
+			isWinner: false,
+			userId: socket.data.userId,
+		});
+		socket.data.username = username;
+		socket.data.matchCode = matchCode;
+		if (isHost) socket.data.isHost = true;
+
+		socket.join(matchCode);
+		const room = io.sockets.adapter.rooms.get(matchCode);
+		if (!isHost && room && room.size > MAX_ROOM_SIZE) {
+			// why not just join AFTER check? coz it will make race conditions, if 2 join at the same time, both will pass the check
+			socket.leave(matchCode);
+			return callback({ success: false, message: "Room is full" });
+		}
+
+		console.log(
+			isHost
+				? `Match hosted with code ${matchCode} by player ${socket.id}`
+				: `Player ${socket.id}(${username}) joined match with code ${matchCode}`,
+		);
+		callback({
+			success: true,
+			message: isHost
+				? `Match hosted with code ${matchCode}`
+				: `Joined match with code ${matchCode}`,
+		});
+		if (isHost) {
+			matchState.passage = generateWords(passageConfig).join(" ");
+			console.log(matchStates[matchCode]);
+		} else {
+			if (matchStates[matchCode].players[socket.data.userId]) {
+				// reconnecting player
+				matchStates[matchCode].players[socket.data.userId].disconnected = false;
+				emitNewMessage(io, matchCode, {
+					username: "",
+					message: `${username ?? "<Unknown>"} is back`,
+					system: true,
+				});
+			} else {
+				emitNewMessage(io, matchCode, {
+					username: "",
+					message: `${username ?? "<Unknown>"} in da house`,
+					system: true,
+				});
+			}
+		}
+
+		sendChatHistory(socket, matchCode);
+		updateLobby(io, matchCode);
 	});
 
 	socket.on("disconnect", () => {
@@ -178,113 +259,6 @@ async function updateMatchStatus(matchCode: string, status: MatchStatus) {
 			console.error("Error updating match status in DB:", err);
 		});
 	matchStates[matchCode].status = status;
-}
-
-async function handleJoin(
-	io: ioServer,
-	socket: ioSocket,
-	data: { matchCode: string; username: string },
-	callback: (response: { success: boolean; message: string }) => void,
-	isHost: boolean,
-) {
-	const { matchCode, username } = data;
-
-	// matchState is non-primitive type(object), so changes will reflect in matchStates
-	// UNTIL ITS UNDEFINED, so have to reassign when creating new matchState
-	let matchState = matchStates[matchCode];
-	if (isHost) {
-		if (io.sockets.adapter.rooms.has(matchCode)) {
-			return callback({
-				success: false,
-				message: `Match with code: ${matchCode} is already hosted`,
-			});
-		} else {
-			matchState = {
-				status: "waiting",
-				passage: "",
-				hostId: socket.data.userId,
-				isStarted: false,
-				players: {
-					[socket.data.userId]: {
-						typingIndex: 0,
-						isHost: true,
-						username,
-						spectator: false,
-						color: getRandomColor(matchCode),
-					},
-				},
-			};
-			matchStates[matchCode] = matchState; // have to reassign, coz its undefined before
-		}
-	} else {
-		if (!matchState || matchState.status !== "waiting" || !matchState.hostId) {
-			return callback({
-				success: false,
-				message: `Match with code: ${matchCode} is not hosted yet`,
-			});
-		}
-	}
-
-	const { id: matchId, status } = await matchInfo(matchCode);
-	if (status !== "waiting" || !matchId) {
-		return callback({
-			success: false,
-			message: `Match ${matchCode} is not available (${status})`,
-		});
-	}
-
-	await db.insert(matchParticipants).values({
-		matchId,
-		disconnected: false,
-		isWinner: false,
-		userId: socket.data.userId,
-	});
-	socket.data.username = username;
-	socket.data.matchCode = matchCode;
-	if (isHost) socket.data.isHost = true;
-
-	socket.join(matchCode);
-	const room = io.sockets.adapter.rooms.get(matchCode);
-	if (!isHost && room && room.size > MAX_ROOM_SIZE) {
-		// why not just join AFTER check? coz it will make race conditions, if 2 join at the same time, both will pass the check
-		socket.leave(matchCode);
-		return callback({ success: false, message: "Room is full" });
-	}
-
-	console.log(
-		isHost
-			? `Match hosted with code ${matchCode} by player ${socket.id}`
-			: `Player ${socket.id}(${username}) joined match with code ${matchCode}`,
-	);
-	callback({
-		success: true,
-		message: isHost
-			? `Match hosted with code ${matchCode}`
-			: `Joined match with code ${matchCode}`,
-	});
-	if (isHost) {
-		matchState.passage = generateWords(passageConfig).join(" ");
-		console.log(matchStates[matchCode]);
-	} else {
-		if (matchStates[matchCode].players[socket.data.userId]) {
-			// reconnecting player
-			matchStates[matchCode].players[socket.data.userId].disconnected = false;
-			emitNewMessage(io, matchCode, {
-				username: "",
-				message: `${username ?? "<Unknown>"} is back`,
-				system: true,
-			});
-		} else {
-			emitNewMessage(io, matchCode, {
-				username: "",
-				message: `${username ?? "<Unknown>"} in da house`,
-				system: true,
-			});
-		}
-	}
-
-	sendChatHistory(socket, matchCode);
-	updateLobby(io, matchCode);
 }
 
 function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
