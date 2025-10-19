@@ -3,7 +3,7 @@
 import { recordKey } from "@versus-type/shared/accuracy";
 import { useRef, useState } from "react";
 import { getWordIndex, getWordStartIndex, isWordCorrect } from "@/lib/utils";
-import { sendKeystroke } from "../socket/pvp.socket.service";
+import { sendBackspace, sendKeystroke } from "../socket/pvp.socket.service";
 
 export function usePvpTypingState(words: string[]) {
 	const passageChars = words.join(" ");
@@ -23,12 +23,11 @@ export function usePvpTypingState(words: string[]) {
 		if (val.length === prev.length + 1 && val.startsWith(prev)) {
 			const typed = val[idx];
 			const expected = passageChars[idx];
-			sendKeystroke(typed);
-			recordKey(typed, expected);
+			recordKey(typed, expected, () => sendKeystroke(typed));
 		} else if (val.length < prev.length && prev.startsWith(val)) {
-			// Handle backspace
+			sendBackspace(prev.length - val.length);
 		} else {
-			// Handle paste or other edits
+			// paste or other edits
 			return;
 		}
 

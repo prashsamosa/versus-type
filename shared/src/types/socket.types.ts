@@ -39,6 +39,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
 	"pvp:start-match": (callback: (response: SocketResponse) => void) => void;
 	"pvp:key-press": (key: string) => void;
+	"pvp:backspace": (amount: number) => void;
 	"pvp:get-passage": (callback: (passage: string) => void) => void;
 	ping: (callback: () => void) => void;
 	"pvp:join-as-host": (

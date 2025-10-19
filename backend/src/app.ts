@@ -44,6 +44,8 @@ export const io = new Server<
 	SocketData
 >(httpServer, {
 	cors: { origin: env.CORS_ORIGIN.split(" "), credentials: true },
+	allowEIO3: true,
+	cookie: { name: "io", path: "/", httpOnly: true, sameSite: false },
 });
 
 initializeSocket(io);

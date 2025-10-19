@@ -127,6 +127,28 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		}
 	});
 
+	socket.on("pvp:backspace", (amount: number) => {
+		const matchCode = socket.data.matchCode;
+		if (!matchCode || !matchStates[matchCode]?.isStarted) {
+			console.warn(
+				`lol ${socket.data.userId} tryna cheat by sending backspace before starting match`,
+			);
+			return;
+		}
+		const pstate = matchStates[matchCode].players[socket.data.userId];
+		if (pstate.spectator) {
+			console.warn(
+				`spectator ${socket.data.userId} tryna send backspace during match lmao`,
+			);
+			return;
+		}
+		pstate.typingIndex = Math.max(0, pstate.typingIndex - amount);
+		io.to(matchCode).emit("pvp:progress-update", {
+			userId: socket.data.userId || socket.id,
+			typingIndex: pstate.typingIndex,
+		});
+	});
+
 	socket.on("pvp:get-passage", (callback) => {
 		console.log("pvp:get-passage called by", socket.data.userId);
 		const matchCode = socket.data.matchCode;

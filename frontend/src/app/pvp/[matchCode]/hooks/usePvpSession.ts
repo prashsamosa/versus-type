@@ -23,6 +23,8 @@ export function usePvpSession() {
 		return "";
 	});
 	const { data: session, isPending } = authClient.useSession();
+	const [hasSignedIn, setHasSignedIn] = useState(false);
+
 	useEffect(() => {
 		console.log("Session changed:", session);
 		if (isPending) return;
@@ -32,13 +34,14 @@ export function usePvpSession() {
 				session.user.name ?? session.user.email?.split("@")[0] ?? "User";
 			setUsername(displayName);
 			return;
-		} else if (!session?.user?.isAnonymous) {
+		} else if (!session?.user && !hasSignedIn) {
 			console.log("Signing in anonymously");
+			setHasSignedIn(true);
 			authClient.signIn.anonymous();
 		} else {
 			console.log("Anonymous user");
 		}
-	}, [session, isPending]);
+	}, [session, isPending, hasSignedIn]);
 
 	useEffect(() => {
 		if (!username || isPending) return;

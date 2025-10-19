@@ -7,14 +7,20 @@ export function resetAccuracy(): void {
 	state.incorrect = 0;
 }
 
-export function recordKey(typed: string, expected?: string): void {
+export function recordKey(
+	typed: string,
+	expected?: string,
+	callback?: () => void,
+): void {
 	if (typed.length > 1 || typed.length === 0) {
 		console.warn("recordKey should be called with a single character");
 		return;
 	}
 
-	if (expected && typed === expected) state.correct++;
-	else state.incorrect++;
+	if (expected && typed === expected) {
+		state.correct++;
+		callback?.();
+	} else state.incorrect++;
 }
 
 export function getAccuracy(): {

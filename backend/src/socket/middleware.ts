@@ -8,16 +8,19 @@ export async function authWithDuplicateCheck(
 	socket: ioSocket,
 	next: (err?: ExtendedError) => void,
 ) {
-	const session = await auth.api.getSession({
-		headers: new Headers(socket.handshake.headers as Record<string, string>),
-	});
+	const headers = new Headers(
+		socket.handshake.headers as Record<string, string>,
+	);
+
+	const session = await auth.api.getSession({ headers });
+
 	if (!session) {
+		console.log("No session found in socket connection");
 		return next(new Error("Unauthorized"));
 	}
 	const userId = session.user.id;
 	console.log(`#### ${session.user.name} connected (${userId})`);
 
-	// ensure one connection per userId
 	const existingSocketId = userToSocket.get(userId);
 	if (existingSocketId && existingSocketId !== socket.id) {
 		next(new Error("User is already connected elsewhere"));

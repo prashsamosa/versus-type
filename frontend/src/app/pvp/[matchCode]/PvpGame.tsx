@@ -12,7 +12,6 @@ export function PvpGame({ players }: { players: PlayersInfo }) {
 
 	useEffect(() => {
 		if (!socket) return;
-		// TODO: if passage missed, demand again?
 		socket.emitWithAck("pvp:get-passage").then((receivedPassage) => {
 			setPassage(receivedPassage);
 			setLoading(false);
