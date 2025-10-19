@@ -32,8 +32,14 @@ export default function Passage({
 	const containerRef = useRef<HTMLDivElement>(null);
 	const charRefs = useRef<HTMLSpanElement[]>([]);
 
-	const { typedText, finished, startRef, endRef, handleInputChange } =
-		usePvpTypingState(words);
+	const {
+		typedText,
+		finished,
+		startRef,
+		endRef,
+		handleInputChange,
+		shakeWordIndex,
+	} = usePvpTypingState(words);
 
 	const [manualScrollOffset, setManualScrollOffset] = useState<number | null>(
 		null,
@@ -157,6 +163,7 @@ export default function Passage({
 				scrollOffset={
 					manualScrollOffset === null ? scrollOffset : manualScrollOffset
 				}
+				shakeWordIndex={shakeWordIndex}
 			/>
 
 			{!disabled ? (

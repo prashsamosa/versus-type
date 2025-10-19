@@ -7,6 +7,7 @@ interface PassageDisplayProps {
 	typedText: string;
 	charRefs: React.RefObject<HTMLSpanElement[]>;
 	scrollOffset: number;
+	shakeWordIndex?: number | null;
 }
 
 interface SpaceProps {
@@ -56,12 +57,9 @@ export default function PassageText({
 	typedText,
 	charRefs,
 	scrollOffset,
+	shakeWordIndex,
 }: PassageDisplayProps) {
 	const currentIndex = typedText.length;
-
-	// const passageTransforms = useMemo(() => {
-	// 	return words.map((word) => word.split("").map(() => getTransform()));
-	// }, [words]);
 
 	let idx = 0;
 	return (
@@ -86,7 +84,7 @@ export default function PassageText({
 							currentIndex={currentIndex}
 							typedText={typedText}
 							charRefs={charRefs}
-							// passageTransforms={passageTransforms}
+							shouldShake={shakeWordIndex === wordIndex}
 						/>
 						{wordIndex < words.length - 1 ? (
 							<Space

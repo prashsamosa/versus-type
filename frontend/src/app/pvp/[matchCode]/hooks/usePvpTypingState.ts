@@ -2,6 +2,7 @@
 
 import { recordKey } from "@versus-type/shared/accuracy";
 import { useRef, useState } from "react";
+import { getWordIndex, getWordStartIndex, isWordCorrect } from "@/lib/utils";
 import { sendKeystroke } from "../socket/pvp.socket.service";
 
 export function usePvpTypingState(words: string[]) {
@@ -9,6 +10,7 @@ export function usePvpTypingState(words: string[]) {
 
 	const [typedText, setTypedText] = useState("");
 	const [finished, setFinished] = useState(false);
+	const [shakeWordIndex, setShakeWordIndex] = useState<number | null>(null);
 	const startRef = useRef<number | null>(null);
 	const endRef = useRef<number | null>(null);
 	const prevInputRef = useRef("");
@@ -29,6 +31,21 @@ export function usePvpTypingState(words: string[]) {
 			// Handle paste or other edits
 			return;
 		}
+
+		const prevWordIdx = getWordIndex(prev.length, words);
+		const newWordIdx = getWordIndex(val.length, words);
+
+		if (newWordIdx > prevWordIdx) {
+			for (let i = 0; i < prevWordIdx; i++) {
+				const wordStart = getWordStartIndex(i, words);
+				if (!isWordCorrect(val, words[i], wordStart)) {
+					setShakeWordIndex(i);
+					setTimeout(() => setShakeWordIndex(null), 400);
+					return;
+				}
+			}
+		}
+
 		prevInputRef.current = val;
 
 		setTypedText(val);
@@ -41,16 +58,6 @@ export function usePvpTypingState(words: string[]) {
 		}
 	}
 
-	// function restartTest() {
-	// 	setWords(generateWords(config));
-	// 	setTypedText("");
-	// 	startRef.current = null;
-	// 	endRef.current = null;
-	// 	prevInputRef.current = "";
-	// 	resetAccuracy();
-	// 	setFinished(false);
-	// }
-
 	return {
 		passageChars,
 		typedText,
@@ -58,5 +65,6 @@ export function usePvpTypingState(words: string[]) {
 		startRef,
 		endRef,
 		handleInputChange,
+		shakeWordIndex,
 	};
 }

@@ -7,7 +7,7 @@ interface WordProps {
 	currentIndex: number;
 	typedText: string;
 	charRefs: React.RefObject<HTMLSpanElement[]>;
-	// passageTransforms: string[][];
+	shouldShake?: boolean;
 }
 
 export default function Word({
@@ -17,7 +17,7 @@ export default function Word({
 	currentIndex,
 	typedText,
 	charRefs,
-	// passageTransforms,
+	shouldShake = false,
 }: WordProps) {
 	let idx = startIndex;
 
@@ -27,9 +27,10 @@ export default function Word({
 		typedText.slice(idx, idx + word.length) ===
 		word.slice(0, currentIndex - idx);
 	const isWordCurrentOrPrev = currentIndex >= idx;
-
 	return (
 		<span
+			// WARNING: DO NOT ADD 'relative' HERE. IT BREAKS THE WHOLE CURSOR POSITIONING SYSTEM(fucks up char's span's offsetLeft)
+			// spend hours debugging T_T
 			className={`whitespace-nowrap rounded transition ${
 				isWordCurrentOrPrev && !isWordPartiallyCorrect
 					? "underline underline-offset-2 decoration-destructive"
@@ -59,8 +60,9 @@ export default function Word({
 						className={charClassName}
 						style={{
 							display: "inline-block",
-							animation:
-								isWordTyped && isWordCorrect
+							animation: shouldShake
+								? "shake 0.4s ease-in-out"
+								: isWordTyped && isWordCorrect
 									? // ? passageTransforms[wordIndex][charIndex]
 										"charBounce 0.3s"
 									: "none",

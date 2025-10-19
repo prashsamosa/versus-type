@@ -18,9 +18,9 @@ export function useCursorPosition(
 
 	useLayoutEffect(() => {
 		const span = charRefs.current?.[index];
+		console.log(index, span?.textContent, span?.offsetLeft, span?.offsetTop);
 		const container = containerRef.current;
 		if (!span || !container) return;
-
 		const containerStyle = getComputedStyle(container);
 
 		if (lineHeightRef.current === 0 && span.offsetHeight > 0) {
@@ -36,7 +36,10 @@ export function useCursorPosition(
 			span.offsetParent?.scrollHeight ?? container.scrollHeight;
 		const visibleHeight = Math.min(totalHeight, lineHeight * 4 + pt + pb);
 
-		container.style.height = `${Math.max(visibleHeight, lineHeight * 4 + pt + pb)}px`;
+		container.style.height = `${Math.max(
+			visibleHeight,
+			lineHeight * 4 + pt + pb,
+		)}px`;
 		const stableOffsetTop =
 			Math.round(span.offsetTop / lineHeight) * lineHeight;
 

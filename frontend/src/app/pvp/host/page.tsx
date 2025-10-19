@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { hostMatch } from "@/services/pvp.client";
 import { authClient } from "@/lib/auth-client";
+import { hostMatch } from "@/services/pvp.client";
 
 export default function HostPage() {
 	const [isPrivate, setIsPrivate] = useState(false);
