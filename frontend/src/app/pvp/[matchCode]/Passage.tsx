@@ -15,10 +15,12 @@ export default function Passage({
 	words,
 	disabled,
 	players,
+	initialIndex,
 }: {
 	words: string[];
 	disabled?: boolean;
 	players: PlayersInfo;
+	initialIndex?: number;
 }) {
 	useEffect(() => {
 		if (!socket) return;
@@ -40,7 +42,7 @@ export default function Passage({
 		handleInputChange,
 		shakeWordIndex,
 		incorrect,
-	} = usePvpTypingState(words);
+	} = usePvpTypingState(words, initialIndex);
 
 	const [manualScrollOffset, setManualScrollOffset] = useState<number | null>(
 		null,

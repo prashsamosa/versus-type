@@ -20,6 +20,9 @@ export default function PvpPage() {
 		matchCode,
 		latency,
 		players,
+		gameStarted,
+		setGameStarted,
+		initialIndex,
 	} = usePvpSession();
 
 	const [copied, setCopied] = useState(false);
@@ -47,6 +50,7 @@ export default function PvpPage() {
 	}
 
 	function copyMatchLink() {
+		console.log("Copying match link for code:", matchCode);
 		const url = `${window.location.origin}/pvp/${matchCode}`;
 		navigator.clipboard.writeText(url);
 		setCopied(true);
@@ -65,7 +69,12 @@ export default function PvpPage() {
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
 				<div className="p-16">
-					<PvpGame players={players} />
+					<PvpGame
+						players={players}
+						gameStarted={gameStarted}
+						setGameStarted={setGameStarted}
+						initialIndex={initialIndex}
+					/>
 				</div>
 				<div className="flex gap-4 p-4 w-full absolute bottom-0 left-0">
 					<div className="flex-1 min-h-[30vh] max-h-[30vh]">

@@ -21,6 +21,13 @@ export type PlayersInfo = {
 	[userId: string]: PlayerState;
 };
 
+export type JoinResponse = {
+	success: boolean;
+	message?: string;
+	isStarted?: boolean;
+	typingIndex?: number;
+};
+
 export interface ServerToClientEvents {
 	"pvp:countdown": (seconds: number) => void;
 	"pvp:progress-update": (data: {
@@ -37,7 +44,9 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-	"pvp:start-match": (callback: (response: SocketResponse) => void) => void;
+	"pvp:start-match": (
+		callback: (response: { success: boolean; message?: string }) => void,
+	) => void;
 	"pvp:key-press": (key: string) => void;
 	"pvp:backspace": (amount: number) => void;
 	"pvp:get-passage": (callback: (passage: string) => void) => void;
@@ -47,7 +56,7 @@ export interface ClientToServerEvents {
 			matchCode: string;
 			username: string;
 		},
-		callback: (response: SocketResponse) => void,
+		callback: (response: JoinResponse) => void,
 	) => void;
 
 	"chat:send-message": (data: { message: string }) => void;
@@ -60,12 +69,6 @@ export interface SocketData {
 	matchCode?: string;
 	isHost?: boolean;
 	userId: string;
-}
-
-// ack response type
-export interface SocketResponse {
-	success: boolean;
-	message?: string;
 }
 
 export type ioServer = Server<

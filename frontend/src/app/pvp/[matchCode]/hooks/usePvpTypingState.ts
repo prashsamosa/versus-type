@@ -1,12 +1,18 @@
 "use client";
 
 import { recordKey } from "@versus-type/shared/accuracy";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getWordIndex, getWordStartIndex, isWordCorrect } from "@/lib/utils";
 import { sendBackspace, sendKeystroke } from "../socket/pvp.socket.service";
 
-export function usePvpTypingState(words: string[]) {
+export function usePvpTypingState(words: string[], initialIndex: number) {
 	const passageChars = words.join(" ");
+	useEffect(() => {
+		if (initialIndex > 0) {
+			setTypedText(passageChars.slice(0, initialIndex));
+			prevInputRef.current = passageChars.slice(0, initialIndex);
+		}
+	}, [initialIndex]);
 
 	const [typedText, setTypedText] = useState("");
 	const [finished, setFinished] = useState(false);

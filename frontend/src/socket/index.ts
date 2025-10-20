@@ -1,7 +1,7 @@
 import type {
 	ClientToServerEvents,
+	JoinResponse,
 	ServerToClientEvents,
-	SocketResponse,
 } from "@versus-type/shared";
 import { io, type Socket } from "socket.io-client";
 import { SERVER_URL } from "@/const";
@@ -12,7 +12,7 @@ export let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null =
 export async function setupSocketAndJoin(
 	username: string,
 	matchCode: string,
-): Promise<SocketResponse> {
+): Promise<JoinResponse> {
 	return new Promise((resolve, reject) => {
 		socket = io(SERVER_URL, { withCredentials: true });
 
@@ -25,7 +25,7 @@ export async function setupSocketAndJoin(
 				const response = (await socket?.emitWithAck("pvp:join", {
 					username,
 					matchCode,
-				})) as SocketResponse;
+				})) as JoinResponse;
 				resolve(response);
 			} catch (error) {
 				reject(error);

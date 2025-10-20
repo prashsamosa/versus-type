@@ -13,6 +13,8 @@ export function usePvpSession() {
 	const [socketError, setSocketError] = useState<string | null>(null);
 	const [latency, setLatency] = useState<number | null>(null);
 	const [players, setPlayers] = useState<PlayersInfo>({});
+	const [gameStarted, setGameStarted] = useState(false);
+	const [initialIndex, setInitialIndex] = useState(0);
 	const [username, setUsername] = useState(() => {
 		if (typeof window !== "undefined") {
 			return localStorage.getItem("anonymousUsername") || "";
@@ -47,6 +49,9 @@ export function usePvpSession() {
 				setLoading(false);
 				if (!response.success) {
 					setSocketError(response.message ?? "Failed to join match");
+				} else {
+					setGameStarted(!!response.isStarted);
+					setInitialIndex(response.typingIndex ?? 0);
 				}
 			})
 			.catch((err) => {
@@ -91,5 +96,8 @@ export function usePvpSession() {
 		isPending,
 		latency,
 		players,
+		gameStarted,
+		setGameStarted,
+		initialIndex,
 	};
 }

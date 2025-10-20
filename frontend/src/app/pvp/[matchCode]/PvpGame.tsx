@@ -4,11 +4,24 @@ import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
 import Passage from "./Passage";
 
-export function PvpGame({ players }: { players: PlayersInfo }) {
+export function PvpGame({
+	players,
+	gameStarted,
+	setGameStarted,
+	initialIndex,
+}: {
+	players: PlayersInfo;
+	gameStarted: boolean;
+	setGameStarted: (started: boolean) => void;
+	initialIndex: number;
+}) {
 	const [passage, setPassage] = useState<string>("");
 	const [loading, setLoading] = useState(true);
 	const [countdown, setCountdown] = useState<number | null>(null);
-	const gameStarted = countdown === 0;
+
+	if (!gameStarted && countdown === 0) {
+		setGameStarted(true);
+	}
 
 	useEffect(() => {
 		if (!socket) return;
@@ -36,6 +49,7 @@ export function PvpGame({ players }: { players: PlayersInfo }) {
 				words={passage.split(" ")}
 				disabled={!gameStarted}
 				players={players}
+				initialIndex={initialIndex}
 			/>
 			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
 				{!gameStarted ? (

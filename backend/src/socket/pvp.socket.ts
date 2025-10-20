@@ -56,8 +56,11 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			matchStates[matchCode] = matchState; // have to reassign, coz its undefined before
 		}
 
+		// match status check
 		const { id: matchId, status } = await matchInfo(matchCode);
-		if (status !== "waiting" || !matchId) {
+
+		// const status = matchStates[matchCode].status; // cant do this coz we want matchId
+		if (status === "notFound" || status === "expired" || !matchId) {
 			return callback({
 				success: false,
 				message: `Match ${matchCode} is not available (${status})`,
@@ -70,6 +73,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			isWinner: false,
 			userId: socket.data.userId,
 		});
+
 		socket.data.username = username;
 		socket.data.matchCode = matchCode;
 		if (isHost) socket.data.isHost = true;
@@ -87,15 +91,14 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				? `Match hosted with code ${matchCode} by player ${socket.id}`
 				: `Player ${socket.id}(${username}) joined match with code ${matchCode}`,
 		);
-		callback({
-			success: true,
-			message: isHost
-				? `Match hosted with code ${matchCode}`
-				: `Joined match with code ${matchCode}`,
-		});
+
+		// TODO: in future, allow reconnection of the HOST too, ie, game won't close immediately if last one leaves
 		if (isHost) {
 			matchState.passage = generateWords(passageConfig).join(" ");
-			console.log(matchStates[matchCode]);
+			callback({
+				success: true,
+				message: `Match hosted with code ${matchCode}`,
+			});
 		} else {
 			if (matchStates[matchCode].players[socket.data.userId]) {
 				// reconnecting player
@@ -105,11 +108,22 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					message: `${username ?? "<Unknown>"} is back`,
 					system: true,
 				});
+				callback({
+					success: true,
+					message: `Reconnected to match ${matchCode}`,
+					isStarted: matchStates[matchCode].isStarted,
+					typingIndex:
+						matchStates[matchCode].players[socket.data.userId].typingIndex,
+				});
 			} else {
 				emitNewMessage(io, matchCode, {
 					username: "",
 					message: `${username ?? "<Unknown>"} in da house`,
 					system: true,
+				});
+				callback({
+					success: true,
+					message: `Joined match ${matchCode}`,
 				});
 			}
 		}
@@ -174,6 +188,13 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			console.warn(
 				"MatchCode not found in socket.data (Some sent start-match without joining)",
 			);
+			return;
+		}
+		if (matchStates[matchCode].isStarted) {
+			callback({
+				success: false,
+				message: "Match already started",
+			});
 			return;
 		}
 		await updateMatchStatus(matchCode, "inProgress");
