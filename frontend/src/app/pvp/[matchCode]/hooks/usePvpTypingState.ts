@@ -40,7 +40,7 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 			if (incorrect && val === passageChars.slice(0, val.length)) {
 				setIncorrect(false);
 			}
-			sendBackspace(prev.length - val.length);
+			if (!incorrect) sendBackspace(prev.length - val.length);
 		} else {
 			// paste or other edits
 			return;
