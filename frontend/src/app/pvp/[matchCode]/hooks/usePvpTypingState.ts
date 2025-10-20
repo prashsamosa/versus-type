@@ -11,6 +11,7 @@ export function usePvpTypingState(words: string[]) {
 	const [typedText, setTypedText] = useState("");
 	const [finished, setFinished] = useState(false);
 	const [shakeWordIndex, setShakeWordIndex] = useState<number | null>(null);
+	const [incorrect, setIncorrect] = useState(false); // TODO: useRef?
 	const startRef = useRef<number | null>(null);
 	const endRef = useRef<number | null>(null);
 	const prevInputRef = useRef("");
@@ -23,8 +24,16 @@ export function usePvpTypingState(words: string[]) {
 		if (val.length === prev.length + 1 && val.startsWith(prev)) {
 			const typed = val[idx];
 			const expected = passageChars[idx];
-			recordKey(typed, expected, () => sendKeystroke(typed));
+			recordKey(typed, expected);
+			if (typed !== expected) {
+				setIncorrect(true);
+			} else {
+				if (!incorrect) sendKeystroke(typed);
+			}
 		} else if (val.length < prev.length && prev.startsWith(val)) {
+			if (incorrect && val === passageChars.slice(0, val.length)) {
+				setIncorrect(false);
+			}
 			sendBackspace(prev.length - val.length);
 		} else {
 			// paste or other edits
@@ -65,5 +74,6 @@ export function usePvpTypingState(words: string[]) {
 		endRef,
 		handleInputChange,
 		shakeWordIndex,
+		incorrect,
 	};
 }

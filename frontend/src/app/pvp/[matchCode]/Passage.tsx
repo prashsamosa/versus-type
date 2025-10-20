@@ -39,6 +39,7 @@ export default function Passage({
 		endRef,
 		handleInputChange,
 		shakeWordIndex,
+		incorrect,
 	} = usePvpTypingState(words);
 
 	const [manualScrollOffset, setManualScrollOffset] = useState<number | null>(
@@ -100,8 +101,9 @@ export default function Passage({
 		<div
 			ref={containerRef}
 			className={
-				"max-w-3xl min-h-[13rem] overflow-hidden mx-auto mt-20 px-4 py-10 bg-card/50 rounded-md relative cursor-text " +
+				"max-w-3xl min-h-[13rem] overflow-hidden mx-auto transition mt-20 px-4 py-10 bg-card/50 rounded-md relative cursor-text " +
 				(disabled ? "opacity-80" : "")
+				// +  (incorrect ? " shadow-destructive/10 shadow-xl" : "")
 			}
 			onClick={() => {
 				hiddenInputRef.current?.focus();
@@ -172,6 +174,7 @@ export default function Passage({
 					y={cursorPos.y}
 					color={color}
 					disabled={!focused}
+					glow={incorrect}
 				/>
 			) : null}
 			{!disabled
