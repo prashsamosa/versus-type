@@ -43,6 +43,7 @@ export function usePvpTypingState(words: string[]) {
 		const prevWordIdx = getWordIndex(prev.length, words);
 		const newWordIdx = getWordIndex(val.length, words);
 
+		// check if previous words are correct when moving to a new word
 		if (newWordIdx > prevWordIdx) {
 			for (let i = 0; i < prevWordIdx; i++) {
 				const wordStart = getWordStartIndex(i, words);

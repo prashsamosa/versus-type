@@ -22,10 +22,7 @@ export default function Cursor({
 				height: "2em",
 				backgroundColor: color,
 				opacity: disabled ? 0.5 : 1,
-				boxShadow: glow
-					? // ? `0 0 8px 2px ${color || "var(--destructive)"}`
-						`0 0 8px 0.5px var(--destructive)`
-					: undefined,
+				boxShadow: glow ? `0 0 8px 0.3px var(--destructive)` : undefined,
 			}}
 		/>
 	);

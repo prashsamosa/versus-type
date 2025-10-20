@@ -11,7 +11,7 @@ export function isWordCorrect(
 	startIdx: number,
 ): boolean {
 	const wordEndIdx = startIdx + word.length;
-	return typedText.slice(startIdx, wordEndIdx) === word;
+	return typedText.slice(startIdx, wordEndIdx + 1) === word + " ";
 }
 
 export function getWordIndex(typedTextLength: number, words: string[]): number {
