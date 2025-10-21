@@ -1,16 +1,13 @@
 "use client";
 import { Activity, Check, Copy, WifiOff } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
-import { socket } from "@/socket";
 import Chat from "./Chat";
 import { DISCONNECT_LATENCY, usePvpSession } from "./hooks/usePvpSession";
 import { Lobby } from "./Lobby";
 import { PvpGame } from "./PvpGame";
 import SocketErrorPage from "./SocketErrorPage";
-import { usePvpStore } from "./store";
 import { UsernameInput } from "./UsernameInput";
 
 export default function PvpPage() {
@@ -25,17 +22,6 @@ export default function PvpPage() {
 	} = usePvpSession();
 
 	const [copied, setCopied] = useState(false);
-	const setWpms = usePvpStore((s) => s.setWpms);
-
-	useEffect(() => {
-		if (!socket) return;
-		const unregister = registerSocketHandlers(socket, {
-			"pvp:wpm-update": (data) => {
-				setWpms(data);
-			},
-		});
-		return unregister;
-	}, [setWpms]);
 
 	if (isPending) {
 		return (

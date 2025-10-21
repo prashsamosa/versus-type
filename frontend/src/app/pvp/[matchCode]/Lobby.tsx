@@ -16,6 +16,8 @@ export function Lobby() {
 	const myUserId = authClient.useSession().data?.user.id;
 	const isHost = players[myUserId || ""]?.isHost || false;
 
+	console.log("Current WPMs in store:", wpms);
+
 	async function handleStartCountdown() {
 		const response = await socket?.emitWithAck("pvp:start-match");
 		if (response?.success) setCountdownStarted(true);

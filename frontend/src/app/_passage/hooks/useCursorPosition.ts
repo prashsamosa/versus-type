@@ -18,7 +18,6 @@ export function useCursorPosition(
 
 	useLayoutEffect(() => {
 		const span = charRefs.current?.[index];
-		console.log(index, span?.textContent, span?.offsetLeft, span?.offsetTop);
 		const container = containerRef.current;
 		if (!span || !container) return;
 		const containerStyle = getComputedStyle(container);

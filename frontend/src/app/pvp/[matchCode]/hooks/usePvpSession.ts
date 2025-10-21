@@ -24,6 +24,7 @@ export function usePvpSession() {
 	const setPlayers = usePvpStore((s) => s.setPlayers);
 	const setGameStarted = usePvpStore((s) => s.setGameStarted);
 	const setInitialIndex = usePvpStore((s) => s.setInitialIndex);
+	const setWpms = usePvpStore((s) => s.setWpms);
 	const players = usePvpStore((s) => s.players);
 	const gameStarted = usePvpStore((s) => s.gameStarted);
 	const initialIndex = usePvpStore((s) => s.initialIndex);
@@ -68,6 +69,9 @@ export function usePvpSession() {
 			"pvp:lobby-update": (players) => {
 				setPlayers(players);
 			},
+			"pvp:wpm-update": (data) => {
+				setWpms(data);
+			},
 		});
 
 		const timeoutId = setInterval(async () => {
@@ -90,7 +94,7 @@ export function usePvpSession() {
 			disconnectSocket();
 			setLatency(null);
 		};
-	}, [username, isPending]);
+	}, [username, isPending, setWpms]);
 	return {
 		loading,
 		socketError,
