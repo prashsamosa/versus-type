@@ -1,5 +1,5 @@
 import type { PlayersInfo } from "@versus-type/shared/index";
-import { WifiOff } from "lucide-react";
+import { Crown, WifiOff } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,14 +49,22 @@ export function Lobby({
 								) : null}
 							</div>
 						</div>
-						<div className="w-2xs mx-4 bg-muted rounded h-2">
-							<div
-								className="h-full bg-accent transition-all duration-100 rounded"
-								style={{
-									width: `calc(${(player.typingIndex / maxIdx) * 100}%`,
-									backgroundColor: player.color || "#666",
-								}}
-							/>
+						<div className="flex items-center gap-2">
+							<Crown
+								className={`text-yellow-400 w-5 h-5 transition ease-in-out ${player.winner ? "" : "scale-0"}`}
+							/>{" "}
+							<span className="text-right tabular-nums">
+								{player.wpm ? Math.round(player.wpm) : 0} WPM
+							</span>
+							<div className="w-2xs mx-4 bg-muted rounded h-2">
+								<div
+									className="h-full bg-accent transition-all duration-100 rounded"
+									style={{
+										width: `calc(${(player.typingIndex / maxIdx) * 100}%`,
+										backgroundColor: player.color || "#666",
+									}}
+								/>
+							</div>
 						</div>
 					</div>
 				))}

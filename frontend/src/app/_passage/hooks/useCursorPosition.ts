@@ -43,7 +43,15 @@ export function useCursorPosition(
 		const stableOffsetTop =
 			Math.round(span.offsetTop / lineHeight) * lineHeight;
 
-		const targetOffset = Math.max(stableOffsetTop - lineHeight, 0);
+		const maxScrollOffset = Math.max(
+			0,
+			(container?.scrollHeight ?? 0) - (container?.clientHeight ?? 0),
+		);
+		// const targetOffset = Math.max(stableOffsetTop - lineHeight, 0);
+		const targetOffset = Math.min(
+			Math.max(stableOffsetTop - lineHeight, 0),
+			maxScrollOffset,
+		);
 
 		if (targetOffset !== scrollOffset) {
 			setScrollOffset(targetOffset);

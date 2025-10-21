@@ -22,6 +22,7 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 	const prevInputRef = useRef("");
 
 	function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+		if (finished) return;
 		const val = e.target.value;
 
 		const prev = prevInputRef.current;

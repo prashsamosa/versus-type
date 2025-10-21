@@ -34,15 +34,8 @@ export default function Passage({
 	const containerRef = useRef<HTMLDivElement>(null);
 	const charRefs = useRef<HTMLSpanElement[]>([]);
 
-	const {
-		typedText,
-		finished,
-		startRef,
-		endRef,
-		handleInputChange,
-		shakeWordIndex,
-		incorrect,
-	} = usePvpTypingState(words, initialIndex);
+	const { typedText, finished, handleInputChange, shakeWordIndex, incorrect } =
+		usePvpTypingState(words, initialIndex);
 
 	const [manualScrollOffset, setManualScrollOffset] = useState<number | null>(
 		null,
@@ -94,10 +87,6 @@ export default function Passage({
 		container.addEventListener("wheel", handleWheel, { passive: false });
 		return () => container.removeEventListener("wheel", handleWheel);
 	}, [scrollOffset]);
-
-	if (finished && startRef.current && endRef.current) {
-		return <p>finished lol</p>;
-	}
 
 	return (
 		<div
@@ -170,7 +159,7 @@ export default function Passage({
 				shakeWordIndex={shakeWordIndex}
 			/>
 
-			{!disabled ? (
+			{!disabled && !finished ? (
 				<Cursor
 					x={cursorPos.x}
 					y={cursorPos.y}
@@ -188,6 +177,9 @@ export default function Passage({
 								x={pos.x}
 								y={pos.y}
 								color={players[oppId]?.color || "gray"}
+								disabled={
+									players[oppId]?.disconnected || players[oppId]?.finished
+								}
 							/>
 						);
 					})
