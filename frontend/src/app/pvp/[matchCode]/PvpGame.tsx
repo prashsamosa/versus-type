@@ -13,9 +13,11 @@ export function PvpGame() {
 	const setCountdown = usePvpStore((s) => s.setCountdown);
 	const setPassageLength = usePvpStore((s) => s.setPassageLength);
 
-	if (!gameStarted && countdown === 0) {
-		setGameStarted(true);
-	}
+	useEffect(() => {
+		if (!gameStarted && countdown === 0) {
+			setGameStarted(true);
+		}
+	}, [gameStarted, countdown, setGameStarted]);
 
 	useEffect(() => {
 		if (!socket) return;
