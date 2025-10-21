@@ -216,6 +216,8 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			return;
 		}
 		const pstate = matchStates[matchCode].players[socket.data.userId];
+		if (pstate.finished) return;
+
 		if (pstate.spectator) {
 			console.warn(
 				`spectator ${socket.data.userId} tryna send key-press during match lmao`,
@@ -230,6 +232,16 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		);
 		if (passage[pstate.typingIndex] === key) {
 			pstate.typingIndex++;
+			if (pstate.typingIndex >= passage.length) {
+				pstate.finished = true;
+
+				const anyWinner = Object.values(matchStates[matchCode].players).some(
+					(pl) => pl.winner,
+				);
+				if (!anyWinner) pstate.winner = true;
+
+				updateLobby(io, matchCode);
+			}
 			io.to(matchCode).emit("pvp:progress-update", {
 				userId: socket.data.userId ?? socket.id,
 				typingIndex: pstate.typingIndex,
@@ -291,6 +303,7 @@ async function updateMatchStatus(matchCode: string, status: MatchStatus) {
 }
 
 function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
+	// TODO: just emit matchStates[matchCode].players directly. update the states when events happen directly
 	const room = io.sockets.adapter.rooms.get(matchCode);
 	if (!room) return;
 	for (const memberId of room) {
@@ -306,7 +319,8 @@ function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
 					accState: resetAccuracy(),
 				};
 			} else {
-				// things that can update (host change)
+				// things that can update
+				// host change
 				if (
 					memberSocket.data.isHost !==
 					matchStates[matchCode].players[memberSocket.data.userId].isHost

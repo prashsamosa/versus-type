@@ -16,8 +16,9 @@ export type PlayerState = {
 	accuracy?: number;
 	accState?: AccuracyState;
 	spectator: boolean;
-	completed?: boolean;
+	finished?: boolean;
 	color: string;
+	winner?: boolean;
 	disconnected?: boolean;
 };
 
