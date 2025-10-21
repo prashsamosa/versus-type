@@ -1,6 +1,6 @@
 "use client";
 
-import type { PlayersInfo } from "@versus-type/shared/index";
+import type { LobbyInfo } from "@versus-type/shared/index";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
 import { useChat } from "./hooks/useChat";
 
-export default function Chat({ players }: { players: PlayersInfo }) {
+export default function Chat({ players }: { players: LobbyInfo }) {
 	const { messages, sendMessage } = useChat();
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const scrollContainerRef = useRef<HTMLDivElement>(null);

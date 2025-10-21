@@ -1,4 +1,4 @@
-import type { PlayersInfo } from "@versus-type/shared/index";
+import type { LobbyInfo } from "@versus-type/shared/index";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
@@ -12,7 +12,7 @@ export function usePvpSession() {
 	const [loading, setLoading] = useState(true);
 	const [socketError, setSocketError] = useState<string | null>(null);
 	const [latency, setLatency] = useState<number | null>(null);
-	const [players, setPlayers] = useState<PlayersInfo>({});
+	const [players, setPlayers] = useState<LobbyInfo>({});
 	const [gameStarted, setGameStarted] = useState(false);
 	const [initialIndex, setInitialIndex] = useState(0);
 	const [username, setUsername] = useState(() => {

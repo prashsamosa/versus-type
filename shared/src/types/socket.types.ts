@@ -1,5 +1,4 @@
 import type { Server, Socket } from "socket.io";
-import type { AccuracyState } from "../accuracy";
 
 export type ChatMessage = {
 	username: string;
@@ -8,22 +7,23 @@ export type ChatMessage = {
 	system?: boolean;
 };
 
-export type PlayerState = {
+export type PlayerInfo = {
 	isHost?: boolean;
 	username?: string;
-	typingIndex: number;
-	wpm?: number;
-	accuracy?: number;
-	accState?: AccuracyState;
 	spectator: boolean;
-	finished?: boolean;
-	color: string;
 	winner?: boolean;
 	disconnected?: boolean;
+	color: string;
+
+	// for now
+	finished?: boolean;
+	typingIndex: number;
+	wpm?: number;
+	// accuracy?: number;
 };
 
-export type PlayersInfo = {
-	[userId: string]: PlayerState;
+export type LobbyInfo = {
+	[userId: string]: PlayerInfo;
 };
 
 export type JoinResponse = {
@@ -33,6 +33,10 @@ export type JoinResponse = {
 	typingIndex?: number;
 };
 
+export type WpmInfo = {
+	[userId: string]: number;
+};
+
 export interface ServerToClientEvents {
 	"pvp:countdown": (seconds: number) => void;
 	"pvp:progress-update": (data: {
@@ -40,7 +44,8 @@ export interface ServerToClientEvents {
 		typingIndex: number;
 	}) => void;
 
-	"pvp:lobby-update": (players: PlayersInfo) => void;
+	"pvp:lobby-update": (lobby: LobbyInfo) => void;
+	"pvp:wpm-update": (data: WpmInfo) => void;
 
 	"chat:new-message": (data: ChatMessage) => void;
 	"chat:history": (messages: ChatMessage[]) => void;

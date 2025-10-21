@@ -1,4 +1,4 @@
-import type { PlayersInfo } from "@versus-type/shared/index";
+import type { LobbyInfo } from "@versus-type/shared/index";
 import { useEffect, useState } from "react";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
@@ -10,7 +10,7 @@ export function PvpGame({
 	setGameStarted,
 	initialIndex,
 }: {
-	players: PlayersInfo;
+	players: LobbyInfo;
 	gameStarted: boolean;
 	setGameStarted: (started: boolean) => void;
 	initialIndex: number;

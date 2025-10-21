@@ -1,26 +1,38 @@
-import type { PlayersInfo } from "@versus-type/shared/index";
+import type { LobbyInfo, WpmInfo } from "@versus-type/shared";
 import { Crown, WifiOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
+import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
 
 export function Lobby({
 	players,
 	maxIdx,
 }: {
-	players: PlayersInfo;
+	players: LobbyInfo;
 	maxIdx: number;
 }) {
 	const [countdownStarted, setCountdownStarted] = useState(false);
+	const [wpms, setWPMs] = useState<WpmInfo>({});
 	const myUserId = authClient.useSession().data?.user.id;
 	const isHost = players[myUserId || ""]?.isHost || false;
 	async function handleStartCountdown() {
 		const response = await socket?.emitWithAck("pvp:start-match");
 		if (response?.success) setCountdownStarted(true);
 	}
+	useEffect(() => {
+		if (!socket) return;
+		const unregister = registerSocketHandlers(socket, {
+			"pvp:wpm-update": (data: WpmInfo) => {
+				setWPMs(data);
+			},
+		});
+		return unregister;
+	}, [socket]);
+
 	return (
 		<Card className="h-full p-2 gap-2 relative">
 			<div className="border-b p-2 pb-3 flex justify-between items-center">
@@ -54,7 +66,8 @@ export function Lobby({
 								className={`text-yellow-400 w-5 h-5 transition ease-in-out ${player.winner ? "" : "scale-0"}`}
 							/>{" "}
 							<span className="text-right tabular-nums">
-								{player.wpm ? Math.round(player.wpm) : 0} WPM
+								{/* {player.wpm ? Math.round(player.wpm) : 0} WPM */}
+								{Math.round(wpms[userId] ?? 0)} WPM
 							</span>
 							<div className="w-2xs mx-4 bg-muted rounded h-2">
 								<div

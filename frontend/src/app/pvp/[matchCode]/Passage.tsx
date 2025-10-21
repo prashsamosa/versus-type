@@ -1,6 +1,6 @@
 "use client";
 
-import type { PlayersInfo } from "@versus-type/shared/index";
+import type { LobbyInfo } from "@versus-type/shared/index";
 import { useEffect, useRef, useState } from "react";
 import Cursor from "@/app/_passage/Cursor";
 import { useCursorPosition } from "@/app/_passage/hooks/useCursorPosition";
@@ -19,7 +19,7 @@ export default function Passage({
 }: {
 	words: string[];
 	disabled?: boolean;
-	players: PlayersInfo;
+	players: LobbyInfo;
 	initialIndex: number;
 }) {
 	useEffect(() => {

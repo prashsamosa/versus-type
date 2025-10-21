@@ -1,5 +1,9 @@
-import type { ioServer, ioSocket, PlayerState } from "@versus-type/shared";
-import { recordKey, resetAccuracy } from "@versus-type/shared/accuracy";
+import type { ioServer, ioSocket, LobbyInfo } from "@versus-type/shared";
+import {
+	type AccuracyState,
+	recordKey,
+	resetAccuracy,
+} from "@versus-type/shared/accuracy";
 import {
 	type GeneratorConfig,
 	generateWords,
@@ -14,6 +18,20 @@ const MAX_ROOM_SIZE = 10;
 const COUNTDOWN_SECONDS = 3;
 
 type MatchStatus = "waiting" | "inProgress" | "completed" | "cancelled";
+
+type PlayerState = {
+	isHost?: boolean;
+	username?: string;
+	typingIndex: number;
+	wpm?: number;
+	accuracy?: number;
+	accState?: AccuracyState;
+	spectator: boolean;
+	finished?: boolean;
+	color: string;
+	winner?: boolean;
+	disconnected?: boolean;
+};
 
 type MatchState = {
 	status: MatchStatus;
@@ -335,7 +353,29 @@ function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
 		matchStates[matchCode].players[disconnectedId].disconnected = true;
 		matchStates[matchCode].players[disconnectedId].isHost = false;
 	}
-	io.to(matchCode).emit("pvp:lobby-update", matchStates[matchCode].players);
+	io.to(matchCode).emit(
+		"pvp:lobby-update",
+		toPlayersInfo(matchStates[matchCode].players),
+	);
+}
+
+function toPlayersInfo(players: { [userId: string]: PlayerState }) {
+	const info: LobbyInfo = {};
+	for (const userId in players) {
+		const p = players[userId];
+		info[userId] = {
+			isHost: p.isHost,
+			username: p.username,
+			typingIndex: p.typingIndex,
+			wpm: p.wpm,
+			spectator: p.spectator,
+			finished: p.finished,
+			winner: p.winner,
+			disconnected: p.disconnected,
+			color: p.color,
+		};
+	}
+	return info;
 }
 
 function getRandomColor(matchCode: string) {
