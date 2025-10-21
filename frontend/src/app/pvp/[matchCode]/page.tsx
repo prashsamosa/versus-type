@@ -78,7 +78,7 @@ export default function PvpPage() {
 				</div>
 				<div className="flex gap-4 p-4 w-full absolute bottom-0 left-0">
 					<div className="flex-1 min-h-[30vh] max-h-[30vh]">
-						<Lobby players={players} maxIdx={100} />
+						<Lobby players={players} maxIdx={10} />
 					</div>
 					<div className="flex-1 min-h-[30vh] max-h-[30vh]">
 						<Chat players={players} />

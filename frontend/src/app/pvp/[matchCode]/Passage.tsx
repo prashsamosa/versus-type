@@ -20,7 +20,7 @@ export default function Passage({
 	words: string[];
 	disabled?: boolean;
 	players: PlayersInfo;
-	initialIndex?: number;
+	initialIndex: number;
 }) {
 	useEffect(() => {
 		if (!socket) return;

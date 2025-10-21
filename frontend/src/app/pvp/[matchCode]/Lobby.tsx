@@ -1,4 +1,5 @@
 import type { PlayersInfo } from "@versus-type/shared/index";
+import { WifiOff } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,7 @@ export function Lobby({
 								) : null}
 								{player.disconnected ? (
 									<Badge variant="secondary" className="mt-0.5">
-										Disconnected
+										<WifiOff />
 									</Badge>
 								) : null}
 							</div>
@@ -52,7 +53,7 @@ export function Lobby({
 							<div
 								className="h-full bg-accent transition-all duration-100 rounded"
 								style={{
-									width: `calc(${(player.typingIndex / maxIdx) * 500}px`,
+									width: `calc(${(player.typingIndex / maxIdx) * 100}%`,
 									backgroundColor: player.color || "#666",
 								}}
 							/>
