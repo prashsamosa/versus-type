@@ -25,6 +25,7 @@ export default function Passage({
 		finished,
 		startRef,
 		endRef,
+		accuracyRef,
 		handleInputChange,
 		restartTest,
 		handleKeyDown,
@@ -60,6 +61,7 @@ export default function Passage({
 				input={typedText}
 				target={passageChars}
 				onRestartAction={handleRestart}
+				accuracyState={accuracyRef.current}
 			/>
 		);
 	}

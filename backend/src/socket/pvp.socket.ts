@@ -1,4 +1,5 @@
 import type { ioServer, ioSocket, PlayerState } from "@versus-type/shared";
+import { recordKey, resetAccuracy } from "@versus-type/shared/accuracy";
 import {
 	type GeneratorConfig,
 	generateWords,
@@ -50,6 +51,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 						username,
 						spectator: false,
 						color: getRandomColor(matchCode),
+						accState: resetAccuracy(),
 					},
 				},
 			};
@@ -220,10 +222,16 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
-		if (matchStates[matchCode].passage[pstate.typingIndex] === key) {
+		const passage = matchStates[matchCode].passage;
+		pstate.accState = recordKey(
+			pstate.accState || resetAccuracy(),
+			key,
+			passage[pstate.typingIndex],
+		);
+		if (passage[pstate.typingIndex] === key) {
 			pstate.typingIndex++;
 			io.to(matchCode).emit("pvp:progress-update", {
-				userId: socket.data.userId || socket.id,
+				userId: socket.data.userId ?? socket.id,
 				typingIndex: pstate.typingIndex,
 			});
 		}
@@ -295,6 +303,7 @@ function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
 					username: memberSocket.data.username || "<Unknown>",
 					spectator: matchStates[matchCode].isStarted ?? false,
 					color: getRandomColor(matchCode),
+					accState: resetAccuracy(),
 				};
 			} else {
 				// things that can update (host change)

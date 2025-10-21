@@ -1,6 +1,10 @@
 "use client";
 
-import { recordKey, resetAccuracy } from "@versus-type/shared/accuracy";
+import {
+	type AccuracyState,
+	recordKey,
+	resetAccuracy,
+} from "@versus-type/shared/accuracy";
 import {
 	type GeneratorConfig,
 	generateWords,
@@ -16,6 +20,7 @@ export function useTypingTest(config: GeneratorConfig, initialWords: string[]) {
 	const startRef = useRef<number | null>(null);
 	const endRef = useRef<number | null>(null);
 	const prevInputRef = useRef("");
+	const accuracyRef = useRef<AccuracyState>(resetAccuracy());
 
 	function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
 		const val = e.target.value;
@@ -25,7 +30,7 @@ export function useTypingTest(config: GeneratorConfig, initialWords: string[]) {
 		if (val.length === prev.length + 1 && val.startsWith(prev)) {
 			const typed = val[idx];
 			const expected = passageChars[idx];
-			recordKey(typed, expected);
+			accuracyRef.current = recordKey(accuracyRef.current, typed, expected);
 		}
 		prevInputRef.current = val;
 
@@ -45,7 +50,7 @@ export function useTypingTest(config: GeneratorConfig, initialWords: string[]) {
 		startRef.current = null;
 		endRef.current = null;
 		prevInputRef.current = "";
-		resetAccuracy();
+		accuracyRef.current = resetAccuracy();
 		setFinished(false);
 	}
 
@@ -63,6 +68,7 @@ export function useTypingTest(config: GeneratorConfig, initialWords: string[]) {
 		finished,
 		startRef,
 		endRef,
+		accuracyRef,
 		handleInputChange,
 		restartTest,
 		handleKeyDown,

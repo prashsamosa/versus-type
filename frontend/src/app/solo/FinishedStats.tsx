@@ -1,6 +1,10 @@
 "use client";
 
-import { getAccuracy, getErrorCount } from "@versus-type/shared/accuracy";
+import {
+	type AccuracyState,
+	getAccuracy,
+	getErrorCount,
+} from "@versus-type/shared/accuracy";
 import { computeStats } from "@versus-type/shared/stats";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -25,16 +29,18 @@ export default function FinishedStats({
 	input,
 	target,
 	onRestartAction,
+	accuracyState,
 }: {
 	startTs: number;
 	endTs: number;
 	input: string;
 	target: string;
 	onRestartAction: () => void;
+	accuracyState: AccuracyState;
 }) {
 	const stats = computeStats(startTs, endTs, input, target);
-	const acc = getAccuracy();
-	const errors = getErrorCount();
+	const acc = getAccuracy(accuracyState);
+	const errors = getErrorCount(accuracyState);
 	const [saving, setSaving] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const { data: session } = authClient.useSession();

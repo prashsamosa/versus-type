@@ -1,24 +1,26 @@
 export type AccuracyState = { correct: number; incorrect: number };
 
-const state: AccuracyState = { correct: 0, incorrect: 0 };
-
-export function resetAccuracy(): void {
-	state.correct = 0;
-	state.incorrect = 0;
+export function resetAccuracy(): AccuracyState {
+	return { correct: 0, incorrect: 0 };
 }
 
-export function recordKey(typed: string, expected?: string): void {
+export function recordKey(
+	state: AccuracyState,
+	typed: string,
+	expected?: string,
+): AccuracyState {
 	if (typed.length > 1 || typed.length === 0) {
 		console.warn("recordKey should be called with a single character");
-		return;
+		return state;
 	}
-
+	const newState = { ...state };
 	if (expected && typed === expected) {
-		state.correct++;
-	} else state.incorrect++;
+		newState.correct++;
+	} else newState.incorrect++;
+	return newState;
 }
 
-export function getAccuracy(): {
+export function getAccuracy(state: AccuracyState): {
 	correct: number;
 	incorrect: number;
 	acc: number;
@@ -28,6 +30,6 @@ export function getAccuracy(): {
 	return { correct: state.correct, incorrect: state.incorrect, acc };
 }
 
-export function getErrorCount(): number {
+export function getErrorCount(state: AccuracyState): number {
 	return state.incorrect;
 }

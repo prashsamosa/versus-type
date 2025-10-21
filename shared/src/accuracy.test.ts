@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
 	getAccuracy,
 	getErrorCount,
@@ -7,18 +7,15 @@ import {
 } from "./accuracy";
 
 describe("accuracy", () => {
-	beforeEach(() => {
-		resetAccuracy();
-	});
-
 	describe("resetAccuracy", () => {
 		it("resets state to zero", () => {
-			recordKey("a", "a");
-			recordKey("b", "c");
+			let state = resetAccuracy();
+			state = recordKey(state, "a", "a");
+			state = recordKey(state, "b", "c");
 
-			resetAccuracy();
+			state = resetAccuracy();
 
-			const result = getAccuracy();
+			const result = getAccuracy(state);
 			expect(result.correct).toBe(0);
 			expect(result.incorrect).toBe(0);
 			expect(result.acc).toBe(100);
@@ -27,53 +24,59 @@ describe("accuracy", () => {
 
 	describe("recordKey", () => {
 		it("increments correct when typed matches expected", () => {
-			recordKey("a", "a");
+			let state = resetAccuracy();
+			state = recordKey(state, "a", "a");
 
-			const result = getAccuracy();
+			const result = getAccuracy(state);
 			expect(result.correct).toBe(1);
 			expect(result.incorrect).toBe(0);
 		});
 
 		it("increments incorrect when typed does not match expected", () => {
-			recordKey("a", "b");
+			let state = resetAccuracy();
+			state = recordKey(state, "a", "b");
 
-			const result = getAccuracy();
+			const result = getAccuracy(state);
 			expect(result.correct).toBe(0);
 			expect(result.incorrect).toBe(1);
 		});
 
 		it("increments incorrect when no expected value provided", () => {
-			recordKey("a");
+			let state = resetAccuracy();
+			state = recordKey(state, "a");
 
-			const result = getAccuracy();
+			const result = getAccuracy(state);
 			expect(result.correct).toBe(0);
 			expect(result.incorrect).toBe(1);
 		});
 
 		it("does nothing when typed is empty", () => {
-			recordKey("");
+			let state = resetAccuracy();
+			state = recordKey(state, "");
 
-			const result = getAccuracy();
+			const result = getAccuracy(state);
 			expect(result.correct).toBe(0);
 			expect(result.incorrect).toBe(0);
 		});
 
 		it("treat empty string expected as incorrect", () => {
-			recordKey("x", "");
+			let state = resetAccuracy();
+			state = recordKey(state, "x", "");
 
-			const result = getAccuracy();
+			const result = getAccuracy(state);
 			expect(result.correct).toBe(0);
 			expect(result.incorrect).toBe(1);
 		});
 
 		it("tracks multiple keystrokes correctly", () => {
-			recordKey("h", "h");
-			recordKey("e", "e");
-			recordKey("l", "l");
-			recordKey("l", "l");
-			recordKey("x", "o");
+			let state = resetAccuracy();
+			state = recordKey(state, "h", "h");
+			state = recordKey(state, "e", "e");
+			state = recordKey(state, "l", "l");
+			state = recordKey(state, "l", "l");
+			state = recordKey(state, "x", "o");
 
-			const result = getAccuracy();
+			const result = getAccuracy(state);
 			expect(result.correct).toBe(4);
 			expect(result.incorrect).toBe(1);
 		});
@@ -81,7 +84,8 @@ describe("accuracy", () => {
 
 	describe("getAccuracy", () => {
 		it("returns 100% accuracy with no input", () => {
-			const result = getAccuracy();
+			const state = resetAccuracy();
+			const result = getAccuracy(state);
 
 			expect(result.acc).toBe(100);
 			expect(result.correct).toBe(0);
@@ -89,11 +93,12 @@ describe("accuracy", () => {
 		});
 
 		it("calculates accuracy percentage correctly", () => {
-			recordKey("a", "a");
-			recordKey("b", "b");
-			recordKey("c", "d");
+			let state = resetAccuracy();
+			state = recordKey(state, "a", "a");
+			state = recordKey(state, "b", "b");
+			state = recordKey(state, "c", "d");
 
-			const result = getAccuracy();
+			const result = getAccuracy(state);
 
 			expect(result.correct).toBe(2);
 			expect(result.incorrect).toBe(1);
@@ -101,52 +106,58 @@ describe("accuracy", () => {
 		});
 
 		it("returns correct/incorrect counts", () => {
-			recordKey("x", "x");
-			recordKey("y", "z");
-			recordKey("a", "a");
+			let state = resetAccuracy();
+			state = recordKey(state, "x", "x");
+			state = recordKey(state, "y", "z");
+			state = recordKey(state, "a", "a");
 
-			const result = getAccuracy();
+			const result = getAccuracy(state);
 
 			expect(result.correct).toBe(2);
 			expect(result.incorrect).toBe(1);
 		});
 
 		it("handles 0% accuracy", () => {
-			recordKey("a", "b");
-			recordKey("c", "d");
+			let state = resetAccuracy();
+			state = recordKey(state, "a", "b");
+			state = recordKey(state, "c", "d");
 
-			const result = getAccuracy();
+			const result = getAccuracy(state);
 			expect(result.acc).toBe(0);
 		});
 
 		it("handles 100% accuracy", () => {
-			recordKey("a", "a");
-			recordKey("b", "b");
+			let state = resetAccuracy();
+			state = recordKey(state, "a", "a");
+			state = recordKey(state, "b", "b");
 
-			const result = getAccuracy();
+			const result = getAccuracy(state);
 			expect(result.acc).toBe(100);
 		});
 	});
 
 	describe("getErrorCount", () => {
 		it("returns 0 initially", () => {
-			expect(getErrorCount()).toBe(0);
+			const state = resetAccuracy();
+			expect(getErrorCount(state)).toBe(0);
 		});
 
 		it("returns incorrect count", () => {
-			recordKey("a", "a");
-			recordKey("b", "c");
-			recordKey("d", "e");
+			let state = resetAccuracy();
+			state = recordKey(state, "a", "a");
+			state = recordKey(state, "b", "c");
+			state = recordKey(state, "d", "e");
 
-			expect(getErrorCount()).toBe(2);
+			expect(getErrorCount(state)).toBe(2);
 		});
 
 		it("updates after reset", () => {
-			recordKey("a", "b");
-			expect(getErrorCount()).toBe(1);
+			let state = resetAccuracy();
+			state = recordKey(state, "a", "b");
+			expect(getErrorCount(state)).toBe(1);
 
-			resetAccuracy();
-			expect(getErrorCount()).toBe(0);
+			state = resetAccuracy();
+			expect(getErrorCount(state)).toBe(0);
 		});
 	});
 });

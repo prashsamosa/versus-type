@@ -1,4 +1,5 @@
 import type { Server, Socket } from "socket.io";
+import type { AccuracyState } from "../accuracy";
 
 export type ChatMessage = {
 	username: string;
@@ -11,6 +12,9 @@ export type PlayerState = {
 	isHost?: boolean;
 	username?: string;
 	typingIndex: number;
+	wpm?: number;
+	accuracy?: number;
+	accState?: AccuracyState;
 	spectator: boolean;
 	completed?: boolean;
 	color: string;
