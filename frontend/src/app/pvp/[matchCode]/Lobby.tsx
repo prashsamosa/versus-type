@@ -41,7 +41,7 @@ export function Lobby({
 			<div className="flex flex-col p-2 gap-2 overflow-y-auto">
 				{Object.entries(players).map(([userId, player]) => (
 					<div key={userId} className="flex justify-between items-center gap-1">
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-2 flex-1">
 							<div className="flex gap-2">
 								<span
 									className={`${userId === myUserId ? "font-bold" : ""} ${player.disconnected ? "line-through" : ""}`}
@@ -61,15 +61,15 @@ export function Lobby({
 								) : null}
 							</div>
 						</div>
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-2 justify-end flex-2">
 							<Crown
-								className={`text-yellow-400 w-5 h-5 transition ease-in-out ${player.winner ? "" : "scale-0"}`}
+								className={`text-yellow-400 size-4 transition ease-in-out shrink-0 ${player.winner ? "" : "scale-0"}`}
 							/>{" "}
-							<span className="text-right tabular-nums">
+							<span className="text-right text-nowrap">
 								{/* {player.wpm ? Math.round(player.wpm) : 0} WPM */}
 								{Math.round(wpms[userId] ?? 0)} WPM
 							</span>
-							<div className="w-2xs mx-4 bg-muted rounded h-2">
+							<div className="w-full max-w-2xs mx-4 bg-muted rounded h-2">
 								<div
 									className="h-full bg-accent transition-all duration-100 rounded"
 									style={{

@@ -170,7 +170,7 @@ export default function Passage({
 			) : null}
 			{!disabled
 				? Object.entries(oppCursorPoses).map(([oppId, pos]) => {
-						if (oppId === userId) return null;
+						if (oppId === userId || players[oppId]?.finished) return null;
 						return (
 							<Cursor
 								key={oppId}

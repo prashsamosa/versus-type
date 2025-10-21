@@ -24,6 +24,7 @@ type PlayerState = {
 	username?: string;
 	typingIndex: number;
 	wpm?: number;
+	startedAt?: number;
 	accuracy?: number;
 	accState?: AccuracyState;
 	spectator: boolean;
@@ -223,6 +224,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			message: "Starting countdown",
 		});
 		startCountdown(io, matchCode);
+		startWpmUpdates(io, matchCode);
 	});
 
 	socket.on("pvp:key-press", (key: string) => {
@@ -243,6 +245,9 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			return;
 		}
 		const passage = matchStates[matchCode].passage;
+
+		if (!pstate.startedAt) pstate.startedAt = Date.now();
+
 		pstate.accState = recordKey(
 			pstate.accState || resetAccuracy(),
 			key,
@@ -252,6 +257,8 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			pstate.typingIndex++;
 			if (pstate.typingIndex >= passage.length) {
 				pstate.finished = true;
+				pstate.wpm = calcWpm(pstate.typingIndex, pstate.startedAt);
+				sendWpmUpdate(io, matchCode);
 
 				const anyWinner = Object.values(matchStates[matchCode].players).some(
 					(pl) => pl.winner,
@@ -295,6 +302,44 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		if (!matchCode || !matchStates[matchCode]) return callback("");
 		callback(matchStates[matchCode].passage);
 	});
+}
+
+function calcWpm(typingIndex: number, startedAt?: number): number {
+	if (!startedAt) return 0;
+	const elapsedTime = Date.now() - startedAt;
+	return typingIndex / 5 / (elapsedTime / 1000 / 60);
+}
+
+function startWpmUpdates(io: ioServer, matchCode: string) {
+	const timeoutId = setInterval(() => {
+		const matchState = matchStates[matchCode];
+		if (!matchState || !matchState.isStarted) return;
+		if (
+			matchState.status === "completed" ||
+			matchState.status === "cancelled"
+		) {
+			clearInterval(timeoutId);
+			return;
+		}
+		for (const userId in matchState.players) {
+			const player = matchState.players[userId];
+			if (player.finished) continue;
+			player.wpm = calcWpm(player.typingIndex, player.startedAt);
+		}
+
+		sendWpmUpdate(io, matchCode);
+	}, 1000);
+}
+
+function sendWpmUpdate(io: ioServer, matchCode: string) {
+	const wpmInfo = Object.fromEntries(
+		Object.entries(matchStates[matchCode].players).map(([userId, player]) => [
+			userId,
+			player.wpm ?? 0,
+		]),
+	);
+
+	io.to(matchCode).emit("pvp:wpm-update", wpmInfo);
 }
 
 async function startCountdown(io: ioServer, matchCode: string) {
