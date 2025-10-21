@@ -6,7 +6,13 @@ import { Card } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
 
-export function Lobby({ players }: { players: PlayersInfo }) {
+export function Lobby({
+	players,
+	maxIdx,
+}: {
+	players: PlayersInfo;
+	maxIdx: number;
+}) {
 	const [countdownStarted, setCountdownStarted] = useState(false);
 	const myUserId = authClient.useSession().data?.user.id;
 	const isHost = players[myUserId || ""]?.isHost || false;
@@ -21,24 +27,35 @@ export function Lobby({ players }: { players: PlayersInfo }) {
 			</div>
 			<div className="flex flex-col p-2 gap-2 overflow-y-auto">
 				{Object.entries(players).map(([userId, player]) => (
-					<div key={userId} className="flex items-center gap-2">
-						<div className="flex gap-2">
-							<span
-								className={`${userId === myUserId ? "font-bold" : ""} ${player.disconnected ? "line-through" : ""}`}
-								style={{ color: player.color }}
-							>
-								{player.username}{" "}
-							</span>
-							{player.isHost ? (
-								<Badge variant="secondary" className="mt-1">
-									Host
-								</Badge>
-							) : null}
-							{player.disconnected ? (
-								<Badge variant="secondary" className="mt-1">
-									Disconnected
-								</Badge>
-							) : null}
+					<div key={userId} className="flex justify-between items-center gap-1">
+						<div className="flex items-center gap-2">
+							<div className="flex gap-2">
+								<span
+									className={`${userId === myUserId ? "font-bold" : ""} ${player.disconnected ? "line-through" : ""}`}
+									style={{ color: player.color }}
+								>
+									{player.username}{" "}
+								</span>
+								{player.isHost ? (
+									<Badge variant="secondary" className="mt-0.5">
+										Host
+									</Badge>
+								) : null}
+								{player.disconnected ? (
+									<Badge variant="secondary" className="mt-0.5">
+										Disconnected
+									</Badge>
+								) : null}
+							</div>
+						</div>
+						<div className="w-2xs mx-4 bg-muted rounded h-2">
+							<div
+								className="h-full bg-accent transition-all duration-100 rounded"
+								style={{
+									width: `calc(${(player.typingIndex / maxIdx) * 500}px`,
+									backgroundColor: player.color || "#666",
+								}}
+							/>
 						</div>
 					</div>
 				))}
