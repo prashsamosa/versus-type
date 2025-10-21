@@ -1,13 +1,16 @@
 "use client";
 import { Activity, Check, Copy, WifiOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
+import { socket } from "@/socket";
 import Chat from "./Chat";
 import { DISCONNECT_LATENCY, usePvpSession } from "./hooks/usePvpSession";
 import { Lobby } from "./Lobby";
 import { PvpGame } from "./PvpGame";
 import SocketErrorPage from "./SocketErrorPage";
+import { usePvpStore } from "./store";
 import { UsernameInput } from "./UsernameInput";
 
 export default function PvpPage() {
@@ -19,13 +22,20 @@ export default function PvpPage() {
 		isPending,
 		matchCode,
 		latency,
-		players,
-		gameStarted,
-		setGameStarted,
-		initialIndex,
 	} = usePvpSession();
 
 	const [copied, setCopied] = useState(false);
+	const setWpms = usePvpStore((s) => s.setWpms);
+
+	useEffect(() => {
+		if (!socket) return;
+		const unregister = registerSocketHandlers(socket, {
+			"pvp:wpm-update": (data) => {
+				setWpms(data);
+			},
+		});
+		return unregister;
+	}, [setWpms]);
 
 	if (isPending) {
 		return (
@@ -69,19 +79,14 @@ export default function PvpPage() {
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
 				<div className="p-16">
-					<PvpGame
-						players={players}
-						gameStarted={gameStarted}
-						setGameStarted={setGameStarted}
-						initialIndex={initialIndex}
-					/>
+					<PvpGame />
 				</div>
 				<div className="flex gap-4 p-4 w-full absolute bottom-0 left-0">
 					<div className="flex-1 min-h-[30vh] max-h-[30vh]">
-						<Lobby players={players} maxIdx={10} />
+						<Lobby />
 					</div>
 					<div className="flex-1 min-h-[30vh] max-h-[30vh]">
-						<Chat players={players} />
+						<Chat />
 					</div>
 				</div>
 			</div>

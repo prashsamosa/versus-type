@@ -1,37 +1,25 @@
-import type { LobbyInfo, WpmInfo } from "@versus-type/shared";
 import { Crown, WifiOff } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
-import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
+import { usePvpStore } from "./store";
 
-export function Lobby({
-	players,
-	maxIdx,
-}: {
-	players: LobbyInfo;
-	maxIdx: number;
-}) {
+export function Lobby() {
 	const [countdownStarted, setCountdownStarted] = useState(false);
-	const [wpms, setWPMs] = useState<WpmInfo>({});
+	const players = usePvpStore((s) => s.players);
+	const wpms = usePvpStore((s) => s.wpms);
+	const oppTypingIndexes = usePvpStore((s) => s.oppTypingIndexes);
+	const passageLength = usePvpStore((s) => s.passageLength);
 	const myUserId = authClient.useSession().data?.user.id;
 	const isHost = players[myUserId || ""]?.isHost || false;
+
 	async function handleStartCountdown() {
 		const response = await socket?.emitWithAck("pvp:start-match");
 		if (response?.success) setCountdownStarted(true);
 	}
-	useEffect(() => {
-		if (!socket) return;
-		const unregister = registerSocketHandlers(socket, {
-			"pvp:wpm-update": (data: WpmInfo) => {
-				setWPMs(data);
-			},
-		});
-		return unregister;
-	}, [socket]);
 
 	return (
 		<Card className="h-full p-2 gap-2 relative">
@@ -66,14 +54,13 @@ export function Lobby({
 								className={`text-yellow-400 size-4 transition ease-in-out shrink-0 ${player.winner ? "" : "scale-0"}`}
 							/>{" "}
 							<span className="text-right text-nowrap">
-								{/* {player.wpm ? Math.round(player.wpm) : 0} WPM */}
 								{Math.round(wpms[userId] ?? 0)} WPM
 							</span>
 							<div className="w-full max-w-2xs mx-4 bg-muted rounded h-2">
 								<div
 									className="h-full bg-accent transition-all duration-100 rounded"
 									style={{
-										width: `calc(${(player.typingIndex / maxIdx) * 100}%`,
+										width: `calc(${((oppTypingIndexes[userId] ?? player.typingIndex) / Math.max(1, passageLength)) * 100}%)`,
 										backgroundColor: player.color || "#666",
 									}}
 								/>

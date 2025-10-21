@@ -20,7 +20,7 @@ export default function JoinPage() {
 			}
 			const matchCode = ref.current?.value.trim();
 			router.push(`/pvp/${matchCode}`);
-		} catch (err) {
+		} catch (_err) {
 			setLoading(false);
 		}
 	}

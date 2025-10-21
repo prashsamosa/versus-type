@@ -1,6 +1,5 @@
 "use client";
 
-import type { LobbyInfo } from "@versus-type/shared/index";
 import { useEffect, useRef, useState } from "react";
 import Cursor from "@/app/_passage/Cursor";
 import { useCursorPosition } from "@/app/_passage/hooks/useCursorPosition";
@@ -10,29 +9,22 @@ import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
 import { useOppCursorPositions } from "./hooks/useOppCursorPositions";
 import { usePvpTypingState } from "./hooks/usePvpTypingState";
+import { usePvpStore } from "./store";
 
 export default function Passage({
 	words,
 	disabled,
-	players,
-	initialIndex,
 }: {
 	words: string[];
 	disabled?: boolean;
-	players: LobbyInfo;
-	initialIndex: number;
 }) {
-	useEffect(() => {
-		if (!socket) return;
-		const unregister = registerSocketHandlers(socket, {
-			"pvp:progress-update": (data) => {
-				setOppIndexes((prev) => ({ ...prev, [data.userId]: data.typingIndex }));
-			},
-		});
-		return unregister;
-	}, [socket]);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const charRefs = useRef<HTMLSpanElement[]>([]);
+
+	const players = usePvpStore((s) => s.players);
+	const oppTypingIndexes = usePvpStore((s) => s.oppTypingIndexes);
+	const updateOppTypingIndex = usePvpStore((s) => s.updateOppTypingIndex);
+	const initialIndex = usePvpStore((s) => s.initialIndex);
 
 	const { typedText, finished, handleInputChange, shakeWordIndex, incorrect } =
 		usePvpTypingState(words, initialIndex);
@@ -47,19 +39,31 @@ export default function Passage({
 		charRefs,
 		manualScrollOffset,
 	);
+
 	const [focused, setFocused] = useState(false);
-	const [oppIndexes, setOppIndexes] = useState<Record<string, number>>({});
+
 	const { oppCursorPoses } = useOppCursorPositions(
-		oppIndexes,
+		oppTypingIndexes,
 		containerRef,
 		charRefs,
 		scrollOffset,
 		manualScrollOffset,
 	);
+
 	const userId = authClient.useSession()?.data?.user?.id;
 	const color = players[userId || ""]?.color || "black";
 
 	const hiddenInputRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		if (!socket) return;
+		const unregister = registerSocketHandlers(socket, {
+			"pvp:progress-update": (data) => {
+				updateOppTypingIndex(data.userId, data.typingIndex);
+			},
+		});
+		return unregister;
+	}, [updateOppTypingIndex]);
 
 	useEffect(() => {
 		if (!disabled) {
@@ -94,7 +98,6 @@ export default function Passage({
 			className={
 				"max-w-3xl min-h-[13rem] overflow-hidden mx-auto transition mt-20 px-4 py-10 bg-card/50 rounded-md relative cursor-text " +
 				(disabled ? "opacity-80" : "")
-				// +  (incorrect ? " shadow-destructive/10 shadow-xl" : "")
 			}
 			onClick={() => {
 				hiddenInputRef.current?.focus();

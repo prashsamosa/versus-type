@@ -1,9 +1,9 @@
-import type { LobbyInfo } from "@versus-type/shared/index";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { disconnectSocket, setupSocketAndJoin, socket } from "@/socket";
+import { usePvpStore } from "../store";
 
 export const DISCONNECT_LATENCY = 6969;
 
@@ -12,9 +12,6 @@ export function usePvpSession() {
 	const [loading, setLoading] = useState(true);
 	const [socketError, setSocketError] = useState<string | null>(null);
 	const [latency, setLatency] = useState<number | null>(null);
-	const [players, setPlayers] = useState<LobbyInfo>({});
-	const [gameStarted, setGameStarted] = useState(false);
-	const [initialIndex, setInitialIndex] = useState(0);
 	const [username, setUsername] = useState(() => {
 		if (typeof window !== "undefined") {
 			return localStorage.getItem("anonymousUsername") || "";
@@ -23,6 +20,13 @@ export function usePvpSession() {
 	});
 	const { data: session, isPending } = authClient.useSession();
 	const [hasSignedIn, setHasSignedIn] = useState(false);
+
+	const setPlayers = usePvpStore((s) => s.setPlayers);
+	const setGameStarted = usePvpStore((s) => s.setGameStarted);
+	const setInitialIndex = usePvpStore((s) => s.setInitialIndex);
+	const players = usePvpStore((s) => s.players);
+	const gameStarted = usePvpStore((s) => s.gameStarted);
+	const initialIndex = usePvpStore((s) => s.initialIndex);
 
 	useEffect(() => {
 		console.log("Session changed:", session);

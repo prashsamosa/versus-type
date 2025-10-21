@@ -1,6 +1,5 @@
 "use client";
 
-import type { LobbyInfo } from "@versus-type/shared/index";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,19 +7,20 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
 import { useChat } from "./hooks/useChat";
+import { usePvpStore } from "./store";
 
-export default function Chat({ players }: { players: LobbyInfo }) {
+export default function Chat() {
 	const { messages, sendMessage } = useChat();
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const shouldAutoScroll = useRef(true);
 	const userId = authClient.useSession().data?.user.id;
+	const players = usePvpStore((s) => s.players);
 
 	function handleScroll() {
 		if (!scrollContainerRef.current) return;
 		const { scrollTop, scrollHeight, clientHeight } =
 			scrollContainerRef.current;
-		// enable auto-scroll within 50px of the bottom
 		shouldAutoScroll.current = scrollTop + clientHeight >= scrollHeight - 50;
 	}
 
