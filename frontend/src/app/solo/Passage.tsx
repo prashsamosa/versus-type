@@ -31,10 +31,15 @@ export default function Passage({
 		handleKeyDown,
 	} = useTypingTest(config, initialWords);
 
+	const [manualScrollOffset, setManualScrollOffset] = useState<number | null>(
+		null,
+	);
+
 	const { scrollOffset, cursorPos } = useCursorPosition(
 		typedText.length,
 		containerRef,
 		charRefs,
+		manualScrollOffset,
 	);
 	const [focused, setFocused] = useState(false);
 
@@ -44,10 +49,31 @@ export default function Passage({
 		hiddenInputRef.current?.focus();
 	}, []);
 
+	useEffect(() => {
+		const container = containerRef.current;
+		if (!container) return;
+
+		function handleWheel(e: WheelEvent) {
+			e.preventDefault();
+			setManualScrollOffset((prev) => {
+				prev = prev === null ? scrollOffset : prev;
+				const maxScrollOffset = Math.max(
+					0,
+					(container?.scrollHeight ?? 0) - (container?.clientHeight ?? 0),
+				);
+				return Math.min(Math.max(0, prev + e.deltaY * 0.2), maxScrollOffset);
+			});
+		}
+
+		container.addEventListener("wheel", handleWheel, { passive: false });
+		return () => container.removeEventListener("wheel", handleWheel);
+	}, [scrollOffset]);
+
 	function handleRestart() {
 		restartTest();
 		if (charRefs.current) charRefs.current.length = 0;
 		setFocused(false);
+		setManualScrollOffset(null);
 		setTimeout(() => {
 			hiddenInputRef.current?.focus();
 		}, 0);
@@ -69,15 +95,41 @@ export default function Passage({
 	return (
 		<div
 			ref={containerRef}
-			className="max-w-3xl h-64 overflow-hidden mx-auto mt-20 p-4 bg-card rounded-md relative cursor-text"
+			className="max-w-3xl min-h-[13rem] overflow-hidden mx-auto transition mt-20 px-4 py-10 bg-card/50 rounded-md relative cursor-text"
 			onClick={() => {
 				hiddenInputRef.current?.focus();
 			}}
 		>
 			<div
+				className="absolute top-0 left-0 w-full h-14 z-10 select-none"
+				style={{
+					background: `
+      linear-gradient(
+        to bottom,
+        var(--background) 20%,
+        rgba(var(--background-rgb), 0.9) 30%,
+        rgba(var(--background-rgb), 0.6) 45%,
+        rgba(var(--background-rgb), 0.3) 70%,
+        rgba(var(--background-rgb), 0.1) 60%,
+        transparent 100%
+      )
+    `,
+				}}
+			/>
+			<div
 				className="absolute bottom-0 left-0 w-full h-14 z-10 select-none"
 				style={{
-					background: "linear-gradient(to bottom, transparent, var(--card))",
+					background: `
+      linear-gradient(
+        to top,
+        var(--background) 20%,
+        rgba(var(--background-rgb), 0.9) 30%,
+        rgba(var(--background-rgb), 0.6) 45%,
+        rgba(var(--background-rgb), 0.3) 70%,
+        rgba(var(--background-rgb), 0.1) 60%,
+        transparent 100%
+      )
+    `,
 				}}
 			/>
 			<input
@@ -85,7 +137,10 @@ export default function Passage({
 				type="text"
 				className="absolute opacity-0 -z-10"
 				value={typedText}
-				onChange={handleInputChange}
+				onChange={(e) => {
+					setManualScrollOffset(null);
+					handleInputChange(e);
+				}}
 				onKeyDown={handleKeyDown}
 				onFocus={() => setFocused(true)}
 				onBlur={() => setFocused(false)}
@@ -94,7 +149,9 @@ export default function Passage({
 				words={words}
 				typedText={typedText}
 				charRefs={charRefs}
-				scrollOffset={scrollOffset}
+				scrollOffset={
+					manualScrollOffset === null ? scrollOffset : manualScrollOffset
+				}
 			/>
 			<Cursor x={cursorPos.x} y={cursorPos.y} disabled={!focused} />
 		</div>
