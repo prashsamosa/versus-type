@@ -34,6 +34,7 @@ type PlayerState = {
 	timeTyped?: number;
 	ordinal?: number;
 	disconnected?: boolean;
+	incorrectIdx: number | null;
 };
 
 type MatchState = {
@@ -73,6 +74,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 						spectator: false,
 						color: getRandomColor(matchCode),
 						accState: resetAccuracy(),
+						incorrectIdx: null,
 					},
 				},
 			};
@@ -255,9 +257,8 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			key,
 			passage[player.typingIndex],
 		);
-		if (passage[player.typingIndex] === key) {
-			player.typingIndex++;
-			if (player.typingIndex >= passage.length) {
+		if (player.incorrectIdx === null && passage[player.typingIndex] === key) {
+			if (player.typingIndex >= passage.length - 1) {
 				player.finished = true;
 				player.wpm = calcWpm(player.typingIndex, player.startedAt);
 				player.accuracy = getAccuracy(player.accState);
@@ -279,9 +280,12 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			}
 			io.to(matchCode).emit("pvp:progress-update", {
 				userId: socket.data.userId ?? socket.id,
-				typingIndex: player.typingIndex,
+				typingIndex: player.typingIndex + 1,
 			});
+		} else if (player.incorrectIdx === null) {
+			player.incorrectIdx = player.typingIndex;
 		}
+		player.typingIndex++;
 	});
 
 	socket.on("pvp:backspace", (amount: number) => {
@@ -292,18 +296,26 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
-		const pstate = matchStates[matchCode].players[socket.data.userId];
-		if (pstate.spectator) {
+		const player = matchStates[matchCode].players[socket.data.userId];
+		if (player.spectator) {
 			console.warn(
 				`spectator ${socket.data.userId} tryna send backspace during match lmao`,
 			);
 			return;
 		}
-		pstate.typingIndex = Math.max(0, pstate.typingIndex - amount);
-		io.to(matchCode).emit("pvp:progress-update", {
-			userId: socket.data.userId || socket.id,
-			typingIndex: pstate.typingIndex,
-		});
+		player.typingIndex = Math.max(0, player.typingIndex - amount);
+		if (
+			player.incorrectIdx !== null &&
+			player.typingIndex <= player.incorrectIdx
+		) {
+			player.incorrectIdx = null;
+		}
+		if (player.incorrectIdx == null) {
+			io.to(matchCode).emit("pvp:progress-update", {
+				userId: socket.data.userId || socket.id,
+				typingIndex: player.typingIndex,
+			});
+		}
 	});
 
 	socket.on("pvp:get-passage", (callback) => {
@@ -390,6 +402,7 @@ function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
 					spectator: matchStates[matchCode].isStarted ?? false,
 					color: getRandomColor(matchCode),
 					accState: resetAccuracy(),
+					incorrectIdx: null,
 				};
 			} else {
 				// things that can update

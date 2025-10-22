@@ -92,7 +92,8 @@ export function Lobby() {
 										variant="outline"
 										className="text-right text-nowrap text-md"
 									>
-										{player.accuracy}% <span className="opacity-50">Acc</span>
+										{Math.round(player.accuracy ?? 0)}%{" "}
+										<span className="opacity-50">Acc</span>
 									</Badge>
 								) : null}
 							</div>

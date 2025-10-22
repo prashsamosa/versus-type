@@ -28,26 +28,6 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 
 		const prev = prevInputRef.current;
 		const idx = prev.length;
-		if (val.length === prev.length + 1 && val.startsWith(prev)) {
-			if (idx >= passageChars.length) return;
-			const typed = val[idx];
-			const expected = passageChars[idx];
-			if (typed !== expected) {
-				setIncorrect(true);
-				incorrectCurr = true;
-			} else {
-				if (!incorrect) sendKeystroke(typed);
-			}
-		} else if (val.length < prev.length && prev.startsWith(val)) {
-			if (incorrect && val === passageChars.slice(0, val.length)) {
-				setIncorrect(false);
-				incorrectCurr = false;
-			}
-			if (!incorrect) sendBackspace(prev.length - val.length);
-		} else {
-			// paste or other edits
-			return;
-		}
 
 		const prevWordIdx = getWordIndex(prev.length, words);
 		const newWordIdx = getWordIndex(val.length, words);
@@ -62,6 +42,26 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 					return;
 				}
 			}
+		}
+
+		if (val.length === prev.length + 1 && val.startsWith(prev)) {
+			if (idx >= passageChars.length) return;
+			const typed = val[idx];
+			const expected = passageChars[idx];
+			if (typed !== expected) {
+				setIncorrect(true);
+				incorrectCurr = true;
+			}
+			sendKeystroke(typed);
+		} else if (val.length < prev.length && prev.startsWith(val)) {
+			if (incorrect && val === passageChars.slice(0, val.length)) {
+				setIncorrect(false);
+				incorrectCurr = false;
+			}
+			sendBackspace(prev.length - val.length);
+		} else {
+			// paste or other edits
+			return;
 		}
 
 		prevInputRef.current = val;
