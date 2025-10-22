@@ -4,7 +4,11 @@ import type {
 } from "@versus-type/shared";
 import type { Socket } from "socket.io-client";
 
-export type EventHandlers = Partial<ServerToClientEvents>;
+export type EventHandlers =
+	| Partial<ServerToClientEvents>
+	| {
+			disconnect: (reason: string) => void;
+	  };
 
 export function registerSocketHandlers(
 	socket: Socket<ServerToClientEvents, ClientToServerEvents>,

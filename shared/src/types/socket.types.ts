@@ -19,7 +19,7 @@ export type PlayerInfo = {
 	finished?: boolean;
 	typingIndex: number;
 	wpm?: number;
-	// accuracy?: number;
+	accuracy?: number;
 };
 
 export type LobbyInfo = {

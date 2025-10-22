@@ -57,7 +57,7 @@ export default function FinishedStats({
 		const testStats: TestStats = {
 			wpm: stats.wpm,
 			rawWpm: stats.rawWpm,
-			accuracy: acc.acc,
+			accuracy: acc,
 			correctChars: stats.correctChars,
 			errorChars: stats.incorrectChars,
 			time: stats.time,
@@ -110,7 +110,7 @@ export default function FinishedStats({
 					</div>
 					<div>
 						<div className="text-sm text-muted-foreground">Acc</div>
-						<div className="text-3xl font-bold">{Math.round(acc.acc)}%</div>
+						<div className="text-3xl font-bold">{Math.round(acc)}%</div>
 					</div>
 					<div>
 						<div className="text-sm text-muted-foreground">Correct</div>

@@ -80,19 +80,33 @@ export function Lobby() {
 												: "th"}
 									</Badge>
 								) : null}
-								<span className="text-right text-nowrap">
-									{Math.round(wpms[userId] ?? 0)} WPM
-								</span>
+								<Badge
+									variant="outline"
+									className="text-right text-nowrap text-md"
+								>
+									{Math.round(wpms[userId] ?? 0)}{" "}
+									<span className="opacity-50">WPM</span>
+								</Badge>
+								{player.finished ? (
+									<Badge
+										variant="outline"
+										className="text-right text-nowrap text-md"
+									>
+										{player.accuracy}% <span className="opacity-50">Acc</span>
+									</Badge>
+								) : null}
 							</div>
-							<div className="md:w-3xs w-[5rem] mx-4 bg-muted rounded h-2 overflow-hidden">
-								<div
-									className="h-full bg-accent transition-all duration-100 rounded"
-									style={{
-										width: `calc(${((oppTypingIndexes[userId] ?? player.typingIndex) / Math.max(1, passageLength)) * 100}%)`,
-										backgroundColor: player.color || "#666",
-									}}
-								/>
-							</div>
+							{player.finished ? null : (
+								<div className="md:w-3xs w-[5rem] mx-4 bg-muted rounded h-2 overflow-hidden ">
+									<div
+										className="h-full bg-accent transition-all duration-100 rounded"
+										style={{
+											width: `calc(${((oppTypingIndexes[userId] ?? player.typingIndex) / Math.max(1, passageLength)) * 100}%)`,
+											backgroundColor: player.color || "#666",
+										}}
+									/>
+								</div>
+							)}
 						</div>
 					</div>
 				))}

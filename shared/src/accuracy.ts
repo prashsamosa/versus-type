@@ -20,14 +20,10 @@ export function recordKey(
 	return newState;
 }
 
-export function getAccuracy(state: AccuracyState): {
-	correct: number;
-	incorrect: number;
-	acc: number;
-} {
+export function getAccuracy(state: AccuracyState) {
 	const den = state.correct + state.incorrect;
 	const acc = den > 0 ? (state.correct / den) * 100 : 100;
-	return { correct: state.correct, incorrect: state.incorrect, acc };
+	return acc;
 }
 
 export function getErrorCount(state: AccuracyState): number {

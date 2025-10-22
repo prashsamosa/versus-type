@@ -237,10 +237,10 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
-		const pstate = matchStates[matchCode].players[socket.data.userId];
-		if (pstate.finished) return;
+		const player = matchStates[matchCode].players[socket.data.userId];
+		if (player.finished) return;
 
-		if (pstate.spectator) {
+		if (player.spectator) {
 			console.warn(
 				`spectator ${socket.data.userId} tryna send key-press during match lmao`,
 			);
@@ -248,28 +248,29 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		}
 		const passage = matchStates[matchCode].passage;
 
-		if (!pstate.startedAt) pstate.startedAt = Date.now();
+		if (!player.startedAt) player.startedAt = Date.now();
 
-		pstate.accState = recordKey(
-			pstate.accState || resetAccuracy(),
+		player.accState = recordKey(
+			player.accState ?? resetAccuracy(),
 			key,
-			passage[pstate.typingIndex],
+			passage[player.typingIndex],
 		);
-		if (passage[pstate.typingIndex] === key) {
-			pstate.typingIndex++;
-			if (pstate.typingIndex >= passage.length) {
-				pstate.finished = true;
-				pstate.wpm = calcWpm(pstate.typingIndex, pstate.startedAt);
+		if (passage[player.typingIndex] === key) {
+			player.typingIndex++;
+			if (player.typingIndex >= passage.length) {
+				player.finished = true;
+				player.wpm = calcWpm(player.typingIndex, player.startedAt);
+				player.accuracy = getAccuracy(player.accState);
 				sendWpmUpdate(io, matchCode);
-				pstate.timeTyped = Date.now() - pstate.startedAt;
+				player.timeTyped = Date.now() - player.startedAt;
 
 				const maxOrdinal = Object.values(matchStates[matchCode].players).reduce(
 					(max, pl) => (pl.ordinal && pl.ordinal > max ? pl.ordinal : max),
 					0,
 				);
-				pstate.ordinal = maxOrdinal + 1;
+				player.ordinal = maxOrdinal + 1;
 				if (
-					pstate.ordinal === Object.keys(matchStates[matchCode].players).length
+					player.ordinal === Object.keys(matchStates[matchCode].players).length
 				) {
 					completeMatch(matchCode);
 				}
@@ -278,7 +279,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			}
 			io.to(matchCode).emit("pvp:progress-update", {
 				userId: socket.data.userId ?? socket.id,
-				typingIndex: pstate.typingIndex,
+				typingIndex: player.typingIndex,
 			});
 		}
 	});
@@ -425,7 +426,7 @@ async function updatePlayersInfoInDB(matchCode: string) {
 		const player = matchState.players[userId];
 		if (!player.finished) continue;
 		const isWinner = player.ordinal === 1 ? 1 : 0;
-		const accuracy = getAccuracy(player.accState || resetAccuracy()).acc;
+		const accuracy = player.accuracy ?? 0;
 		await db
 			.update(matchParticipants)
 			.set({
@@ -463,6 +464,7 @@ function toPlayersInfo(players: { [userId: string]: PlayerState }) {
 			username: p.username,
 			typingIndex: p.typingIndex,
 			wpm: p.wpm,
+			accuracy: p.accuracy,
 			spectator: p.spectator,
 			finished: p.finished,
 			ordinal: p.ordinal,

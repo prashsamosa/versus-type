@@ -1,5 +1,6 @@
 "use client";
 
+import { MessageCircleMore } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -49,7 +50,8 @@ export default function Chat() {
 				onScroll={handleScroll}
 			>
 				{messages.length === 0 ? (
-					<div className="flex items-center justify-center h-full text-muted-foreground text-xl">
+					<div className="flex flex-col gap-2 items-center justify-center h-full text-muted-foreground text-xl">
+						<MessageCircleMore />
 						No messages yet
 					</div>
 				) : (

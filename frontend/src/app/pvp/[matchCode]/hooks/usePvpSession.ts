@@ -5,13 +5,12 @@ import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { disconnectSocket, setupSocketAndJoin, socket } from "@/socket";
 import { usePvpStore } from "../store";
 
-export const DISCONNECT_LATENCY = 6969;
-
 export function usePvpSession() {
 	const { matchCode } = useParams<{ matchCode: string }>();
 	const [loading, setLoading] = useState(true);
 	const [socketError, setSocketError] = useState<string | null>(null);
 	const [latency, setLatency] = useState<number | null>(null);
+	const [disconnected, setDisconnected] = useState(false);
 	const [username, setUsername] = useState(() => {
 		if (typeof window !== "undefined") {
 			return localStorage.getItem("anonymousUsername") || "";
@@ -72,6 +71,9 @@ export function usePvpSession() {
 			"pvp:wpm-update": (data) => {
 				setWpms(data);
 			},
+			disconnect: () => {
+				setDisconnected(true);
+			},
 		});
 
 		const timeoutId = setInterval(async () => {
@@ -80,9 +82,7 @@ export function usePvpSession() {
 				await socket
 					.timeout(4000)
 					.emitWithAck("ping")
-					.catch(() => {
-						setLatency(DISCONNECT_LATENCY);
-					});
+					.catch(() => {});
 				const latency = Date.now() - start;
 				setLatency(latency);
 			}
@@ -107,5 +107,6 @@ export function usePvpSession() {
 		gameStarted,
 		setGameStarted,
 		initialIndex,
+		disconnected,
 	};
 }

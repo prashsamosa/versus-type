@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Chat from "./Chat";
-import { DISCONNECT_LATENCY, usePvpSession } from "./hooks/usePvpSession";
+import { usePvpSession } from "./hooks/usePvpSession";
 import { Lobby } from "./Lobby";
 import { PvpGame } from "./PvpGame";
 import SocketErrorPage from "./SocketErrorPage";
@@ -19,6 +19,7 @@ export default function PvpPage() {
 		isPending,
 		matchCode,
 		latency,
+		disconnected,
 	} = usePvpSession();
 
 	const [copied, setCopied] = useState(false);
@@ -55,13 +56,22 @@ export default function PvpPage() {
 
 	return (
 		<div className="flex flex-col items-center justify-start min-h-screen">
-			<div className="px-2 flex justify-between items-center w-full mb-4">
+			<div className="p-2 flex justify-between items-center w-full mb-4">
 				<CodeCopy
 					matchCode={matchCode}
 					copied={copied}
 					copyMatchLink={copyMatchLink}
 				/>
-				<LatencyStatus latency={latency} />
+				{disconnected ? (
+					<Badge
+						variant="outline"
+						className="text-destructive text-sm shadow-destructive/15 shadow-md"
+					>
+						<WifiOff /> Disconnected
+					</Badge>
+				) : (
+					<LatencyStatus latency={latency} />
+				)}
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
 				<div className="p-16">
@@ -116,13 +126,6 @@ function CodeCopy({
 
 function LatencyStatus({ latency }: { latency: number | null }) {
 	if (!latency) return null;
-	if (latency === DISCONNECT_LATENCY) {
-		return (
-			<Badge variant="outline">
-				<WifiOff className="size-4 text-destructive" />
-			</Badge>
-		);
-	}
 	if (latency < 300) {
 		return (
 			<Badge variant="outline">
