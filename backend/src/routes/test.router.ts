@@ -32,7 +32,7 @@ testRouter.post("/", async (req, res) => {
 				avgAccuracy: sql`(((${userStats.avgAccuracy} * ${userStats.tests}) + ${testData.accuracy}) / (${userStats.tests} + 1))`,
 				correctChars: sql`${userStats.correctChars} + ${testData.correctChars}`,
 				errorChars: sql`${userStats.errorChars} + ${testData.errorChars}`,
-				totalTimePlayed: sql`${userStats.totalTimePlayed} + ${testData.time}`,
+				totalTimePlayed: sql`${userStats.totalTimeTyped} + ${testData.time}`,
 				highestWpm: sql`CASE WHEN ${testData.wpm} > ${userStats.highestWpm} THEN ${testData.wpm} ELSE ${userStats.highestWpm} END`,
 			})
 			.where(eq(userStats.userId, session.user.id));
@@ -83,7 +83,7 @@ testRouter.delete("/", async (req, res) => {
 				tests: sql`${userStats.tests} - 1`,
 				correctChars: sql`${userStats.correctChars} - ${testData.correctChars}`,
 				errorChars: sql`${userStats.errorChars} - ${testData.errorChars}`,
-				totalTimePlayed: sql`${userStats.totalTimePlayed} - ${testData.time}`,
+				totalTimePlayed: sql`${userStats.totalTimeTyped} - ${testData.time}`,
 				avgWpm: sql`CASE WHEN ${userStats.tests} - 1 = 0 THEN 0 ELSE (((${userStats.avgWpm} * ${userStats.tests}) - ${testData.wpm}) / (${userStats.tests} - 1)) END`,
 				avgAccuracy: sql`CASE WHEN ${userStats.tests} - 1 = 0 THEN 0 ELSE (((${userStats.avgAccuracy} * ${userStats.tests}) - ${testData.accuracy}) / (${userStats.tests} - 1)) END`,
 				highestWpm: sql`CASE WHEN ${testData.wpm} = ${userStats.highestWpm} THEN (SELECT MAX(wpm) FROM tests WHERE user_id = ${session.user.id} AND id != ${testIdReceived}) ELSE ${userStats.highestWpm} END`,

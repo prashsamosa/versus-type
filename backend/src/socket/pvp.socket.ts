@@ -1,6 +1,7 @@
 import type { ioServer, ioSocket, LobbyInfo } from "@versus-type/shared";
 import {
 	type AccuracyState,
+	getAccuracy,
 	recordKey,
 	resetAccuracy,
 } from "@versus-type/shared/accuracy";
@@ -8,10 +9,10 @@ import {
 	type GeneratorConfig,
 	generateWords,
 } from "@versus-type/shared/passage-generator";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { matchInfo } from "@/routes/pvp.router";
 import { db } from "../db";
-import { matches, matchParticipants } from "../db/schema";
+import { matches, matchParticipants, userStats } from "../db/schema";
 import { emitNewMessage, sendChatHistory } from "./chat.socket";
 
 const MAX_ROOM_SIZE = 10;
@@ -22,6 +23,7 @@ type MatchStatus = "waiting" | "inProgress" | "completed" | "cancelled";
 type PlayerState = {
 	isHost?: boolean;
 	username?: string;
+	color: string;
 	typingIndex: number;
 	wpm?: number;
 	startedAt?: number;
@@ -29,7 +31,7 @@ type PlayerState = {
 	accState?: AccuracyState;
 	spectator: boolean;
 	finished?: boolean;
-	color: string;
+	timeTyped?: number;
 	ordinal?: number;
 	disconnected?: boolean;
 };
@@ -259,18 +261,18 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				pstate.finished = true;
 				pstate.wpm = calcWpm(pstate.typingIndex, pstate.startedAt);
 				sendWpmUpdate(io, matchCode);
+				pstate.timeTyped = Date.now() - pstate.startedAt;
 
-				// const anyWinner = Object.values(matchStates[matchCode].players).some(
-				// 	(pl) => pl.winner,
-				// );
-				// if (!anyWinner) pstate.winner = true;
-
-				// get max ordinal
 				const maxOrdinal = Object.values(matchStates[matchCode].players).reduce(
 					(max, pl) => (pl.ordinal && pl.ordinal > max ? pl.ordinal : max),
 					0,
 				);
 				pstate.ordinal = maxOrdinal + 1;
+				if (
+					pstate.ordinal === Object.keys(matchStates[matchCode].players).length
+				) {
+					completeMatch(matchCode);
+				}
 
 				updateLobby(io, matchCode);
 			}
@@ -409,6 +411,47 @@ function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
 		"pvp:lobby-update",
 		toPlayersInfo(matchStates[matchCode].players),
 	);
+}
+
+async function completeMatch(matchCode: string) {
+	await updateMatchStatus(matchCode, "completed");
+	await updatePlayersInfoInDB(matchCode);
+	console.log(`Match ${matchCode} completed`);
+}
+
+async function updatePlayersInfoInDB(matchCode: string) {
+	const matchState = matchStates[matchCode];
+	for (const userId in matchState.players) {
+		const player = matchState.players[userId];
+		if (!player.finished) continue;
+		const isWinner = player.ordinal === 1 ? 1 : 0;
+		const accuracy = getAccuracy(player.accState || resetAccuracy()).acc;
+		await db
+			.update(matchParticipants)
+			.set({
+				isWinner: isWinner === 1,
+				accuracy: accuracy,
+				wpm: player.wpm || 0,
+			})
+			.where(eq(matchParticipants.userId, userId))
+			.catch((err) => {
+				console.error("Error updating match participant stats in DB:", err);
+			});
+
+		await db
+			.update(userStats)
+			.set({
+				pvpMatches: sql`${userStats.pvpMatches} + 1`,
+				wins: sql`${userStats.wins} + ${isWinner ? 1 : 0}`,
+				avgWpmPvp: sql`(((${userStats.avgWpmPvp} * ${userStats.pvpMatches}) + ${player.wpm || 0}) / (${userStats.pvpMatches} + 1))`,
+				avgAccuracyPvp: sql`(((${userStats.avgAccuracyPvp} * ${userStats.pvpMatches}) + ${accuracy}) / (${userStats.pvpMatches} + 1))`,
+				highestWpm: sql`CASE WHEN ${player.wpm || 0} > ${userStats.highestWpm} THEN ${player.wpm || 0} ELSE ${userStats.highestWpm} END`,
+			})
+			.where(eq(userStats.userId, userId))
+			.catch((err) => {
+				console.error("Error updating user stats in DB:", err);
+			});
+	}
 }
 
 function toPlayersInfo(players: { [userId: string]: PlayerState }) {

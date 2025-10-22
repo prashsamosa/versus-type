@@ -112,9 +112,7 @@ export const userStats = sqliteTable(
 		highestWpm: real().notNull().default(0),
 		avgWpm: real().notNull().default(0),
 		avgAccuracy: real().notNull().default(0),
-		correctChars: integer().notNull().default(0),
-		errorChars: integer().notNull().default(0),
-		totalTimePlayed: integer().notNull().default(0),
+		totalTimeTyped: integer().notNull().default(0),
 		updatedAt: integer("updated_at", { mode: "timestamp" })
 			.notNull()
 			.$onUpdateFn(() => new Date()),

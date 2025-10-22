@@ -13,6 +13,7 @@ export function Lobby() {
 	const wpms = usePvpStore((s) => s.wpms);
 	const oppTypingIndexes = usePvpStore((s) => s.oppTypingIndexes);
 	const passageLength = usePvpStore((s) => s.passageLength);
+	const gameStarted = usePvpStore((s) => s.gameStarted);
 	const myUserId = authClient.useSession().data?.user.id;
 	const isHost = players[myUserId || ""]?.isHost || false;
 
@@ -26,7 +27,7 @@ export function Lobby() {
 			<div className="border-b p-2 pb-3 flex justify-between items-center">
 				Lobby <Badge>{Object.keys(players).length} players</Badge>
 			</div>
-			<div className="flex flex-col p-2 gap-2 overflow-y-auto">
+			<div className="flex flex-col p-2 gap-2 overflow-y-auto overflow-x-hidden">
 				{Object.entries(players).map(([userId, player]) => (
 					<div key={userId} className="flex justify-between items-center gap-1">
 						<div className="flex items-center gap-2 flex-1">
@@ -49,7 +50,12 @@ export function Lobby() {
 								) : null}
 							</div>
 						</div>
-						<div className="flex items-center justify-end flex-2">
+						<div
+							className={
+								"flex items-center justify-end flex-2 transition duration-300 ease-in-out " +
+								(gameStarted ? "" : "translate-x-full")
+							}
+						>
 							<div className="flex items-center gap-2 min-w-[80px] justify-end">
 								<Crown
 									className={`text-yellow-400 size-4 transition ease-in-out shrink-0 ${player.ordinal === 1 ? "" : "scale-0"}`}
