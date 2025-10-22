@@ -11,7 +11,7 @@ export type PlayerInfo = {
 	isHost?: boolean;
 	username?: string;
 	spectator: boolean;
-	winner?: boolean;
+	ordinal?: number;
 	disconnected?: boolean;
 	color: string;
 

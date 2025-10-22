@@ -30,7 +30,7 @@ type PlayerState = {
 	spectator: boolean;
 	finished?: boolean;
 	color: string;
-	winner?: boolean;
+	ordinal?: number;
 	disconnected?: boolean;
 };
 
@@ -260,10 +260,17 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				pstate.wpm = calcWpm(pstate.typingIndex, pstate.startedAt);
 				sendWpmUpdate(io, matchCode);
 
-				const anyWinner = Object.values(matchStates[matchCode].players).some(
-					(pl) => pl.winner,
+				// const anyWinner = Object.values(matchStates[matchCode].players).some(
+				// 	(pl) => pl.winner,
+				// );
+				// if (!anyWinner) pstate.winner = true;
+
+				// get max ordinal
+				const maxOrdinal = Object.values(matchStates[matchCode].players).reduce(
+					(max, pl) => (pl.ordinal && pl.ordinal > max ? pl.ordinal : max),
+					0,
 				);
-				if (!anyWinner) pstate.winner = true;
+				pstate.ordinal = maxOrdinal + 1;
 
 				updateLobby(io, matchCode);
 			}
@@ -415,7 +422,7 @@ function toPlayersInfo(players: { [userId: string]: PlayerState }) {
 			wpm: p.wpm,
 			spectator: p.spectator,
 			finished: p.finished,
-			winner: p.winner,
+			ordinal: p.ordinal,
 			disconnected: p.disconnected,
 			color: p.color,
 		};

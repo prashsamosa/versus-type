@@ -24,20 +24,24 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 	function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
 		if (finished) return;
 		const val = e.target.value;
+		let incorrectCurr = incorrect; // to avoid stale incorrect state, for finished check
 
 		const prev = prevInputRef.current;
 		const idx = prev.length;
 		if (val.length === prev.length + 1 && val.startsWith(prev)) {
+			if (idx >= passageChars.length) return;
 			const typed = val[idx];
 			const expected = passageChars[idx];
 			if (typed !== expected) {
 				setIncorrect(true);
+				incorrectCurr = true;
 			} else {
 				if (!incorrect) sendKeystroke(typed);
 			}
 		} else if (val.length < prev.length && prev.startsWith(val)) {
 			if (incorrect && val === passageChars.slice(0, val.length)) {
 				setIncorrect(false);
+				incorrectCurr = false;
 			}
 			if (!incorrect) sendBackspace(prev.length - val.length);
 		} else {
@@ -66,7 +70,7 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 
 		if (startRef.current === null) startRef.current = performance.now();
 
-		if (val.length >= passageChars.length && !finished) {
+		if (val.length >= passageChars.length && !finished && !incorrectCurr) {
 			endRef.current = performance.now();
 			setFinished(true);
 		}

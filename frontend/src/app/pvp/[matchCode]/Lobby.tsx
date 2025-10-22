@@ -16,8 +16,6 @@ export function Lobby() {
 	const myUserId = authClient.useSession().data?.user.id;
 	const isHost = players[myUserId || ""]?.isHost || false;
 
-	console.log("Current WPMs in store:", wpms);
-
 	async function handleStartCountdown() {
 		const response = await socket?.emitWithAck("pvp:start-match");
 		if (response?.success) setCountdownStarted(true);
@@ -51,14 +49,36 @@ export function Lobby() {
 								) : null}
 							</div>
 						</div>
-						<div className="flex items-center gap-2 justify-end flex-2">
-							<Crown
-								className={`text-yellow-400 size-4 transition ease-in-out shrink-0 ${player.winner ? "" : "scale-0"}`}
-							/>{" "}
-							<span className="text-right text-nowrap">
-								{Math.round(wpms[userId] ?? 0)} WPM
-							</span>
-							<div className="w-full max-w-2xs mx-4 bg-muted rounded h-2">
+						<div className="flex items-center justify-end flex-2">
+							<div className="flex items-center gap-2 min-w-[80px] justify-end">
+								<Crown
+									className={`text-yellow-400 size-4 transition ease-in-out shrink-0 ${player.ordinal === 1 ? "" : "scale-0"}`}
+								/>{" "}
+								{player.ordinal && player.ordinal > 1 ? (
+									<Badge
+										variant="secondary"
+										className={
+											"mt-0.5 font-bold " +
+											(player.ordinal === 2
+												? "bg-gray-400 text-background"
+												: player.ordinal === 3
+													? "bg-orange-400/70 text-background"
+													: "")
+										}
+									>
+										{player.ordinal}
+										{player.ordinal === 2
+											? "nd"
+											: player.ordinal === 3
+												? "rd"
+												: "th"}
+									</Badge>
+								) : null}
+								<span className="text-right text-nowrap">
+									{Math.round(wpms[userId] ?? 0)} WPM
+								</span>
+							</div>
+							<div className="md:w-3xs w-[5rem] mx-4 bg-muted rounded h-2 overflow-hidden">
 								<div
 									className="h-full bg-accent transition-all duration-100 rounded"
 									style={{

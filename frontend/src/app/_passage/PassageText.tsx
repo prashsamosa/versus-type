@@ -103,7 +103,7 @@ export default function PassageText({
 					if (el && charRefs.current)
 						charRefs.current[words.join(" ").length] = el;
 				}}
-				className="inline-block w-px opacity-0"
+				className="w-px"
 			/>
 		</div>
 	);
