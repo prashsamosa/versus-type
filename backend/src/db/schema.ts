@@ -123,57 +123,67 @@ export const userStats = sqliteTable(
 	],
 );
 
-export const matches = sqliteTable(
-	"matches",
+export const rooms = sqliteTable(
+	"rooms",
 	{
 		id: text()
 			.primaryKey()
-			.notNull()
 			.$defaultFn(() => randomUUID()),
+		roomCode: text().unique().notNull(),
+		hostId: text().references(() => user.id),
 		private: integer({ mode: "boolean" }).notNull().default(false),
 		status: text()
-			.$type<"waiting" | "inProgress" | "completed" | "cancelled">()
+			.$type<"waiting" | "inProgress" | "completed">()
 			.notNull()
 			.default("waiting"),
-		matchCode: text().unique(),
+		// settings: text({ mode: "json" }),
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
 			.$defaultFn(() => new Date()),
 	},
 	(table) => [
-		// index("idx_matchType").on(table.matchType),
-		check(
-			"chk_status",
-			sql`${table.status} IN ('waiting', 'inProgress', 'completed', 'cancelled')`,
-		),
-		index("idx_matchCode").on(table.matchCode),
-		index("idx_status").on(table.status), // for matchmaking faster
+		index("idx_roomCode").on(table.roomCode),
+		index("idx_room_status").on(table.status),
 	],
 );
 
-export const matchParticipants = sqliteTable(
-	"matchParticipants",
+export const matches = sqliteTable(
+	"matches",
 	{
 		id: text()
 			.primaryKey()
-			.notNull()
 			.$defaultFn(() => randomUUID()),
-		matchId: text()
+
+		roomId: text()
 			.notNull()
-			.references(() => matches.id, { onDelete: "cascade" }),
-		userId: text()
+			.references(() => rooms.id, { onDelete: "cascade" }),
+
+		passage: text().notNull(),
+		status: text()
+			.$type<"inProgress" | "completed" | "cancelled">()
 			.notNull()
-			.references(() => user.id, { onDelete: "cascade" }),
-		wpm: real(),
-		accuracy: real(),
-		isWinner: integer({ mode: "boolean" }).notNull(),
-		disconnected: integer({ mode: "boolean" }).notNull(),
+			.default("inProgress"),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.$defaultFn(() => new Date()),
 	},
-	(table) => [
-		index("idx_matchId").on(table.matchId),
-		index("idx_userId").on(table.userId),
-	],
+	(table) => [index("idx_match_roomId").on(table.roomId)],
 );
+
+export const matchParticipants = sqliteTable("matchParticipants", {
+	id: text()
+		.primaryKey()
+		.$defaultFn(() => randomUUID()),
+	matchId: text()
+		.notNull()
+		.references(() => matches.id, { onDelete: "cascade" }),
+	userId: text()
+		.notNull()
+		.references(() => user.id),
+	wpm: real(),
+	accuracy: real(),
+	ordinal: integer(),
+});
 
 export const tests = sqliteTable(
 	"tests",
