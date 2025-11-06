@@ -32,6 +32,10 @@
 			},
 			"a11y": "off",
 			"recommended": true
+		},
+		"domains": {
+			"react": "recommended",
+			"next": "recommended"
 		}
 	},
 	"javascript": {
