@@ -2,19 +2,17 @@ import { eq } from "drizzle-orm";
 import { Router } from "express";
 import { customAlphabet } from "nanoid";
 import { db } from "../db";
-import { matches } from "../db/schema";
+import { rooms } from "../db/schema";
 
 const MATCH_CODE_LENGTH = 6;
 const alphabet =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 const nanoid = customAlphabet(alphabet, MATCH_CODE_LENGTH);
 
-type MatchInfo = {
+type RoomInfo = {
 	id: string;
-	status: MatchStatus;
+	status: "waiting" | "inProgress" | "notFound";
 };
-
-type MatchStatus = "notFound" | "inProgress" | "expired" | "waiting";
 
 export const pvpRouter = Router();
 pvpRouter.post("/host", async (req, res) => {
@@ -33,51 +31,51 @@ pvpRouter.post("/host", async (req, res) => {
 	}
 
 	let inserted = false;
-	let matchCode = "";
+	let roomCode = "";
 	while (!inserted) {
-		// keep retrying until matchCode is unique
-		matchCode = nanoid();
+		// keep retrying until roomCode is unique
+		roomCode = nanoid();
 		const res = await db
-			.insert(matches)
-			.values({ private: isPrivate, matchCode })
+			.insert(rooms)
+			.values({
+				private: isPrivate,
+				roomCode: roomCode,
+			})
 			.onConflictDoNothing()
 			.returning();
 		if (res.length > 0) inserted = true;
 	}
 
-	res.json({ success: true, matchCode });
+	res.json({ success: true, roomCode: roomCode });
 });
 
-pvpRouter.post("/match-status", async (req, res) => {
-	const matchCode = req.body.matchCode;
-	const status = await matchInfo(matchCode);
+pvpRouter.post("/room-status", async (req, res) => {
+	const roomCode = req.body.roomCode;
+	const status = await roomInfo(roomCode);
 	res.json({ status });
 });
 
-export async function matchInfo(matchCode: string): Promise<MatchInfo> {
-	let matchStatus: MatchStatus;
-	if (typeof matchCode !== "string" || matchCode.length !== MATCH_CODE_LENGTH) {
-		matchStatus = "notFound";
-		return { status: matchStatus, id: "" };
+export async function roomInfo(roomCode: string): Promise<RoomInfo> {
+	let roomStatus: "waiting" | "inProgress" | "notFound";
+	if (typeof roomCode !== "string" || roomCode.length !== MATCH_CODE_LENGTH) {
+		roomStatus = "notFound";
+		return { status: roomStatus, id: "" };
 	}
-	const match = await db
+	const room = await db
 		.select()
-		.from(matches)
-		.where(eq(matches.matchCode, matchCode))
+		.from(rooms)
+		.where(eq(rooms.roomCode, roomCode))
 		.limit(1)
 		.then((r) => r[0]);
-	if (!match) {
-		matchStatus = "notFound";
-		return { status: matchStatus, id: "" };
+	if (!room) {
+		roomStatus = "notFound";
+		return { status: roomStatus, id: "" };
 	}
 
-	matchStatus =
-		match.status === "completed" || match.status === "cancelled"
-			? "expired"
-			: match.status;
+	roomStatus = room.status === "completed" ? "inProgress" : room.status;
 
 	return {
-		id: match.id,
-		status: matchStatus,
+		id: room.id,
+		status: roomStatus,
 	};
 }
