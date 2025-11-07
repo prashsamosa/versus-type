@@ -69,8 +69,8 @@ POST {{server}}/pvp/host/
   "private": true
 }
 ### Get Match status
-POST {{server}}/pvp/match-status/
+POST {{server}}/pvp/room-status/
 
 {
-  "matchCode": "yo123"
+  "roomCode": "yo123"
 }

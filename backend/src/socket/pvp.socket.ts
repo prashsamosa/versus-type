@@ -10,41 +10,49 @@ import {
 	generateWords,
 } from "@versus-type/shared/passage-generator";
 import { eq, sql } from "drizzle-orm";
-import { matchInfo } from "@/routes/pvp.router";
+import { roomInfo } from "@/routes/pvp.router";
 import { db } from "../db";
-import { matches, matchParticipants, userStats } from "../db/schema";
+import {
+	matchParticipants,
+	type RoomStatus,
+	rooms,
+	userStats,
+} from "../db/schema";
 import { emitNewMessage, sendChatHistory } from "./chat.socket";
 
 const MAX_ROOM_SIZE = 10;
 const COUNTDOWN_SECONDS = 3;
 
-type MatchStatus = "waiting" | "inProgress" | "completed" | "cancelled";
-
 type PlayerState = {
 	isHost?: boolean;
 	username?: string;
 	color: string;
+	spectator: boolean;
+	disconnected?: boolean;
+
+	// game-specific, needs RESET
 	typingIndex: number;
 	wpm?: number;
 	startedAt?: number;
 	accuracy?: number;
 	accState?: AccuracyState;
-	spectator: boolean;
 	finished?: boolean;
 	timeTyped?: number;
 	ordinal?: number;
-	disconnected?: boolean;
 	incorrectIdx: number | null;
 };
 
-type MatchState = {
-	status: MatchStatus;
+type RoomState = {
+	status: "inProgress" | "waiting" | "completed";
 	passage: string;
 	hostId: string | null;
 	isStarted: boolean;
 	players: { [userId: string]: PlayerState };
+	// currentMatchId: string | null;
+	// settings: GeneratorConfig;
 };
-const matchStates: Record<string, MatchState> = {};
+
+const roomStates: Record<string, RoomState> = {};
 const passageConfig: GeneratorConfig = {
 	punctuation: false,
 	numbers: false,
@@ -53,15 +61,15 @@ const passageConfig: GeneratorConfig = {
 
 export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("pvp:join", async (data, callback) => {
-		const { matchCode, username } = data;
+		const { roomCode, username } = data;
 
-		// matchState is non-primitive type(object), so changes will reflect in matchStates
-		// UNTIL ITS UNDEFINED, so have to reassign when creating new matchState
-		let matchState = matchStates[matchCode];
+		// roomState is non-primitive type(object), so changes will reflect in matchStates
+		// UNTIL ITS UNDEFINED, so have to reassign when creating new roomState
+		let roomState = roomStates[roomCode];
 		let isHost = true;
-		if (io.sockets.adapter.rooms.has(matchCode)) isHost = false;
+		if (io.sockets.adapter.rooms.has(roomCode)) isHost = false;
 		if (isHost) {
-			matchState = {
+			roomState = {
 				status: "waiting",
 				passage: "",
 				hostId: socket.data.userId,
@@ -72,105 +80,105 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 						isHost: true,
 						username,
 						spectator: false,
-						color: getRandomColor(matchCode),
+						color: getRandomColor(roomCode),
 						accState: resetAccuracy(),
 						incorrectIdx: null,
 					},
 				},
 			};
-			matchStates[matchCode] = matchState; // have to reassign, coz its undefined before
+			roomStates[roomCode] = roomState; // have to reassign, coz its undefined before
 		}
 
 		// match status check
-		const { id: matchId, status } = await matchInfo(matchCode);
+		const { id: roomId, status } = await roomInfo(roomCode);
 
-		// const status = matchStates[matchCode].status; // cant do this coz we want matchId
-		if (status === "notFound" || status === "expired" || !matchId) {
+		// const status = roomStates[roomCode].status; // cant do this coz we want matchId
+		if (status === "notFound" || !roomId) {
 			return callback({
 				success: false,
-				message: `Match ${matchCode} is not available (${status})`,
+				message: `Room ${roomCode} not found`,
 			});
 		}
 
 		await db.insert(matchParticipants).values({
-			matchId,
-			disconnected: false,
-			isWinner: false,
+			matchId: roomId,
+			ordinal: null,
 			userId: socket.data.userId,
 		});
 
 		socket.data.username = username;
-		socket.data.matchCode = matchCode;
+		socket.data.roomCode = roomCode;
 		if (isHost) socket.data.isHost = true;
 
-		socket.join(matchCode);
-		const room = io.sockets.adapter.rooms.get(matchCode);
+		socket.join(roomCode);
+		const room = io.sockets.adapter.rooms.get(roomCode);
 		if (!isHost && room && room.size > MAX_ROOM_SIZE) {
 			// why not just join AFTER check? coz it will make race conditions, if 2 join at the same time, both will pass the check
-			socket.leave(matchCode);
+			socket.leave(roomCode);
 			return callback({ success: false, message: "Room is full" });
 		}
 
 		console.log(
 			isHost
-				? `Match hosted with code ${matchCode} by player ${socket.id}`
-				: `Player ${socket.id}(${username}) joined match with code ${matchCode}`,
+				? `Match hosted with code ${roomCode} by player ${socket.id}`
+				: `Player ${socket.id}(${username}) joined match with code ${roomCode}`,
 		);
 
 		// TODO: in future, allow reconnection of the HOST too, ie, game won't close immediately if last one leaves
 		if (isHost) {
-			matchState.passage = generateWords(passageConfig).join(" ");
+			roomState.passage = generateWords(passageConfig).join(" ");
 			callback({
 				success: true,
-				message: `Match hosted with code ${matchCode}`,
+				message: `Room hosted with code ${roomCode}`,
 			});
 		} else {
-			if (matchStates[matchCode].players[socket.data.userId]) {
+			if (roomStates[roomCode].players[socket.data.userId]) {
 				// reconnecting player
-				matchStates[matchCode].players[socket.data.userId].disconnected = false;
-				emitNewMessage(io, matchCode, {
+				roomStates[roomCode].players[socket.data.userId].disconnected = false;
+				emitNewMessage(io, roomCode, {
 					username: "",
 					message: `${username ?? "<Unknown>"} is back`,
 					system: true,
 				});
 				callback({
 					success: true,
-					message: `Reconnected to match ${matchCode}`,
-					isStarted: matchStates[matchCode].isStarted,
+					message: `Reconnected to room ${roomCode}`,
+					isStarted: roomStates[roomCode].isStarted,
 					typingIndex:
-						matchStates[matchCode].players[socket.data.userId].typingIndex,
+						roomStates[roomCode].players[socket.data.userId].typingIndex,
 				});
 			} else {
-				emitNewMessage(io, matchCode, {
+				emitNewMessage(io, roomCode, {
 					username: "",
 					message: `${username ?? "<Unknown>"} in da house`,
 					system: true,
 				});
 				callback({
 					success: true,
-					message: `Joined match ${matchCode}`,
+					message: `Joined room ${roomCode}`,
 				});
 			}
 		}
 
-		sendChatHistory(socket, matchCode);
-		updateLobby(io, matchCode);
+		sendChatHistory(socket, roomCode);
+		updateLobby(io, roomCode);
 	});
 
 	socket.on("disconnect", () => {
-		const matchCode = socket.data.matchCode;
+		const roomCode = socket.data.roomCode;
 		const username = socket.data.username;
-		if (matchCode) {
-			emitNewMessage(io, matchCode, {
+		if (roomCode) {
+			emitNewMessage(io, roomCode, {
 				username: "",
 				message: `${username ?? "<Unknown>"} disconnected`,
 				system: true,
 			});
-			const room = io.sockets.adapter.rooms.get(matchCode);
+			const room = io.sockets.adapter.rooms.get(roomCode);
 			if (!room || room.size === 0) {
-				console.log(`Match with code ${matchCode} has ended`);
-				if (matchStates[matchCode]?.status !== "completed") {
-					updateMatchStatus(matchCode, "cancelled");
+				console.log(`Room ${roomCode} has ended`);
+				if (roomStates[roomCode]?.status !== "completed") {
+					// updateMatchStatus(roomCode, "cancelled");
+					deleteRoom(roomCode);
 				}
 			} else {
 				if (socket.data.isHost) {
@@ -188,9 +196,9 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					if (newHostSocket) {
 						newHostSocket.data.isHost = true;
 						console.log(
-							`Player ${newHostSocket.id}(${newHostSocket.data.username}) is the new host of match ${matchCode}`,
+							`Player ${newHostSocket.id}(${newHostSocket.data.username}) is the new host of the room ${roomCode}`,
 						);
-						emitNewMessage(io, matchCode, {
+						emitNewMessage(io, roomCode, {
 							username: "",
 							message: `${newHostSocket.data.username ?? "<Unknown>"} is the new host`,
 							system: true,
@@ -198,48 +206,48 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					}
 				}
 			}
-			updateLobby(io, matchCode, socket.data.userId);
+			updateLobby(io, roomCode, socket.data.userId);
 		}
 		console.log(`Player ${socket.id}(${username}) disconnected`);
 	});
 
 	socket.on("pvp:start-match", async (callback) => {
-		const matchCode = socket.data.matchCode;
-		if (!matchCode) {
+		const roomCode = socket.data.roomCode;
+		if (!roomCode) {
 			callback({
 				success: false,
 				message: "Error starting match, join the match again",
 			});
 			console.warn(
-				"MatchCode not found in socket.data (Some sent start-match without joining)",
+				"roomCode not found in socket.data (Some sent start-match without joining)",
 			);
 			return;
 		}
-		if (matchStates[matchCode].isStarted) {
+		if (roomStates[roomCode].isStarted) {
 			callback({
 				success: false,
 				message: "Match already started",
 			});
 			return;
 		}
-		await updateMatchStatus(matchCode, "inProgress");
+		await updateRoomStatus(roomCode, "inProgress");
 		callback({
 			success: true,
 			message: "Starting countdown",
 		});
-		startCountdown(io, matchCode);
-		startWpmUpdates(io, matchCode);
+		startCountdown(io, roomCode);
+		startWpmUpdates(io, roomCode);
 	});
 
 	socket.on("pvp:key-press", (key: string) => {
-		const matchCode = socket.data.matchCode;
-		if (!matchCode || !matchStates[matchCode]?.isStarted) {
+		const roomCode = socket.data.roomCode;
+		if (!roomCode || !roomStates[roomCode]?.isStarted) {
 			console.warn(
 				`lol ${socket.data.userId} tryna cheat by sending key-press before starting match`,
 			);
 			return;
 		}
-		const player = matchStates[matchCode].players[socket.data.userId];
+		const player = roomStates[roomCode].players[socket.data.userId];
 		if (player.finished) return;
 
 		if (player.spectator) {
@@ -248,7 +256,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
-		const passage = matchStates[matchCode].passage;
+		const passage = roomStates[roomCode].passage;
 
 		if (!player.startedAt) player.startedAt = Date.now();
 
@@ -262,23 +270,23 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				player.finished = true;
 				player.wpm = calcWpm(player.typingIndex, player.startedAt);
 				player.accuracy = getAccuracy(player.accState);
-				sendWpmUpdate(io, matchCode);
+				sendWpmUpdate(io, roomCode);
 				player.timeTyped = Date.now() - player.startedAt;
 
-				const maxOrdinal = Object.values(matchStates[matchCode].players).reduce(
+				const maxOrdinal = Object.values(roomStates[roomCode].players).reduce(
 					(max, pl) => (pl.ordinal && pl.ordinal > max ? pl.ordinal : max),
 					0,
 				);
 				player.ordinal = maxOrdinal + 1;
 				if (
-					player.ordinal === Object.keys(matchStates[matchCode].players).length
+					player.ordinal === Object.keys(roomStates[roomCode].players).length
 				) {
-					completeMatch(matchCode);
+					completeMatch(roomCode);
 				}
 
-				updateLobby(io, matchCode);
+				updateLobby(io, roomCode);
 			}
-			io.to(matchCode).emit("pvp:progress-update", {
+			io.to(roomCode).emit("pvp:progress-update", {
 				userId: socket.data.userId ?? socket.id,
 				typingIndex: player.typingIndex + 1,
 			});
@@ -289,14 +297,14 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	});
 
 	socket.on("pvp:backspace", (amount: number) => {
-		const matchCode = socket.data.matchCode;
-		if (!matchCode || !matchStates[matchCode]?.isStarted) {
+		const roomCode = socket.data.roomCode;
+		if (!roomCode || !roomStates[roomCode]?.isStarted) {
 			console.warn(
 				`lol ${socket.data.userId} tryna cheat by sending backspace before starting match`,
 			);
 			return;
 		}
-		const player = matchStates[matchCode].players[socket.data.userId];
+		const player = roomStates[roomCode].players[socket.data.userId];
 		if (player.spectator) {
 			console.warn(
 				`spectator ${socket.data.userId} tryna send backspace during match lmao`,
@@ -311,7 +319,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			player.incorrectIdx = null;
 		}
 		if (player.incorrectIdx == null) {
-			io.to(matchCode).emit("pvp:progress-update", {
+			io.to(roomCode).emit("pvp:progress-update", {
 				userId: socket.data.userId || socket.id,
 				typingIndex: player.typingIndex,
 			});
@@ -320,9 +328,9 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 
 	socket.on("pvp:get-passage", (callback) => {
 		console.log("pvp:get-passage called by", socket.data.userId);
-		const matchCode = socket.data.matchCode;
-		if (!matchCode || !matchStates[matchCode]) return callback("");
-		callback(matchStates[matchCode].passage);
+		const roomCode = socket.data.roomCode;
+		if (!roomCode || !roomStates[roomCode]) return callback("");
+		callback(roomStates[roomCode].passage);
 	});
 }
 
@@ -332,75 +340,82 @@ function calcWpm(typingIndex: number, startedAt?: number): number {
 	return typingIndex / 5 / (elapsedTime / 1000 / 60);
 }
 
-function startWpmUpdates(io: ioServer, matchCode: string) {
+function startWpmUpdates(io: ioServer, roomCode: string) {
 	const timeoutId = setInterval(() => {
-		const matchState = matchStates[matchCode];
-		if (!matchState || !matchState.isStarted) return;
-		if (
-			matchState.status === "completed" ||
-			matchState.status === "cancelled"
-		) {
+		const roomState = roomStates[roomCode];
+		if (!roomState || !roomState.isStarted) return;
+		if (roomState.status === "completed") {
 			clearInterval(timeoutId);
 			return;
 		}
-		for (const userId in matchState.players) {
-			const player = matchState.players[userId];
+		for (const userId in roomState.players) {
+			const player = roomState.players[userId];
 			if (player.finished) continue;
 			player.wpm = calcWpm(player.typingIndex, player.startedAt);
 		}
 
-		sendWpmUpdate(io, matchCode);
+		sendWpmUpdate(io, roomCode);
 	}, 1000);
 }
 
-function sendWpmUpdate(io: ioServer, matchCode: string) {
+function sendWpmUpdate(io: ioServer, roomCode: string) {
 	const wpmInfo = Object.fromEntries(
-		Object.entries(matchStates[matchCode].players).map(([userId, player]) => [
+		Object.entries(roomStates[roomCode].players).map(([userId, player]) => [
 			userId,
 			player.wpm ?? 0,
 		]),
 	);
 
-	io.to(matchCode).emit("pvp:wpm-update", wpmInfo);
+	io.to(roomCode).emit("pvp:wpm-update", wpmInfo);
 }
 
-async function startCountdown(io: ioServer, matchCode: string) {
+async function startCountdown(io: ioServer, roomCode: string) {
 	let countdown = COUNTDOWN_SECONDS + 1;
 	const countdownInterval = setInterval(() => {
 		countdown--;
-		io.to(matchCode).emit("pvp:countdown", countdown);
+		io.to(roomCode).emit("pvp:countdown", countdown);
 		if (countdown === 0) {
-			matchStates[matchCode].isStarted = true;
+			roomStates[roomCode].isStarted = true;
 			clearInterval(countdownInterval);
 		}
 	}, 1000);
 }
 
-async function updateMatchStatus(matchCode: string, status: MatchStatus) {
+async function updateRoomStatus(roomCode: string, status: RoomStatus) {
 	await db
-		.update(matches)
+		.update(rooms)
 		.set({ status })
-		.where(eq(matches.matchCode, matchCode))
+		.where(eq(rooms.roomCode, roomCode))
 		.catch((err) => {
 			console.error("Error updating match status in DB:", err);
 		});
-	matchStates[matchCode].status = status;
+	roomStates[roomCode].status = status;
 }
 
-function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
-	// TODO: just emit matchStates[matchCode].players directly. update the states when events happen directly
-	const room = io.sockets.adapter.rooms.get(matchCode);
+async function deleteRoom(roomCode: string) {
+	await db
+		.delete(rooms)
+		.where(eq(rooms.roomCode, roomCode))
+		.catch((err) => {
+			console.error("Error deleting room from DB:", err);
+		});
+	delete roomStates[roomCode];
+}
+
+function updateLobby(io: ioServer, roomCode: string, disconnectedId?: string) {
+	// TODO: just emit matchStates[roomCode].players directly. update the states when events happen directly
+	const room = io.sockets.adapter.rooms.get(roomCode);
 	if (!room) return;
 	for (const memberId of room) {
 		const memberSocket = io.sockets.sockets.get(memberId);
 		if (memberSocket) {
-			if (!matchStates[matchCode].players[memberSocket.data.userId]) {
-				matchStates[matchCode].players[memberSocket.data.userId] = {
+			if (!roomStates[roomCode].players[memberSocket.data.userId]) {
+				roomStates[roomCode].players[memberSocket.data.userId] = {
 					typingIndex: 0,
 					isHost: memberSocket.data.isHost || false,
 					username: memberSocket.data.username || "<Unknown>",
-					spectator: matchStates[matchCode].isStarted ?? false,
-					color: getRandomColor(matchCode),
+					spectator: roomStates[roomCode].isStarted ?? false,
+					color: getRandomColor(roomCode),
 					accState: resetAccuracy(),
 					incorrectIdx: null,
 				};
@@ -409,41 +424,41 @@ function updateLobby(io: ioServer, matchCode: string, disconnectedId?: string) {
 				// host change
 				if (
 					memberSocket.data.isHost !==
-					matchStates[matchCode].players[memberSocket.data.userId].isHost
+					roomStates[roomCode].players[memberSocket.data.userId].isHost
 				) {
-					matchStates[matchCode].players[memberSocket.data.userId].isHost =
+					roomStates[roomCode].players[memberSocket.data.userId].isHost =
 						memberSocket.data.isHost || false;
 				}
 			}
 		}
 	}
 	if (disconnectedId) {
-		matchStates[matchCode].players[disconnectedId].disconnected = true;
-		matchStates[matchCode].players[disconnectedId].isHost = false;
+		roomStates[roomCode].players[disconnectedId].disconnected = true;
+		roomStates[roomCode].players[disconnectedId].isHost = false;
 	}
-	io.to(matchCode).emit(
+	io.to(roomCode).emit(
 		"pvp:lobby-update",
-		toPlayersInfo(matchStates[matchCode].players),
+		toPlayersInfo(roomStates[roomCode].players),
 	);
 }
 
-async function completeMatch(matchCode: string) {
-	await updateMatchStatus(matchCode, "completed");
-	await updatePlayersInfoInDB(matchCode);
-	console.log(`Match ${matchCode} completed`);
+async function completeMatch(roomCode: string) {
+	await updateRoomStatus(roomCode, "completed");
+	await updatePlayersInfoInDB(roomCode);
+	console.log(`Match ${roomCode} completed`);
 }
 
-async function updatePlayersInfoInDB(matchCode: string) {
-	const matchState = matchStates[matchCode];
-	for (const userId in matchState.players) {
-		const player = matchState.players[userId];
+async function updatePlayersInfoInDB(roomCode: string) {
+	const roomState = roomStates[roomCode];
+	for (const userId in roomState.players) {
+		const player = roomState.players[userId];
 		if (!player.finished) continue;
 		const isWinner = player.ordinal === 1 ? 1 : 0;
 		const accuracy = player.accuracy ?? 0;
 		await db
 			.update(matchParticipants)
 			.set({
-				isWinner: isWinner === 1,
+				ordinal: player.ordinal,
 				accuracy: accuracy,
 				wpm: player.wpm || 0,
 			})
@@ -488,7 +503,7 @@ function toPlayersInfo(players: { [userId: string]: PlayerState }) {
 	return info;
 }
 
-function getRandomColor(matchCode: string) {
+function getRandomColor(roomCode: string) {
 	const colors = [
 		"#60A5FA",
 		"#34D399",
@@ -500,10 +515,10 @@ function getRandomColor(matchCode: string) {
 		"#14B8A6",
 	];
 	let notUsed = colors.slice();
-	if (matchStates[matchCode]) {
-		for (const userId in matchStates[matchCode].players) {
+	if (roomStates[roomCode]) {
+		for (const userId in roomStates[roomCode].players) {
 			notUsed = notUsed.filter(
-				(c) => c !== matchStates[matchCode].players[userId].color,
+				(c) => c !== roomStates[roomCode].players[userId].color,
 			);
 		}
 		if (notUsed.length === 0) {

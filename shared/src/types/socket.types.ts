@@ -63,7 +63,7 @@ export interface ClientToServerEvents {
 	ping: (callback: () => void) => void;
 	"pvp:join": (
 		data: {
-			matchCode: string;
+			roomCode: string;
 			username: string;
 		},
 		callback: (response: JoinResponse) => void,
@@ -76,7 +76,7 @@ export interface InterServerEvents {}
 
 export interface SocketData {
 	username?: string;
-	matchCode?: string;
+	roomCode?: string;
 	isHost?: boolean;
 	userId: string;
 }

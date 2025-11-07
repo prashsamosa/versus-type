@@ -13,12 +13,12 @@ export function registerChatHandlers(io: ioServer, socket: ioSocket) {
 		if (message.trim().length === 0) {
 			return socket.emit("chat:error", { message: "Empty message" });
 		}
-		const matchCode =
+		const roomCode =
 			socket.rooms.size > 1 ? Array.from(socket.rooms)[1] : null;
-		if (!matchCode) {
+		if (!roomCode) {
 			return socket.emit("chat:error", { message: "Not in a match room" });
 		}
-		emitNewMessage(io, matchCode, {
+		emitNewMessage(io, roomCode, {
 			username,
 			message,
 			userId: socket.data.userId || socket.id,
@@ -26,22 +26,22 @@ export function registerChatHandlers(io: ioServer, socket: ioSocket) {
 	});
 }
 
-export function sendChatHistory(socket: ioSocket, matchCode: string) {
-	const messages = chatMessages.get(matchCode) || [];
+export function sendChatHistory(socket: ioSocket, roomCode: string) {
+	const messages = chatMessages.get(roomCode) || [];
 	socket.emit("chat:history", messages);
 }
 
 export function emitNewMessage(
 	io: ioServer,
-	matchCode: string,
+	roomCode: string,
 	newMessage: ChatMessage,
 ) {
-	console.log("Emitting message to", matchCode, newMessage);
-	if (!chatMessages.has(matchCode)) {
-		chatMessages.set(matchCode, []);
+	console.log("Emitting message to", roomCode, newMessage);
+	if (!chatMessages.has(roomCode)) {
+		chatMessages.set(roomCode, []);
 	}
-	const messages = chatMessages.get(matchCode);
+	const messages = chatMessages.get(roomCode);
 	messages?.push(newMessage);
 
-	io.to(matchCode).emit("chat:new-message", newMessage);
+	io.to(roomCode).emit("chat:new-message", newMessage);
 }
