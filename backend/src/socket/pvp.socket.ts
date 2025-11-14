@@ -14,7 +14,7 @@ import {
 	type GeneratorConfig,
 	generateWords,
 } from "@versus-type/shared/passage-generator";
-import { and, eq, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { roomInfo } from "@/routes/pvp.router";
 import { db } from "../db";
 import {
@@ -197,10 +197,10 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			if (!room || room.size === 0) {
 				console.log(`Room ${roomCode} has closed`);
 				if (roomStates[roomCode]?.status !== "closed") {
-					// updateMatchStatus(roomCode, "cancelled");
 					closeRoom(roomCode, io);
-					// TODO: delete room from DB after some time? why not delete immediately?
-					// deleteRoomFromDB(roomCode);
+					// deleting rooms immediately.
+					// alternative: update status to 'closed', setup cron job or setTimeout to delete closed rooms
+					deleteRoomFromDB(roomCode);
 				}
 			} else {
 				if (socket.data.isHost) {
@@ -529,25 +529,26 @@ async function updatePlayersInfoInDB(roomCode: string) {
 		return;
 	}
 	for (const userId in roomState.players) {
+		if (
+			roomState.players[userId].spectator ||
+			!roomState.players[userId].finished
+		)
+			continue;
 		const player = roomState.players[userId];
 		if (!player.finished) continue;
 		const isWinner = player.ordinal === 1 ? 1 : 0;
 		const accuracy = player.accuracy ?? 0;
 		await db
-			.update(matchParticipants)
-			.set({
+			.insert(matchParticipants)
+			.values({
+				matchId: matchId,
+				userId: userId,
 				ordinal: player.ordinal,
 				accuracy: accuracy,
 				wpm: player.wpm || 0,
 			})
-			.where(
-				and(
-					eq(matchParticipants.userId, userId),
-					eq(matchParticipants.matchId, matchId),
-				),
-			)
 			.catch((err) => {
-				console.error("Error updating match participant stats in DB:", err);
+				console.error("Error inserting match participant:", err);
 			});
 
 		await db
