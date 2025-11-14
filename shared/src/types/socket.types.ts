@@ -37,13 +37,22 @@ export type WpmInfo = {
 	[userId: string]: number;
 };
 
+export type MatchResults = {
+	[userId: string]: {
+		wpm: number;
+		accuracy: number;
+		ordinal: number;
+	};
+};
+
 export interface ServerToClientEvents {
 	"pvp:countdown": (seconds: number) => void;
 	"pvp:progress-update": (data: {
 		userId: string;
 		typingIndex: number;
 	}) => void;
-
+	"pvp:match-ended": (data: MatchResults) => void;
+	"pvp:disconnect": (data: { reason: string }) => void;
 	"pvp:lobby-update": (lobby: LobbyInfo) => void;
 	"pvp:wpm-update": (data: WpmInfo) => void;
 

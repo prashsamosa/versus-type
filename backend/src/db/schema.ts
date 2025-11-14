@@ -132,7 +132,7 @@ export const rooms = sqliteTable(
 		roomCode: text().unique().notNull(),
 		private: integer({ mode: "boolean" }).notNull().default(false),
 		status: text()
-			.$type<"waiting" | "inProgress" | "completed">()
+			.$type<"waiting" | "inProgress" | "closed">()
 			.notNull()
 			.default("waiting"),
 		// settings: text({ mode: "json" }),
@@ -158,7 +158,7 @@ export const matches = sqliteTable(
 			.references(() => rooms.id, { onDelete: "cascade" }),
 
 		passage: text().notNull(),
-		status: text().$type<RoomStatus>().notNull().default("inProgress"),
+
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
 			.$defaultFn(() => new Date()),
@@ -206,4 +206,4 @@ export const tests = sqliteTable(
 	(table) => [check("chk_mode", sql`${table.mode} IN ('time', 'words')`)],
 );
 
-export type RoomStatus = "inProgress" | "completed" | "waiting";
+export type RoomStatus = "inProgress" | "closed" | "waiting";

@@ -11,8 +11,9 @@ const nanoid = customAlphabet(alphabet, MATCH_CODE_LENGTH);
 
 type RoomInfo = {
 	id: string;
-	status: "waiting" | "inProgress" | "notFound";
+	status: RoomStatusClient;
 };
+type RoomStatusClient = "waiting" | "inProgress" | "notFound";
 
 export const pvpRouter = Router();
 pvpRouter.post("/host", async (req, res) => {
@@ -56,7 +57,7 @@ pvpRouter.post("/room-status", async (req, res) => {
 });
 
 export async function roomInfo(roomCode: string): Promise<RoomInfo> {
-	let roomStatus: "waiting" | "inProgress" | "notFound";
+	let roomStatus: RoomStatusClient;
 	if (typeof roomCode !== "string" || roomCode.length !== MATCH_CODE_LENGTH) {
 		roomStatus = "notFound";
 		return { status: roomStatus, id: "" };
@@ -72,7 +73,7 @@ export async function roomInfo(roomCode: string): Promise<RoomInfo> {
 		return { status: roomStatus, id: "" };
 	}
 
-	roomStatus = room.status === "completed" ? "inProgress" : room.status;
+	roomStatus = room.status === "closed" ? "inProgress" : room.status;
 
 	return {
 		id: room.id,

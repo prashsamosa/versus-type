@@ -13,8 +13,7 @@ export function registerChatHandlers(io: ioServer, socket: ioSocket) {
 		if (message.trim().length === 0) {
 			return socket.emit("chat:error", { message: "Empty message" });
 		}
-		const roomCode =
-			socket.rooms.size > 1 ? Array.from(socket.rooms)[1] : null;
+		const roomCode = socket.rooms.size > 1 ? Array.from(socket.rooms)[1] : null;
 		if (!roomCode) {
 			return socket.emit("chat:error", { message: "Not in a match room" });
 		}

@@ -1,4 +1,9 @@
-import type { ioServer, ioSocket, LobbyInfo } from "@versus-type/shared";
+import type {
+	ioServer,
+	ioSocket,
+	LobbyInfo,
+	MatchResults,
+} from "@versus-type/shared";
 import {
 	type AccuracyState,
 	getAccuracy,
@@ -9,10 +14,11 @@ import {
 	type GeneratorConfig,
 	generateWords,
 } from "@versus-type/shared/passage-generator";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { roomInfo } from "@/routes/pvp.router";
 import { db } from "../db";
 import {
+	matches,
 	matchParticipants,
 	type RoomStatus,
 	rooms,
@@ -43,11 +49,13 @@ type PlayerState = {
 };
 
 type RoomState = {
-	status: "inProgress" | "waiting" | "completed";
+	status: "inProgress" | "waiting" | "closed";
 	passage: string;
 	hostId: string | null;
-	isStarted: boolean;
+	isMatchStarted: boolean;
+	isMatchEnded: boolean;
 	players: { [userId: string]: PlayerState };
+	dbId: string;
 	// currentMatchId: string | null;
 	// settings: GeneratorConfig;
 };
@@ -63,17 +71,27 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("pvp:join", async (data, callback) => {
 		const { roomCode, username } = data;
 
-		// roomState is non-primitive type(object), so changes will reflect in matchStates
+		// roomState is non-primitive type(object), so changes will reflect in roomStates
 		// UNTIL ITS UNDEFINED, so have to reassign when creating new roomState
 		let roomState = roomStates[roomCode];
 		let isHost = true;
 		if (io.sockets.adapter.rooms.has(roomCode)) isHost = false;
 		if (isHost) {
+			const dbId = await getRoomIdFromDb(roomCode);
+			if (!dbId) {
+				console.warn(`Room ${roomCode} not found in DB when hosting`);
+				return callback({
+					success: false,
+					message: `Room ${roomCode} not found in DB`,
+				});
+			}
 			roomState = {
 				status: "waiting",
 				passage: "",
 				hostId: socket.data.userId,
-				isStarted: false,
+				isMatchStarted: false,
+				isMatchEnded: false,
+				dbId,
 				players: {
 					[socket.data.userId]: {
 						typingIndex: 0,
@@ -89,10 +107,10 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			roomStates[roomCode] = roomState; // have to reassign, coz its undefined before
 		}
 
-		// match status check
+		// room status check
 		const { id: roomId, status } = await roomInfo(roomCode);
 
-		// const status = roomStates[roomCode].status; // cant do this coz we want matchId
+		// const status = roomStates[roomCode].status; // cant do this coz we want roomId
 		if (status === "notFound" || !roomId) {
 			return callback({
 				success: false,
@@ -100,11 +118,13 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			});
 		}
 
-		await db.insert(matchParticipants).values({
-			matchId: roomId,
-			ordinal: null,
-			userId: socket.data.userId,
-		});
+		// TODO: THINK: null match and matchParticipants before match start VS after match end
+
+		// await db.insert(matchParticipants).values({
+		//   matchId: roomStates[roomCode].currentMatchId!,
+		//   ordinal: null,
+		//   userId: socket.data.userId,
+		// });
 
 		socket.data.username = username;
 		socket.data.roomCode = roomCode;
@@ -124,7 +144,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				: `Player ${socket.id}(${username}) joined match with code ${roomCode}`,
 		);
 
-		// TODO: in future, allow reconnection of the HOST too, ie, game won't close immediately if last one leaves
+		// TODO: in future, allow reconnection of the HOST too, ie, room won't close immediately if last one leaves
 		if (isHost) {
 			roomState.passage = generateWords(passageConfig).join(" ");
 			callback({
@@ -143,7 +163,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				callback({
 					success: true,
 					message: `Reconnected to room ${roomCode}`,
-					isStarted: roomStates[roomCode].isStarted,
+					isStarted: roomStates[roomCode].isMatchStarted,
 					typingIndex:
 						roomStates[roomCode].players[socket.data.userId].typingIndex,
 				});
@@ -175,10 +195,12 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			});
 			const room = io.sockets.adapter.rooms.get(roomCode);
 			if (!room || room.size === 0) {
-				console.log(`Room ${roomCode} has ended`);
-				if (roomStates[roomCode]?.status !== "completed") {
+				console.log(`Room ${roomCode} has closed`);
+				if (roomStates[roomCode]?.status !== "closed") {
 					// updateMatchStatus(roomCode, "cancelled");
-					deleteRoom(roomCode);
+					closeRoom(roomCode, io);
+					// TODO: delete room from DB after some time? why not delete immediately?
+					// deleteRoomFromDB(roomCode);
 				}
 			} else {
 				if (socket.data.isHost) {
@@ -223,7 +245,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
-		if (roomStates[roomCode].isStarted) {
+		if (roomStates[roomCode].isMatchStarted) {
 			callback({
 				success: false,
 				message: "Match already started",
@@ -235,13 +257,19 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			success: true,
 			message: "Starting countdown",
 		});
+		const roomState = roomStates[roomCode];
+		roomState.isMatchEnded = false;
+		if (!roomState.passage) {
+			roomState.passage = generateWords(passageConfig).join(" ");
+		}
+		roomState.status = "inProgress";
 		startCountdown(io, roomCode);
 		startWpmUpdates(io, roomCode);
 	});
 
 	socket.on("pvp:key-press", (key: string) => {
 		const roomCode = socket.data.roomCode;
-		if (!roomCode || !roomStates[roomCode]?.isStarted) {
+		if (!roomCode || !roomStates[roomCode]?.isMatchStarted) {
 			console.warn(
 				`lol ${socket.data.userId} tryna cheat by sending key-press before starting match`,
 			);
@@ -267,6 +295,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		);
 		if (player.incorrectIdx === null && passage[player.typingIndex] === key) {
 			if (player.typingIndex >= passage.length - 1) {
+				// PLAYER FINISHED
 				player.finished = true;
 				player.wpm = calcWpm(player.typingIndex, player.startedAt);
 				player.accuracy = getAccuracy(player.accState);
@@ -281,7 +310,8 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				if (
 					player.ordinal === Object.keys(roomStates[roomCode].players).length
 				) {
-					completeMatch(roomCode);
+					// LAST PLAYER FINISHED
+					endMatch(roomCode, io);
 				}
 
 				updateLobby(io, roomCode);
@@ -298,7 +328,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 
 	socket.on("pvp:backspace", (amount: number) => {
 		const roomCode = socket.data.roomCode;
-		if (!roomCode || !roomStates[roomCode]?.isStarted) {
+		if (!roomCode || !roomStates[roomCode]?.isMatchStarted) {
 			console.warn(
 				`lol ${socket.data.userId} tryna cheat by sending backspace before starting match`,
 			);
@@ -343,8 +373,8 @@ function calcWpm(typingIndex: number, startedAt?: number): number {
 function startWpmUpdates(io: ioServer, roomCode: string) {
 	const timeoutId = setInterval(() => {
 		const roomState = roomStates[roomCode];
-		if (!roomState || !roomState.isStarted) return;
-		if (roomState.status === "completed") {
+		if (!roomState || !roomState.isMatchStarted) return;
+		if (roomState.status === "closed") {
 			clearInterval(timeoutId);
 			return;
 		}
@@ -375,7 +405,7 @@ async function startCountdown(io: ioServer, roomCode: string) {
 		countdown--;
 		io.to(roomCode).emit("pvp:countdown", countdown);
 		if (countdown === 0) {
-			roomStates[roomCode].isStarted = true;
+			roomStates[roomCode].isMatchStarted = true;
 			clearInterval(countdownInterval);
 		}
 	}, 1000);
@@ -387,12 +417,12 @@ async function updateRoomStatus(roomCode: string, status: RoomStatus) {
 		.set({ status })
 		.where(eq(rooms.roomCode, roomCode))
 		.catch((err) => {
-			console.error("Error updating match status in DB:", err);
+			console.error("Error updating room status in DB:", err);
 		});
 	roomStates[roomCode].status = status;
 }
 
-async function deleteRoom(roomCode: string) {
+async function deleteRoomFromDB(roomCode: string) {
 	await db
 		.delete(rooms)
 		.where(eq(rooms.roomCode, roomCode))
@@ -403,7 +433,7 @@ async function deleteRoom(roomCode: string) {
 }
 
 function updateLobby(io: ioServer, roomCode: string, disconnectedId?: string) {
-	// TODO: just emit matchStates[roomCode].players directly. update the states when events happen directly
+	// TODO: just emit room[roomCode].players directly. update the states when events happen directly
 	const room = io.sockets.adapter.rooms.get(roomCode);
 	if (!room) return;
 	for (const memberId of room) {
@@ -414,7 +444,7 @@ function updateLobby(io: ioServer, roomCode: string, disconnectedId?: string) {
 					typingIndex: 0,
 					isHost: memberSocket.data.isHost || false,
 					username: memberSocket.data.username || "<Unknown>",
-					spectator: roomStates[roomCode].isStarted ?? false,
+					spectator: roomStates[roomCode].isMatchStarted ?? false,
 					color: getRandomColor(roomCode),
 					accState: resetAccuracy(),
 					incorrectIdx: null,
@@ -442,14 +472,62 @@ function updateLobby(io: ioServer, roomCode: string, disconnectedId?: string) {
 	);
 }
 
-async function completeMatch(roomCode: string) {
-	await updateRoomStatus(roomCode, "completed");
+async function endMatch(roomCode: string, io: ioServer) {
+	await updateRoomStatus(roomCode, "closed");
+	console.log(`Match in room ${roomCode} ended`);
+	const matchResults: MatchResults = {};
+	const roomState = roomStates[roomCode];
+	for (const userId in roomState.players) {
+		const player = roomState.players[userId];
+		matchResults[userId] = {
+			wpm: player.wpm || 0,
+			accuracy: player.accuracy || 0,
+			ordinal: player.ordinal || 0,
+		};
+	}
+	roomState.isMatchStarted = false;
+	roomState.isMatchEnded = true;
+	roomState.status = "waiting";
+	roomState.passage = "";
+	io.to(roomCode).emit("pvp:match-ended", matchResults);
+
 	await updatePlayersInfoInDB(roomCode);
-	console.log(`Match ${roomCode} completed`);
+}
+
+async function closeRoom(roomCode: string, io: ioServer) {
+	await updateRoomStatus(roomCode, "closed");
+	delete roomStates[roomCode];
+	io.to(roomCode).emit("pvp:disconnect", { reason: "Room closed" });
+	// io.socketsLeave(roomCode);
+	setTimeout(() => {
+		// disconnect all clients
+		const room = io.sockets.adapter.rooms.get(roomCode);
+		if (room) {
+			for (const memberId of room) {
+				const memberSocket = io.sockets.sockets.get(memberId);
+				if (memberSocket) memberSocket.disconnect();
+			}
+		}
+	}, 3000);
+	console.log(`Room ${roomCode} closed`);
 }
 
 async function updatePlayersInfoInDB(roomCode: string) {
 	const roomState = roomStates[roomCode];
+	const matchId = await db
+		.insert(matches)
+		.values({
+			passage: roomState.passage,
+			roomId: roomState.dbId,
+		})
+		.returning({ id: matches.id })
+		.then((r) => r[0]?.id);
+	if (!matchId) {
+		console.error(
+			"updatePlayersInfoInDB: couldn't create match record(matchId is null), aborting",
+		);
+		return;
+	}
 	for (const userId in roomState.players) {
 		const player = roomState.players[userId];
 		if (!player.finished) continue;
@@ -462,7 +540,12 @@ async function updatePlayersInfoInDB(roomCode: string) {
 				accuracy: accuracy,
 				wpm: player.wpm || 0,
 			})
-			.where(eq(matchParticipants.userId, userId))
+			.where(
+				and(
+					eq(matchParticipants.userId, userId),
+					eq(matchParticipants.matchId, matchId),
+				),
+			)
 			.catch((err) => {
 				console.error("Error updating match participant stats in DB:", err);
 			});
@@ -481,6 +564,17 @@ async function updatePlayersInfoInDB(roomCode: string) {
 				console.error("Error updating user stats in DB:", err);
 			});
 	}
+}
+
+async function getRoomIdFromDb(roomCode: string): Promise<string | null> {
+	const room = await db
+		.select({ id: rooms.id })
+		.from(rooms)
+		.where(eq(rooms.roomCode, roomCode))
+		.limit(1)
+		.then((r) => r[0]);
+	if (!room) return null;
+	return room.id;
 }
 
 function toPlayersInfo(players: { [userId: string]: PlayerState }) {
