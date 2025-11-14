@@ -14,12 +14,12 @@ export async function hostMatch(isPrivate: boolean) {
 			throw new Error(`Error fetching match status: ${response.statusText}`);
 		}
 		const data = await response.json();
-		const matchCode = data.matchCode;
-		if (typeof matchCode !== "string") {
-			console.error("Validation error: matchCode is not a string");
+		const roomCode = data.roomCode;
+		if (typeof roomCode !== "string") {
+			console.error("Validation error: roomCode is not a string");
 			throw new Error("Internal server error");
 		}
-		return matchCode;
+		return roomCode;
 	} catch (error) {
 		console.error("hostMatch error:", error);
 		throw error;

@@ -11,7 +11,7 @@ export let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null =
 
 export async function setupSocketAndJoin(
 	username: string,
-	matchCode: string,
+	roomCode: string,
 ): Promise<JoinResponse> {
 	return new Promise((resolve, reject) => {
 		socket = io(SERVER_URL, { withCredentials: true });
@@ -20,11 +20,11 @@ export async function setupSocketAndJoin(
 			try {
 				console.log("Connected to server, joining match as ", {
 					username,
-					matchCode,
+					roomCode,
 				});
 				const response = (await socket?.emitWithAck("pvp:join", {
 					username,
-					matchCode,
+					roomCode,
 				})) as JoinResponse;
 				resolve(response);
 			} catch (error) {

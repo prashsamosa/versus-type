@@ -6,7 +6,7 @@ import { disconnectSocket, setupSocketAndJoin, socket } from "@/socket";
 import { usePvpStore } from "../store";
 
 export function usePvpSession() {
-	const { matchCode } = useParams<{ matchCode: string }>();
+	const { roomCode } = useParams<{ roomCode: string }>();
 	const [loading, setLoading] = useState(true);
 	const [socketError, setSocketError] = useState<string | null>(null);
 	const [latency, setLatency] = useState<number | null>(null);
@@ -48,7 +48,7 @@ export function usePvpSession() {
 
 	useEffect(() => {
 		if (!username || isPending) return;
-		setupSocketAndJoin(username, matchCode)
+		setupSocketAndJoin(username, roomCode)
 			.then((response) => {
 				setLoading(false);
 				if (!response.success) {
@@ -100,7 +100,7 @@ export function usePvpSession() {
 		socketError,
 		username,
 		setUsername,
-		matchCode,
+		roomCode,
 		isPending,
 		latency,
 		players,

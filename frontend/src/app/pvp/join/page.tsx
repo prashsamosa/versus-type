@@ -18,8 +18,8 @@ export default function JoinPage() {
 			if (!session.data) {
 				await authClient.signIn.anonymous();
 			}
-			const matchCode = ref.current?.value.trim();
-			router.push(`/pvp/${matchCode}`);
+			const roomCode = ref.current?.value.trim();
+			router.push(`/pvp/${roomCode}`);
 		} catch (_err) {
 			setLoading(false);
 		}

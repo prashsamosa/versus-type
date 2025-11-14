@@ -17,7 +17,7 @@ export default function PvpPage() {
 		username,
 		setUsername,
 		isPending,
-		matchCode,
+		roomCode,
 		latency,
 		disconnected,
 	} = usePvpSession();
@@ -47,8 +47,8 @@ export default function PvpPage() {
 	}
 
 	function copyMatchLink() {
-		console.log("Copying match link for code:", matchCode);
-		const url = `${window.location.origin}/pvp/${matchCode}`;
+		console.log("Copying match link for code:", roomCode);
+		const url = `${window.location.origin}/pvp/${roomCode}`;
 		navigator.clipboard.writeText(url);
 		setCopied(true);
 		setTimeout(() => setCopied(false), 2000);
@@ -58,7 +58,7 @@ export default function PvpPage() {
 		<div className="flex flex-col items-center justify-start min-h-screen">
 			<div className="p-2 flex justify-between items-center w-full mb-4">
 				<CodeCopy
-					matchCode={matchCode}
+					roomCode={roomCode}
 					copied={copied}
 					copyMatchLink={copyMatchLink}
 				/>
@@ -91,17 +91,17 @@ export default function PvpPage() {
 }
 
 function CodeCopy({
-	matchCode,
+	roomCode,
 	copied,
 	copyMatchLink,
 }: {
-	matchCode: string;
+	roomCode: string;
 	copied: boolean;
 	copyMatchLink: () => void;
 }) {
 	return (
 		<div className="p-2 rounded-md border flex justify-center items-center gap-2">
-			<h1 className="font-bold">Code: {matchCode}</h1>
+			<h1 className="font-bold">Code: {roomCode}</h1>
 			<Button
 				variant="outline"
 				size="sm"

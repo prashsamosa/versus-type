@@ -20,8 +20,8 @@ export default function HostPage() {
 			if (!session.data) {
 				await authClient.signIn.anonymous();
 			}
-			const matchCode = await hostMatch(isPrivate);
-			router.push(`/pvp/${matchCode}`);
+			const roomCode = await hostMatch(isPrivate);
+			router.push(`/pvp/${roomCode}`);
 		} catch (err: any) {
 			setError(`Error: ${err.message}`);
 			setLoading(false);
