@@ -17,7 +17,7 @@ export default function Word({
 	currentIndex,
 	typedText,
 	charRefs,
-	// shouldShake = false,
+	shouldShake = false,
 }: WordProps) {
 	let idx = startIndex;
 
@@ -60,8 +60,7 @@ export default function Word({
 						className={charClassName}
 						style={{
 							display: "inline-block",
-							// animation: shouldShake
-							// 	? "shake 0.4s ease-in-out"
+							animation: shouldShake ? "shake 0.4s ease-in-out" : "none",
 							// 	: isWordTyped && isWordCorrect
 							// 		? // ? passageTransforms[wordIndex][charIndex]
 							// 			"charBounce 0.3s"

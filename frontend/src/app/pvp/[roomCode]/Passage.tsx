@@ -26,7 +26,7 @@ export default function Passage({
 	const updateOppTypingIndex = usePvpStore((s) => s.updateOppTypingIndex);
 	const initialIndex = usePvpStore((s) => s.initialIndex);
 
-	const { typedText, finished, handleInputChange, incorrect } =
+	const { typedText, finished, handleInputChange, shakeWordIndex, incorrect } =
 		usePvpTypingState(words, initialIndex);
 
 	const [manualScrollOffset, setManualScrollOffset] = useState<number | null>(
@@ -159,8 +159,8 @@ export default function Passage({
 				scrollOffset={
 					manualScrollOffset === null ? scrollOffset : manualScrollOffset
 				}
+				shakeWordIndex={shakeWordIndex}
 			/>
-			{/* shakeWordIndex={shakeWordIndex} */}
 
 			{!disabled && !finished ? (
 				<Cursor

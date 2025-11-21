@@ -57,7 +57,7 @@ export default function PassageText({
 	typedText,
 	charRefs,
 	scrollOffset,
-	// shakeWordIndex,
+	shakeWordIndex,
 }: PassageDisplayProps) {
 	const currentIndex = typedText.length;
 
@@ -84,8 +84,8 @@ export default function PassageText({
 							currentIndex={currentIndex}
 							typedText={typedText}
 							charRefs={charRefs}
+							shouldShake={shakeWordIndex === wordIndex}
 						/>
-						{/* shouldShake={shakeWordIndex === wordIndex} */}
 						{wordIndex < words.length - 1 ? (
 							<Space
 								spaceIndex={idx++}
