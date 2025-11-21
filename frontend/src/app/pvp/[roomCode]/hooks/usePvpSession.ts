@@ -79,8 +79,7 @@ export function usePvpSession() {
 				endMatch();
 			},
 		});
-
-		const timeoutId = setInterval(async () => {
+		async function fetchLatency() {
 			if (socket) {
 				const start = Date.now();
 				await socket
@@ -90,7 +89,9 @@ export function usePvpSession() {
 				const latency = Date.now() - start;
 				setLatency(latency);
 			}
-		}, 5000);
+		}
+		fetchLatency();
+		const timeoutId = setInterval(fetchLatency, 5000);
 
 		return () => {
 			unregister();

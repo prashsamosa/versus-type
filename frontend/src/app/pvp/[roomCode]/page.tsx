@@ -1,13 +1,17 @@
 "use client";
 import { Activity, Check, Copy, WifiOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import { socket } from "@/socket";
 import Chat from "./Chat";
 import { usePvpSession } from "./hooks/usePvpSession";
 import { Lobby } from "./Lobby";
 import { PvpGame } from "./PvpGame";
 import SocketErrorPage from "./SocketErrorPage";
+import { usePvpStore } from "./store";
 import { UsernameInput } from "./UsernameInput";
 
 export default function PvpPage() {
@@ -23,6 +27,20 @@ export default function PvpPage() {
 	} = usePvpSession();
 
 	const [copied, setCopied] = useState(false);
+
+	const router = useRouter();
+	const countdownStarted = usePvpStore((s) => s.countdownStarted);
+	const setCountdownStarted = usePvpStore((s) => s.setCountdownStarted);
+	const players = usePvpStore((s) => s.players);
+	const gameStarted = usePvpStore((s) => s.gameStarted);
+	const myUserId = authClient.useSession().data?.user.id;
+	const isHost = players[myUserId || ""]?.isHost || false;
+	const matchEnded = usePvpStore((s) => s.matchEnded);
+	const initializeNextMatchState = usePvpStore(
+		(s) => s.initializeNextMatchState,
+	);
+
+	const waitingForPlayers = Object.keys(players).length < 1; // TODO: change to 2
 
 	if (isPending) {
 		return (
@@ -54,6 +72,16 @@ export default function PvpPage() {
 		setTimeout(() => setCopied(false), 2000);
 	}
 
+	async function handleStartCountdown() {
+		if (matchEnded) initializeNextMatchState();
+		const response = await socket?.emitWithAck("pvp:start-match");
+		if (response?.success) setCountdownStarted(true);
+	}
+
+	function handleExit() {
+		router.push("/");
+	}
+
 	return (
 		<div className="flex flex-col items-center justify-start min-h-screen">
 			<div className="p-2 flex justify-between items-center w-full mb-4">
@@ -62,16 +90,30 @@ export default function PvpPage() {
 					copied={copied}
 					copyMatchLink={copyMatchLink}
 				/>
-				{disconnected ? (
-					<Badge
-						variant="outline"
-						className="text-destructive text-sm shadow-destructive/15 shadow-md"
-					>
-						<WifiOff /> Disconnected
-					</Badge>
-				) : (
-					<LatencyStatus latency={latency} />
-				)}
+				<div className="flex items-center justify-center gap-2">
+					{disconnected ? (
+						<Badge
+							variant="outline"
+							className="text-destructive text-sm shadow-destructive/15 shadow-md"
+						>
+							<WifiOff /> Disconnected
+						</Badge>
+					) : (
+						<LatencyStatus latency={latency} />
+					)}
+					<Button variant="secondary" onClick={handleExit}>
+						Exit
+					</Button>
+					{isHost && !countdownStarted && !gameStarted ? (
+						<Button onClick={handleStartCountdown} disabled={waitingForPlayers}>
+							{waitingForPlayers
+								? "Waiting for players..."
+								: matchEnded
+									? "Start Next Match"
+									: "Start Match"}
+						</Button>
+					) : null}
+				</div>
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
 				<div className="p-16">

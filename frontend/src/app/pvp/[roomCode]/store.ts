@@ -42,7 +42,8 @@ const initialState = {
 export const usePvpStore = create<PvpStore>((set) => ({
 	...initialState,
 	setPlayers: (players) => set({ players }),
-	handleStartGame: (started) => set({ gameStarted: started, countdown: null }),
+	handleStartGame: (started) =>
+		set({ gameStarted: started, countdown: null, countdownStarted: false }),
 	handleCountdownTick: (num) =>
 		set((state) => ({
 			countdown: num === 0 ? null : num,

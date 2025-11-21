@@ -96,7 +96,7 @@ export default function Passage({
 		<div
 			ref={containerRef}
 			className={
-				"max-w-3xl min-h-[13rem] overflow-hidden mx-auto transition mt-20 px-4 py-10 bg-card/50 rounded-md relative cursor-text " +
+				"max-w-3xl min-h-[17rem] overflow-hidden mx-auto transition mt-12 px-4 py-10 bg-card/50 rounded-md relative cursor-text " +
 				(disabled ? "opacity-80" : "")
 			}
 			onClick={() => {

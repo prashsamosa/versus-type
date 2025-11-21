@@ -1,43 +1,17 @@
 import { Crown, WifiOff } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
-import { socket } from "@/socket";
 import { usePvpStore } from "./store";
 
 export function Lobby() {
-	const router = useRouter();
-	const countdownStarted = usePvpStore((s) => s.countdownStarted);
-	const setCountdownStarted = usePvpStore((s) => s.setCountdownStarted);
 	const players = usePvpStore((s) => s.players);
 	const wpms = usePvpStore((s) => s.wpms);
 	const oppTypingIndexes = usePvpStore((s) => s.oppTypingIndexes);
 	const passageLength = usePvpStore((s) => s.passageLength);
 	const gameStarted = usePvpStore((s) => s.gameStarted);
 	const myUserId = authClient.useSession().data?.user.id;
-	const isHost = players[myUserId || ""]?.isHost || false;
 	const matchEnded = usePvpStore((s) => s.matchEnded);
-	const initializeNextMatchState = usePvpStore(
-		(s) => s.initializeNextMatchState,
-	);
-	const waitingForPlayers = Object.keys(players).length < 1; // TODO: change to 2
-
-	useEffect(() => {
-		if (gameStarted) setCountdownStarted(false);
-	}, [gameStarted]);
-
-	async function handleStartCountdown() {
-		if (matchEnded) initializeNextMatchState();
-		const response = await socket?.emitWithAck("pvp:start-match");
-		if (response?.success) setCountdownStarted(true);
-	}
-
-	function handleExit() {
-		router.push("/");
-	}
 
 	return (
 		<Card className="h-full p-2 gap-2 relative">
@@ -130,20 +104,6 @@ export function Lobby() {
 						</div>
 					</div>
 				))}
-			</div>
-			<div className="absolute bottom-4 right-4 flex gap-2">
-				<Button variant="destructive" onClick={handleExit}>
-					Exit
-				</Button>
-				{isHost && !countdownStarted && !gameStarted ? (
-					<Button onClick={handleStartCountdown} disabled={waitingForPlayers}>
-						{waitingForPlayers
-							? "Waiting for players..."
-							: matchEnded
-								? "Start Next Match"
-								: "Start Match"}
-					</Button>
-				) : null}
 			</div>
 		</Card>
 	);
