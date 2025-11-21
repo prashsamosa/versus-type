@@ -62,6 +62,7 @@ export const usePvpStore = create<PvpStore>((set) => ({
 			matchEnded: true,
 			gameStarted: false,
 			countdown: null,
+			countingDown: false,
 		}),
 	initializeNextMatchState: () =>
 		set((state) => ({

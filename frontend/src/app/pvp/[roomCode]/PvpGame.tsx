@@ -11,7 +11,7 @@ export function PvpGame() {
 	const [loading, setLoading] = useState(true);
 	const gameStarted = usePvpStore((s) => s.gameStarted);
 	const countdown = usePvpStore((s) => s.countdown);
-	const countdownStarted = usePvpStore((s) => s.countingDown);
+	const countingDown = usePvpStore((s) => s.countingDown);
 	const handleCountdownTick = usePvpStore((s) => s.handleCountdownTick);
 	const setPassageLength = usePvpStore((s) => s.setPassageLength);
 	const [passageConfig, setPassageConfig] = useState<GeneratorConfig | null>(
@@ -23,7 +23,6 @@ export function PvpGame() {
 		socket
 			.emitWithAck("pvp:get-passage")
 			.then((data) => {
-				console.log(data);
 				const { passage: receivedPassage, config } = data;
 				setPassage(receivedPassage);
 				setPassageLength(receivedPassage.length);
@@ -47,8 +46,8 @@ export function PvpGame() {
 	}, [socket, handleCountdownTick, setPassageLength]);
 
 	useEffect(() => {
-		if (countdownStarted) fetchPassage();
-	}, [countdownStarted]);
+		if (countingDown) fetchPassage();
+	}, [countingDown]);
 
 	if (loading) {
 		return (
@@ -60,7 +59,7 @@ export function PvpGame() {
 
 	return (
 		<div className="relative pt-12">
-			{passageConfig && !countdownStarted ? (
+			{passageConfig && !countingDown ? (
 				<div className="absolute top-10 left-3 z-10 flex justify-start items-center">
 					<Badge variant="outline" className="text-muted-foreground text-sm">
 						{/* TODO: passageConfig should include this */}
@@ -83,7 +82,7 @@ export function PvpGame() {
 			) : null}
 			<Passage words={passage.split(" ")} disabled={!gameStarted} />
 			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-				{countdownStarted ? (
+				{countingDown ? (
 					<div className="text-white flex items-center justify-center text-5xl font-bold">
 						{countdown}
 					</div>
