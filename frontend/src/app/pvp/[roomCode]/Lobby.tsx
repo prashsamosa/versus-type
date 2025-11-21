@@ -17,7 +17,11 @@ export function Lobby() {
 	return (
 		<Card className="h-full p-2 gap-2 relative">
 			<div className="border-b p-2 pb-3 flex justify-between items-center">
-				Lobby <Badge>{Object.keys(players).length} players</Badge>
+				Lobby{" "}
+				<Badge>
+					{Object.keys(players).length}{" "}
+					{Object.keys(players).length === 1 ? "player" : "players"}
+				</Badge>
 			</div>
 			<div className="flex flex-col p-2 gap-2 overflow-y-auto overflow-x-hidden">
 				{Object.entries(players).map(([userId, player]) => (

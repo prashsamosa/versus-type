@@ -1,5 +1,12 @@
 "use client";
-import { Activity, Check, Copy, WifiOff } from "lucide-react";
+import {
+	Activity,
+	Check,
+	ChevronDown,
+	ChevronUp,
+	Copy,
+	WifiOff,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +46,7 @@ export default function PvpPage() {
 	const initializeNextMatchState = usePvpStore(
 		(s) => s.initializeNextMatchState,
 	);
+	const [expanded, setExpanded] = useState(false);
 
 	const waitingForPlayers = Object.keys(players).length < 1; // TODO: change to 2
 
@@ -119,11 +127,31 @@ export default function PvpPage() {
 				<div className="p-16">
 					<PvpGame />
 				</div>
-				<div className="flex gap-4 p-4 w-full absolute bottom-0 left-0">
-					<div className="flex-1 min-h-[30vh] max-h-[30vh]">
+				<div className="flex gap-4 p-4 w-full absolute bottom-0 left-0 z-30">
+					<button
+						onClick={() => setExpanded(!expanded)}
+						className={
+							"cursor-pointer flex justify-center absolute -top-1 left-1/2 -translate-y-1/2 -translate-x-1/2 w-[95%] py-1.5 transition " +
+							(expanded
+								? "bg-card opacity-100 -top-4 rounded-md hover:bg-secondary"
+								: "opacity-40 hover:opacity-100 hover:bg-card/45 rounded-b-none rounded-t-md")
+						}
+					>
+						{expanded ? <ChevronDown /> : <ChevronUp />}
+					</button>
+					<div
+						className={
+							"flex-1 transition-all " +
+							(expanded ? "min-h-[65vh]" : "min-h-[30vh]")
+						}
+					>
 						<Lobby />
 					</div>
-					<div className="flex-1 min-h-[30vh] max-h-[30vh]">
+					<div
+						className={
+							"flex-1 transition-all " + (expanded ? "h-[65vh]" : "h-[30vh]")
+						}
+					>
 						<Chat />
 					</div>
 				</div>
@@ -167,7 +195,7 @@ function CodeCopy({
 }
 
 function LatencyStatus({ latency }: { latency: number | null }) {
-	if (!latency) return null;
+	if (latency === null) return null;
 	if (latency < 300) {
 		return (
 			<Badge variant="outline">

@@ -57,6 +57,7 @@ export default function PassageText({
 	typedText,
 	charRefs,
 	scrollOffset,
+	// shakeWordIndex,
 }: PassageDisplayProps) {
 	const currentIndex = typedText.length;
 
