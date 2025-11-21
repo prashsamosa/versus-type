@@ -1,4 +1,6 @@
+import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
 import Passage from "./Passage";
@@ -9,21 +11,24 @@ export function PvpGame() {
 	const [loading, setLoading] = useState(true);
 	const gameStarted = usePvpStore((s) => s.gameStarted);
 	const countdown = usePvpStore((s) => s.countdown);
-	const countdownStarted = usePvpStore((s) => s.countdownStarted);
+	const countdownStarted = usePvpStore((s) => s.countingDown);
 	const handleCountdownTick = usePvpStore((s) => s.handleCountdownTick);
 	const setPassageLength = usePvpStore((s) => s.setPassageLength);
+	const [passageConfig, setPassageConfig] = useState<GeneratorConfig | null>(
+		null,
+	);
 	function fetchPassage() {
-		console.log("FETCH PASSAGE CALLED");
 		if (!socket) return;
-		console.log("FETCH PASSAGE CALLED");
 		setLoading(true);
 		socket
 			.emitWithAck("pvp:get-passage")
-			.then((receivedPassage) => {
+			.then((data) => {
+				console.log(data);
+				const { passage: receivedPassage, config } = data;
 				setPassage(receivedPassage);
 				setPassageLength(receivedPassage.length);
+				setPassageConfig(config);
 				setLoading(false);
-				console.log(receivedPassage);
 			})
 			.catch(() => {
 				setLoading(false);
@@ -54,13 +59,31 @@ export function PvpGame() {
 	}
 
 	return (
-		<div className="relative">
-			<Passage
-				words={passage.split(" ")}
-				disabled={countdown !== null || !gameStarted}
-			/>
+		<div className="relative pt-12">
+			{passageConfig && !countdownStarted ? (
+				<div className="absolute top-10 left-3 z-10 flex justify-start items-center">
+					<Badge variant="outline" className="text-muted-foreground text-sm">
+						{/* TODO: passageConfig should include this */}
+						English-200
+					</Badge>
+					<Badge variant="outline" className="text-muted-foreground text-sm">
+						{passageConfig?.wordCount} Words
+					</Badge>
+					{passageConfig?.punctuation ? (
+						<Badge variant="outline" className="text-muted-foreground text-sm">
+							Punctuation
+						</Badge>
+					) : null}
+					{passageConfig?.numbers ? (
+						<Badge variant="outline" className="text-muted-foreground text-sm">
+							Numbers
+						</Badge>
+					) : null}
+				</div>
+			) : null}
+			<Passage words={passage.split(" ")} disabled={!gameStarted} />
 			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-				{countdown !== null ? (
+				{countdownStarted ? (
 					<div className="text-white flex items-center justify-center text-5xl font-bold">
 						{countdown}
 					</div>

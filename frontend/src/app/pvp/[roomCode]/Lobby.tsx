@@ -12,6 +12,7 @@ export function Lobby() {
 	const gameStarted = usePvpStore((s) => s.gameStarted);
 	const myUserId = authClient.useSession().data?.user.id;
 	const matchEnded = usePvpStore((s) => s.matchEnded);
+	const countingDown = usePvpStore((s) => s.countingDown);
 
 	return (
 		<Card className="h-full p-2 gap-2 relative">
@@ -44,7 +45,7 @@ export function Lobby() {
 						<div
 							className={
 								"flex items-center justify-end flex-2 transition duration-300 ease-in-out " +
-								(gameStarted || matchEnded
+								(countingDown || gameStarted || matchEnded
 									? player.finished
 										? "md:translate-x-[calc(var(--container-3xs)+_2rem)] translate-x-[calc(5rem+_2rem)]"
 										: ""

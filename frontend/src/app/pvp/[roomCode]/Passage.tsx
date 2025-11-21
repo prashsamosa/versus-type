@@ -26,7 +26,7 @@ export default function Passage({
 	const updateOppTypingIndex = usePvpStore((s) => s.updateOppTypingIndex);
 	const initialIndex = usePvpStore((s) => s.initialIndex);
 
-	const { typedText, finished, handleInputChange, shakeWordIndex, incorrect } =
+	const { typedText, finished, handleInputChange, incorrect } =
 		usePvpTypingState(words, initialIndex);
 
 	const [manualScrollOffset, setManualScrollOffset] = useState<number | null>(
@@ -96,7 +96,7 @@ export default function Passage({
 		<div
 			ref={containerRef}
 			className={
-				"max-w-3xl min-h-[17rem] overflow-hidden mx-auto transition mt-12 px-4 py-10 bg-card/50 rounded-md relative cursor-text " +
+				"max-w-3xl min-h-[17rem] overflow-hidden mx-auto transition px-4 py-10 bg-card/50 rounded-md relative cursor-text " +
 				(disabled ? "opacity-80" : "")
 			}
 			onClick={() => {
@@ -159,8 +159,8 @@ export default function Passage({
 				scrollOffset={
 					manualScrollOffset === null ? scrollOffset : manualScrollOffset
 				}
-				shakeWordIndex={shakeWordIndex}
 			/>
+			{/* shakeWordIndex={shakeWordIndex} */}
 
 			{!disabled && !finished ? (
 				<Cursor

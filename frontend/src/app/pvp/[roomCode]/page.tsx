@@ -29,8 +29,8 @@ export default function PvpPage() {
 	const [copied, setCopied] = useState(false);
 
 	const router = useRouter();
-	const countdownStarted = usePvpStore((s) => s.countdownStarted);
-	const setCountdownStarted = usePvpStore((s) => s.setCountdownStarted);
+	const countdownStarted = usePvpStore((s) => s.countingDown);
+	const setCountdownStarted = usePvpStore((s) => s.setCountingDown);
 	const players = usePvpStore((s) => s.players);
 	const gameStarted = usePvpStore((s) => s.gameStarted);
 	const myUserId = authClient.useSession().data?.user.id;

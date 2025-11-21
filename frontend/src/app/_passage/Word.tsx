@@ -17,12 +17,12 @@ export default function Word({
 	currentIndex,
 	typedText,
 	charRefs,
-	shouldShake = false,
+	// shouldShake = false,
 }: WordProps) {
 	let idx = startIndex;
 
-	const isWordTyped = currentIndex > idx + word.length;
-	const isWordCorrect = typedText.slice(idx, idx + word.length) === word;
+	// const isWordTyped = currentIndex > idx + word.length;
+	// const isWordCorrect = typedText.slice(idx, idx + word.length) === word;
 	const isWordPartiallyCorrect =
 		typedText.slice(idx, idx + word.length) ===
 		word.slice(0, currentIndex - idx);
@@ -60,12 +60,12 @@ export default function Word({
 						className={charClassName}
 						style={{
 							display: "inline-block",
-							animation: shouldShake
-								? "shake 0.4s ease-in-out"
-								: isWordTyped && isWordCorrect
-									? // ? passageTransforms[wordIndex][charIndex]
-										"charBounce 0.3s"
-									: "none",
+							// animation: shouldShake
+							// 	? "shake 0.4s ease-in-out"
+							// 	: isWordTyped && isWordCorrect
+							// 		? // ? passageTransforms[wordIndex][charIndex]
+							// 			"charBounce 0.3s"
+							// 		: "none",
 							willChange: "transform",
 						}}
 					>
