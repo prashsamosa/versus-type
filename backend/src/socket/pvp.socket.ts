@@ -95,7 +95,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				console.warn(`Room ${roomCode} not found in DB when hosting`);
 				return callback({
 					success: false,
-					message: `Room ${roomCode} not found in DB`,
+					message: `Room ${roomCode} not found`,
 				});
 			}
 			roomState = {
@@ -244,6 +244,16 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	});
 
 	socket.on("pvp:start-match", async (callback) => {
+		if (!socket.data.isHost) {
+			callback({
+				success: false,
+				message: "Only the host can start the match",
+			});
+			console.warn(
+				`Non-host player ${socket.id}(${socket.data.username}) tryna start match`,
+			);
+			return;
+		}
 		const roomCode = socket.data.roomCode;
 		if (!roomCode) {
 			callback({
@@ -368,8 +378,9 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("pvp:get-passage", (callback) => {
 		console.log("pvp:get-passage called by", socket.data.userId);
 		const roomCode = socket.data.roomCode;
-		if (!roomCode || !roomStates[roomCode]) return callback("");
-		callback(roomStates[roomCode].passage);
+		if (!roomCode || !roomStates[roomCode])
+			return callback({ passage: "", config: passageConfig });
+		callback({ passage: roomStates[roomCode].passage, config: passageConfig });
 	});
 }
 

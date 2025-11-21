@@ -1,4 +1,5 @@
 import type { Server, Socket } from "socket.io";
+import type { GeneratorConfig } from "../passage-generator";
 
 export type ChatMessage = {
 	username: string;
@@ -68,7 +69,9 @@ export interface ClientToServerEvents {
 	) => void;
 	"pvp:key-press": (key: string) => void;
 	"pvp:backspace": (amount: number) => void;
-	"pvp:get-passage": (callback: (passage: string) => void) => void;
+	"pvp:get-passage": (
+		callback: (data: { passage: string; config: GeneratorConfig }) => void,
+	) => void;
 	ping: (callback: () => void) => void;
 	"pvp:join": (
 		data: {
