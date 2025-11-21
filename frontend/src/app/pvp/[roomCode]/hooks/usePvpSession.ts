@@ -19,9 +19,10 @@ export function usePvpSession() {
 	});
 	const { data: session, isPending } = authClient.useSession();
 	const [hasSignedIn, setHasSignedIn] = useState(false);
+	const endMatch = usePvpStore((s) => s.endMatch);
 
 	const setPlayers = usePvpStore((s) => s.setPlayers);
-	const setGameStarted = usePvpStore((s) => s.setGameStarted);
+	const setGameStarted = usePvpStore((s) => s.handleStartGame);
 	const setInitialIndex = usePvpStore((s) => s.setInitialIndex);
 	const setWpms = usePvpStore((s) => s.setWpms);
 	const players = usePvpStore((s) => s.players);
@@ -74,6 +75,9 @@ export function usePvpSession() {
 			disconnect: () => {
 				setDisconnected(true);
 			},
+			"pvp:match-ended": () => {
+				endMatch();
+			},
 		});
 
 		const timeoutId = setInterval(async () => {
@@ -105,7 +109,6 @@ export function usePvpSession() {
 		latency,
 		players,
 		gameStarted,
-		setGameStarted,
 		initialIndex,
 		disconnected,
 	};

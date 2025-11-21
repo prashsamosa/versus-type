@@ -1,5 +1,6 @@
 import { Crown, WifiOff } from "lucide-react";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,7 +9,9 @@ import { socket } from "@/socket";
 import { usePvpStore } from "./store";
 
 export function Lobby() {
-	const [countdownStarted, setCountdownStarted] = useState(false);
+	const router = useRouter();
+	const countdownStarted = usePvpStore((s) => s.countdownStarted);
+	const setCountdownStarted = usePvpStore((s) => s.setCountdownStarted);
 	const players = usePvpStore((s) => s.players);
 	const wpms = usePvpStore((s) => s.wpms);
 	const oppTypingIndexes = usePvpStore((s) => s.oppTypingIndexes);
@@ -16,10 +19,24 @@ export function Lobby() {
 	const gameStarted = usePvpStore((s) => s.gameStarted);
 	const myUserId = authClient.useSession().data?.user.id;
 	const isHost = players[myUserId || ""]?.isHost || false;
+	const matchEnded = usePvpStore((s) => s.matchEnded);
+	const initializeNextMatchState = usePvpStore(
+		(s) => s.initializeNextMatchState,
+	);
+	const waitingForPlayers = Object.keys(players).length < 1; // TODO: change to 2
+
+	useEffect(() => {
+		if (gameStarted) setCountdownStarted(false);
+	}, [gameStarted]);
 
 	async function handleStartCountdown() {
+		if (matchEnded) initializeNextMatchState();
 		const response = await socket?.emitWithAck("pvp:start-match");
 		if (response?.success) setCountdownStarted(true);
+	}
+
+	function handleExit() {
+		router.push("/");
 	}
 
 	return (
@@ -53,7 +70,11 @@ export function Lobby() {
 						<div
 							className={
 								"flex items-center justify-end flex-2 transition duration-300 ease-in-out " +
-								(gameStarted ? "" : "translate-x-full")
+								(gameStarted || matchEnded
+									? player.finished
+										? "md:translate-x-[calc(var(--container-3xs)+_2rem)] translate-x-[calc(5rem+_2rem)]"
+										: ""
+									: "translate-x-full")
 							}
 						>
 							<div className="flex items-center gap-2 min-w-[80px] justify-end">
@@ -97,24 +118,31 @@ export function Lobby() {
 									</Badge>
 								) : null}
 							</div>
-							{player.finished ? null : (
-								<div className="md:w-3xs w-[5rem] mx-4 bg-muted rounded h-2 overflow-hidden ">
-									<div
-										className="h-full bg-accent transition-all duration-100 rounded"
-										style={{
-											width: `calc(${((oppTypingIndexes[userId] ?? player.typingIndex) / Math.max(1, passageLength)) * 100}%)`,
-											backgroundColor: player.color || "#666",
-										}}
-									/>
-								</div>
-							)}
+							<div className="md:w-3xs w-[5rem] mx-4 bg-muted rounded h-2 overflow-hidden ">
+								<div
+									className="h-full bg-accent transition-all duration-100 rounded"
+									style={{
+										width: `calc(${((oppTypingIndexes[userId] ?? player.typingIndex) / Math.max(1, passageLength)) * 100}%)`,
+										backgroundColor: player.color || "#666",
+									}}
+								/>
+							</div>
 						</div>
 					</div>
 				))}
 			</div>
-			<div className="absolute bottom-4 right-4">
-				{isHost && !countdownStarted ? (
-					<Button onClick={handleStartCountdown}>Start Match</Button>
+			<div className="absolute bottom-4 right-4 flex gap-2">
+				<Button variant="destructive" onClick={handleExit}>
+					Exit
+				</Button>
+				{isHost && !countdownStarted && !gameStarted ? (
+					<Button onClick={handleStartCountdown} disabled={waitingForPlayers}>
+						{waitingForPlayers
+							? "Waiting for players..."
+							: matchEnded
+								? "Start Next Match"
+								: "Start Match"}
+					</Button>
 				) : null}
 			</div>
 		</Card>

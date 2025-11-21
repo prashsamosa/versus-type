@@ -8,31 +8,42 @@ export function PvpGame() {
 	const [passage, setPassage] = useState<string>("");
 	const [loading, setLoading] = useState(true);
 	const gameStarted = usePvpStore((s) => s.gameStarted);
-	const setGameStarted = usePvpStore((s) => s.setGameStarted);
 	const countdown = usePvpStore((s) => s.countdown);
-	const setCountdown = usePvpStore((s) => s.setCountdown);
+	const countdownStarted = usePvpStore((s) => s.countdownStarted);
+	const handleCountdownTick = usePvpStore((s) => s.handleCountdownTick);
 	const setPassageLength = usePvpStore((s) => s.setPassageLength);
-
-	useEffect(() => {
-		if (!gameStarted && countdown === 0) {
-			setGameStarted(true);
-		}
-	}, [gameStarted, countdown, setGameStarted]);
+	function fetchPassage() {
+		console.log("FETCH PASSAGE CALLED");
+		if (!socket) return;
+		console.log("FETCH PASSAGE CALLED");
+		setLoading(true);
+		socket
+			.emitWithAck("pvp:get-passage")
+			.then((receivedPassage) => {
+				setPassage(receivedPassage);
+				setPassageLength(receivedPassage.length);
+				setLoading(false);
+				console.log(receivedPassage);
+			})
+			.catch(() => {
+				setLoading(false);
+			});
+	}
 
 	useEffect(() => {
 		if (!socket) return;
-		socket.emitWithAck("pvp:get-passage").then((receivedPassage) => {
-			setPassage(receivedPassage);
-			setPassageLength(receivedPassage.length);
-			setLoading(false);
-		});
+		fetchPassage();
 		const unregister = registerSocketHandlers(socket, {
 			"pvp:countdown": (num) => {
-				setCountdown(num);
+				handleCountdownTick(num);
 			},
 		});
 		return unregister;
-	}, [socket, setCountdown, setPassageLength]);
+	}, [socket, handleCountdownTick, setPassageLength]);
+
+	useEffect(() => {
+		if (countdownStarted) fetchPassage();
+	}, [countdownStarted]);
 
 	if (loading) {
 		return (
@@ -44,9 +55,12 @@ export function PvpGame() {
 
 	return (
 		<div className="relative">
-			<Passage words={passage.split(" ")} disabled={!gameStarted} />
+			<Passage
+				words={passage.split(" ")}
+				disabled={countdown !== null || !gameStarted}
+			/>
 			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-				{!gameStarted ? (
+				{countdown !== null ? (
 					<div className="text-white flex items-center justify-center text-5xl font-bold">
 						{countdown}
 					</div>
