@@ -20,6 +20,7 @@ type PvpStore = {
 	matchEnded: boolean;
 	endMatch: () => void;
 	initializeNextMatchState: () => void;
+	resetStore: () => void;
 	matchesPlayed: number;
 	countingDown: boolean;
 	setCountingDown: (started: boolean) => void;
@@ -68,9 +69,20 @@ export const usePvpStore = create<PvpStore>((set) => ({
 	initializeNextMatchState: () =>
 		set((state) => ({
 			...initialState,
-			players: state.players,
 			matchStarted: false,
 			matchEnded: false,
+			players: Object.entries(state.players).reduce((acc, [userId, player]) => {
+				acc[userId] = {
+					...player,
+					typingIndex: 0,
+					finished: false,
+					accuracy: undefined,
+					ordinal: undefined,
+					wpm: undefined,
+				};
+				return acc;
+			}, {} as LobbyInfo),
 		})),
 	setCountingDown: (started) => set({ countingDown: started }),
+	resetStore: () => set(initialState),
 }));

@@ -8,7 +8,7 @@ import {
 	WifiOff,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
@@ -46,7 +46,14 @@ export default function PvpPage() {
 	const initializeNextMatchState = usePvpStore(
 		(s) => s.initializeNextMatchState,
 	);
+	const resetStore = usePvpStore((s) => s.resetStore);
 	const [expanded, setExpanded] = useState(false);
+
+	useEffect(() => {
+		return () => {
+			resetStore();
+		};
+	}, [resetStore]);
 
 	const waitingForPlayers = Object.keys(players).length < 1; // TODO: change to 2
 
