@@ -5,7 +5,7 @@ type PvpStore = {
 	players: LobbyInfo;
 	setPlayers: (players: LobbyInfo) => void;
 	matchStarted: boolean;
-	handleStartGame: (started: boolean) => void;
+	handleStartMatch: (started: boolean) => void;
 	countdown: number | null;
 	handleCountdownTick: (num: number | null) => void;
 	wpms: WpmInfo;
@@ -42,12 +42,13 @@ const initialState = {
 export const usePvpStore = create<PvpStore>((set) => ({
 	...initialState,
 	setPlayers: (players) => set({ players }),
-	handleStartGame: (started) =>
+	handleStartMatch: (started) =>
 		set({ matchStarted: started, countdown: null, countingDown: false }),
 	handleCountdownTick: (num) =>
 		set((state) => ({
 			countdown: num === 0 ? null : num,
 			matchStarted: num === 0 ? true : state.matchStarted,
+			countingDown: num !== null && num > 0,
 		})),
 	setWpms: (wpms) => set({ wpms }),
 	setOppTypingIndexes: (indexes) => set({ oppTypingIndexes: indexes }),
@@ -71,6 +72,5 @@ export const usePvpStore = create<PvpStore>((set) => ({
 			matchStarted: false,
 			matchEnded: false,
 		})),
-	setCountingDown: (started) =>
-		set({ countingDown: started, oppTypingIndexes: {} }),
+	setCountingDown: (started) => set({ countingDown: started }),
 }));

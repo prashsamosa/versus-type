@@ -60,15 +60,14 @@ export function Lobby() {
 									<Badge variant="secondary" className="mt-0.5">
 										<WifiOff />
 									</Badge>
-								) : null}
-								{player.spectator ? (
+								) : player.spectator ? (
 									<Badge variant="secondary" className="mt-0.5">
 										<Eye />
 									</Badge>
 								) : null}
 							</div>
 						</div>
-						{player.spectator ? null : (
+						{player.spectator || player.disconnected ? null : (
 							<div
 								className={
 									"flex items-center justify-end flex-2 transition duration-300 ease-in-out " +

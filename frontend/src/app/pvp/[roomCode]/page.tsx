@@ -37,7 +37,7 @@ export default function PvpPage() {
 
 	const router = useRouter();
 	const countingDown = usePvpStore((s) => s.countingDown);
-	const setCountdownStarted = usePvpStore((s) => s.setCountingDown);
+	const setCountingDown = usePvpStore((s) => s.setCountingDown);
 	const players = usePvpStore((s) => s.players);
 	const matchStarted = usePvpStore((s) => s.matchStarted);
 	const myUserId = authClient.useSession().data?.user.id;
@@ -83,7 +83,10 @@ export default function PvpPage() {
 	async function handleStartCountdown() {
 		if (matchEnded) initializeNextMatchState();
 		const response = await socket?.emitWithAck("pvp:start-match");
-		if (response?.success) setCountdownStarted(true);
+		console.log("Start match response:", response);
+		if (response?.success) {
+			setCountingDown(true);
+		}
 	}
 
 	function handleExit() {
