@@ -186,6 +186,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				callback({
 					success: true,
 					message: `Joined room ${roomCode}`,
+					isStarted: roomStates[roomCode].isMatchStarted,
 				});
 			}
 		}
@@ -288,13 +289,14 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 
 	socket.on("pvp:key-press", (key: string) => {
 		const roomCode = socket.data.roomCode;
-		if (!roomCode || !roomStates[roomCode]?.isMatchStarted) {
+		const roomState = roomStates[roomCode!];
+		if (!roomCode || !roomState?.isMatchStarted) {
 			console.warn(
 				`lol ${socket.data.userId} tryna cheat by sending key-press before starting match`,
 			);
 			return;
 		}
-		const player = roomStates[roomCode].players[socket.data.userId];
+		const player = roomState.players[socket.data.userId];
 		if (player.finished) return;
 
 		if (player.spectator) {
@@ -303,7 +305,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
-		const passage = roomStates[roomCode].passage;
+		const passage = roomState.passage;
 
 		if (!player.startedAt) player.startedAt = Date.now();
 
@@ -321,13 +323,21 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				sendWpmUpdate(io, roomCode);
 				player.timeTyped = Date.now() - player.startedAt;
 
-				const maxOrdinal = Object.values(roomStates[roomCode].players).reduce(
+				const maxOrdinal = Object.values(roomState.players).reduce(
 					(max, pl) => (pl.ordinal && pl.ordinal > max ? pl.ordinal : max),
 					0,
 				);
 				player.ordinal = maxOrdinal + 1;
 				if (
-					player.ordinal === Object.keys(roomStates[roomCode].players).length
+					player.ordinal ===
+					Object.keys(roomState.players).reduce(
+						(count, userId) =>
+							roomState.players[userId].spectator ||
+							roomState.players[userId].disconnected
+								? count
+								: count + 1,
+						0,
+					) // number of 'actually playing' players
 				) {
 					// LAST PLAYER FINISHED
 					endMatch(roomCode, io);
