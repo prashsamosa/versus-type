@@ -52,6 +52,7 @@ export default function Passage({
 
 	const userId = authClient.useSession()?.data?.user?.id;
 	const color = players[userId || ""]?.color || "black";
+	const isSpectator = players[userId || ""]?.spectator ?? false;
 
 	const hiddenInputRef = useRef<HTMLInputElement>(null);
 
@@ -162,7 +163,7 @@ export default function Passage({
 				shakeWordIndex={shakeWordIndex}
 			/>
 
-			{!disabled && !finished ? (
+			{!disabled && !finished && !isSpectator ? (
 				<Cursor
 					x={cursorPos.x}
 					y={cursorPos.y}
@@ -171,7 +172,7 @@ export default function Passage({
 					glow={incorrect}
 				/>
 			) : null}
-			{!disabled
+			{!disabled || isSpectator
 				? Object.entries(oppCursorPoses).map(([oppId, pos]) => {
 						if (oppId === userId || players[oppId]?.finished) return null;
 						return (

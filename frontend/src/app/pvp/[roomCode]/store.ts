@@ -71,5 +71,6 @@ export const usePvpStore = create<PvpStore>((set) => ({
 			gameStarted: false,
 			matchEnded: false,
 		})),
-	setCountingDown: (started) => set({ countingDown: started }),
+	setCountingDown: (started) =>
+		set({ countingDown: started, oppTypingIndexes: {} }),
 }));

@@ -22,7 +22,7 @@ export function usePvpSession() {
 	const endMatch = usePvpStore((s) => s.endMatch);
 
 	const setPlayers = usePvpStore((s) => s.setPlayers);
-	const setGameStarted = usePvpStore((s) => s.handleStartGame);
+	const handleStartGame = usePvpStore((s) => s.handleStartGame);
 	const setInitialIndex = usePvpStore((s) => s.setInitialIndex);
 	const setWpms = usePvpStore((s) => s.setWpms);
 	const players = usePvpStore((s) => s.players);
@@ -55,7 +55,7 @@ export function usePvpSession() {
 				if (!response.success) {
 					setSocketError(response.message ?? "Failed to join match");
 				} else {
-					setGameStarted(!!response.isStarted);
+					handleStartGame(!!response.isStarted);
 					setInitialIndex(response.typingIndex ?? 0);
 				}
 			})
