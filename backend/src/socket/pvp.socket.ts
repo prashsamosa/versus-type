@@ -223,12 +223,12 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				console.warn(`disconnect: roomStates[${roomCode}] not found`);
 				return;
 			}
+			const roomState = roomStates[roomCode];
 			const room = io.sockets.adapter.rooms.get(roomCode);
-			const disconnectedPlayer =
-				roomStates[roomCode].players[socket.data.userId];
+			const disconnectedPlayer = roomState.players[socket.data.userId];
 			if (!room || room.size === 0) {
 				console.log(`Room ${roomCode} has closed`);
-				if (roomStates[roomCode]?.status !== "closed") {
+				if (roomState?.status !== "closed") {
 					closeRoom(roomCode, io);
 					// deleting rooms immediately.
 					// alternative: update status to 'closed', setup cron job or setTimeout to delete closed rooms
@@ -250,8 +250,8 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					if (newHostSocket) {
 						const newHostUserId = newHostSocket.data.userId;
 						newHostSocket.data.isHost = true;
-						roomStates[roomCode].hostId = newHostUserId;
-						roomStates[roomCode].players[newHostUserId].isHost = true;
+						roomState.hostId = newHostUserId;
+						roomState.players[newHostUserId].isHost = true;
 						disconnectedPlayer.isHost = false;
 						console.log(
 							`Player ${newHostSocket.id}(${newHostSocket.data.username}) is the new host of the room ${roomCode}`,
@@ -263,8 +263,17 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 						});
 					}
 				}
+				disconnectedPlayer.disconnected = true;
+				if (
+					roomState.isMatchStarted &&
+					!disconnectedPlayer.finished &&
+					!disconnectedPlayer.spectator &&
+					typingPlayerCount(roomCode) === 0
+				) {
+					// LAST TYPING PLAYER DISCONNECTED
+					endMatch(roomCode, io);
+				}
 			}
-			disconnectedPlayer.disconnected = true;
 			sendLobbyUpdate(io, roomCode);
 		}
 		console.log(`Player ${socket.id}(${username}) disconnected`);
@@ -358,17 +367,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					0,
 				);
 				player.ordinal = maxOrdinal + 1;
-				if (
-					player.ordinal ===
-					Object.keys(roomState.players).reduce(
-						(count, userId) =>
-							roomState.players[userId].spectator ||
-							roomState.players[userId].disconnected
-								? count
-								: count + 1,
-						0,
-					) // number of 'actually playing' players
-				) {
+				if (player.ordinal === participantCount(roomCode)) {
 					// LAST PLAYER FINISHED
 					endMatch(roomCode, io);
 				}
@@ -435,6 +434,7 @@ function reinitializeRoomState(roomCode: string) {
 	const resetedPlayers: { [userId: string]: PlayerState } = {};
 	for (const userId in roomState.players) {
 		const player = roomState.players[userId];
+		if (player.disconnected) continue; // clear disconnectd players
 		resetedPlayers[userId] = {
 			...initialPlayerState,
 			isHost: player.isHost,
@@ -489,7 +489,7 @@ async function startCountdown(io: ioServer, roomCode: string) {
 		countdown--;
 		io.to(roomCode).emit("pvp:countdown", countdown);
 		if (countdown === 0) {
-			roomStates[roomCode].isMatchStarted = true;
+			if (roomStates[roomCode]) roomStates[roomCode].isMatchStarted = true;
 			clearInterval(countdownInterval);
 		}
 	}, 1000);
@@ -650,6 +650,32 @@ function toPlayersInfo(players: { [userId: string]: PlayerState }) {
 		};
 	}
 	return info;
+}
+
+function participantCount(roomCode: string): number {
+	const roomState = roomStates[roomCode];
+	return Object.keys(roomState.players).reduce(
+		(count, userId) =>
+			roomState.players[userId].spectator ||
+			(roomState.players[userId].disconnected &&
+				!roomState.players[userId].finished)
+				? count
+				: count + 1,
+		0,
+	);
+}
+
+function typingPlayerCount(roomCode: string): number {
+	const roomState = roomStates[roomCode];
+	return Object.keys(roomState.players).reduce(
+		(count, userId) =>
+			roomState.players[userId].spectator ||
+			roomState.players[userId].disconnected ||
+			roomState.players[userId].finished
+				? count
+				: count + 1,
+		0,
+	);
 }
 
 function getRandomColor(roomCode: string) {
