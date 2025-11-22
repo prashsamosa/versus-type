@@ -73,6 +73,7 @@ const initialPlayerState = {
 	spectator: false,
 	accState: resetAccuracy(),
 	incorrectIdx: null,
+	timeTyped: 0,
 } satisfies Partial<PlayerState>;
 
 export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
@@ -148,7 +149,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		);
 
 		const player = roomStates[roomCode].players[socket.data.userId];
-		// TODO: in future, allow reconnection of the HOST too, ie, room won't close immediately if last one leaves
+		// TODO: allow reconnection of the HOST too, ie, room won't close immediately if last one leaves
 		if (isHost) {
 			roomState.passage = generateWords(passageConfig).join(" ");
 			callback({
@@ -197,6 +198,15 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				color: getRandomColor(roomCode),
 			};
 		}
+		// send progress updates to mid-game joiners
+		if (roomState.isMatchStarted) {
+			for (const [userId, p] of Object.entries(roomState.players)) {
+				socket.emit("pvp:progress-update", {
+					userId,
+					typingIndex: p.typingIndex,
+				});
+			}
+		}
 		sendChatHistory(socket, roomCode);
 		sendLobbyUpdate(io, roomCode);
 	});
@@ -228,21 +238,21 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			} else {
 				if (socket.data.isHost) {
 					// change host
-					let newHostId: string | null = null;
+					let newHostSocketId: string | null = null;
 					for (const memberId of room) {
 						if (memberId !== socket.id) {
-							newHostId = memberId;
+							newHostSocketId = memberId;
 							break;
 						}
 					}
-					if (!newHostId) return;
+					if (!newHostSocketId) return;
 
-					const newHostSocket = io.sockets.sockets.get(newHostId);
+					const newHostSocket = io.sockets.sockets.get(newHostSocketId);
 					if (newHostSocket) {
 						const newHostUserId = newHostSocket.data.userId;
 						newHostSocket.data.isHost = true;
 						roomStates[roomCode].hostId = newHostUserId;
-						roomStates[roomCode].players[newHostId].isHost = true;
+						roomStates[roomCode].players[newHostUserId].isHost = true;
 						disconnectedPlayer.isHost = false;
 						console.log(
 							`Player ${newHostSocket.id}(${newHostSocket.data.username}) is the new host of the room ${roomCode}`,
@@ -283,7 +293,8 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
-		if (roomStates[roomCode].isMatchStarted) {
+		const roomState = roomStates[roomCode];
+		if (roomState.isMatchStarted) {
 			callback({
 				success: false,
 				message: "Match already started",
@@ -296,12 +307,15 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			message: "Starting countdown",
 		});
 		reinitializeRoomState(roomCode);
-		io.to(roomCode).emit(
-			"pvp:lobby-update",
-			toPlayersInfo(roomStates[roomCode].players),
-		);
+		io.to(roomCode).emit("pvp:lobby-update", toPlayersInfo(roomState.players));
 		startCountdown(io, roomCode);
 		startWpmUpdates(io, roomCode);
+		for (const [userId, p] of Object.entries(roomState.players)) {
+			socket.emit("pvp:progress-update", {
+				userId,
+				typingIndex: p.typingIndex, // = 0 after reinitialize
+			});
+		}
 	});
 
 	socket.on("pvp:key-press", (key: string) => {
@@ -428,6 +442,7 @@ function reinitializeRoomState(roomCode: string) {
 			username: player.username,
 			spectator: false,
 			color: player.color,
+			disconnected: player.disconnected,
 		};
 	}
 	roomState.players = resetedPlayers;
