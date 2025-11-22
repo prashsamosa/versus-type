@@ -157,6 +157,13 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				message: `Room hosted with code ${roomCode}`,
 			});
 		} else {
+			const oppTypingIndexes = roomState.isMatchStarted
+				? Object.fromEntries(
+						Object.entries(roomState.players)
+							.filter(([userId, _]) => userId !== socket.data.userId)
+							.map(([userId, p]) => [userId, p.typingIndex]),
+					)
+				: undefined;
 			if (player) {
 				// reconnecting player
 				player.disconnected = false;
@@ -174,6 +181,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					message: `Reconnected to room ${roomCode}`,
 					isStarted: roomStates[roomCode].isMatchStarted,
 					typingIndex: player.typingIndex,
+					oppTypingIndexes,
 				});
 			} else {
 				emitNewMessage(io, roomCode, {
@@ -184,7 +192,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				callback({
 					success: true,
 					message: `Joined room ${roomCode}`,
-					isStarted: roomStates[roomCode].isMatchStarted,
+					oppTypingIndexes,
 				});
 			}
 		}
@@ -197,15 +205,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				spectator: roomState.isMatchStarted,
 				color: getRandomColor(roomCode),
 			};
-		}
-		// send progress updates to mid-game joiners
-		if (roomState.isMatchStarted) {
-			for (const [userId, p] of Object.entries(roomState.players)) {
-				socket.emit("pvp:progress-update", {
-					userId,
-					typingIndex: p.typingIndex,
-				});
-			}
 		}
 		sendChatHistory(socket, roomCode);
 		sendLobbyUpdate(io, roomCode);

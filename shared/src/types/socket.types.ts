@@ -32,6 +32,7 @@ export type JoinResponse = {
 	message?: string;
 	isStarted?: boolean;
 	typingIndex?: number;
+	oppTypingIndexes?: { [userId: string]: number };
 };
 
 export type WpmInfo = {
