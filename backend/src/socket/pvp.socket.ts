@@ -105,14 +105,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				isMatchStarted: false,
 				isMatchEnded: false,
 				dbId,
-				players: {
-					[socket.data.userId]: {
-						...initialPlayerState,
-						isHost: true,
-						username: username || "<Unknown>",
-						color: getRandomColor(roomCode),
-					},
-				},
+				players: {},
 			};
 			roomStates[roomCode] = roomState; // have to reassign, coz its undefined before
 		}
@@ -154,6 +147,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				: `Player ${socket.id}(${username}) joined match with code ${roomCode}`,
 		);
 
+		const player = roomStates[roomCode].players[socket.data.userId];
 		// TODO: in future, allow reconnection of the HOST too, ie, room won't close immediately if last one leaves
 		if (isHost) {
 			roomState.passage = generateWords(passageConfig).join(" ");
@@ -162,9 +156,13 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				message: `Room hosted with code ${roomCode}`,
 			});
 		} else {
-			if (roomStates[roomCode].players[socket.data.userId]) {
+			if (player) {
 				// reconnecting player
-				roomStates[roomCode].players[socket.data.userId].disconnected = false;
+				player.disconnected = false;
+				if (roomStates[roomCode].isMatchStarted && !player.typingIndex) {
+					// only set spectator if player hasn't typed yet
+					player.spectator = true;
+				}
 				emitNewMessage(io, roomCode, {
 					username: "",
 					message: `${username ?? "<Unknown>"} is back`,
@@ -174,8 +172,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					success: true,
 					message: `Reconnected to room ${roomCode}`,
 					isStarted: roomStates[roomCode].isMatchStarted,
-					typingIndex:
-						roomStates[roomCode].players[socket.data.userId].typingIndex,
+					typingIndex: player.typingIndex,
 				});
 			} else {
 				emitNewMessage(io, roomCode, {
@@ -191,8 +188,17 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			}
 		}
 
+		if (!player) {
+			roomState.players[socket.data.userId] = {
+				...initialPlayerState,
+				isHost: isHost,
+				username: username || "<Unknown>",
+				spectator: roomState.isMatchStarted,
+				color: getRandomColor(roomCode),
+			};
+		}
 		sendChatHistory(socket, roomCode);
-		updateLobby(io, roomCode);
+		sendLobbyUpdate(io, roomCode);
 	});
 
 	socket.on("disconnect", () => {
@@ -204,7 +210,13 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				message: `${username ?? "<Unknown>"} disconnected`,
 				system: true,
 			});
+			if (!roomStates[roomCode]) {
+				console.warn(`disconnect: roomStates[${roomCode}] not found`);
+				return;
+			}
 			const room = io.sockets.adapter.rooms.get(roomCode);
+			const disconnectedPlayer =
+				roomStates[roomCode].players[socket.data.userId];
 			if (!room || room.size === 0) {
 				console.log(`Room ${roomCode} has closed`);
 				if (roomStates[roomCode]?.status !== "closed") {
@@ -227,7 +239,11 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 
 					const newHostSocket = io.sockets.sockets.get(newHostId);
 					if (newHostSocket) {
+						const newHostUserId = newHostSocket.data.userId;
 						newHostSocket.data.isHost = true;
+						roomStates[roomCode].hostId = newHostUserId;
+						roomStates[roomCode].players[newHostId].isHost = true;
+						disconnectedPlayer.isHost = false;
 						console.log(
 							`Player ${newHostSocket.id}(${newHostSocket.data.username}) is the new host of the room ${roomCode}`,
 						);
@@ -239,7 +255,8 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					}
 				}
 			}
-			updateLobby(io, roomCode, socket.data.userId);
+			disconnectedPlayer.disconnected = true;
+			sendLobbyUpdate(io, roomCode);
 		}
 		console.log(`Player ${socket.id}(${username}) disconnected`);
 	});
@@ -343,7 +360,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					endMatch(roomCode, io);
 				}
 
-				updateLobby(io, roomCode);
+				sendLobbyUpdate(io, roomCode);
 			}
 			io.to(roomCode).emit("pvp:progress-update", {
 				userId: socket.data.userId ?? socket.id,
@@ -485,37 +502,9 @@ async function deleteRoomFromDB(roomCode: string) {
 	delete roomStates[roomCode];
 }
 
-function updateLobby(io: ioServer, roomCode: string, disconnectedId?: string) {
-	// TODO: just emit room[roomCode].players directly. update the states when events happen directly
-	const room = io.sockets.adapter.rooms.get(roomCode);
-	if (!room) return;
-	for (const memberId of room) {
-		const memberSocket = io.sockets.sockets.get(memberId);
-		if (memberSocket) {
-			if (!roomStates[roomCode].players[memberSocket.data.userId]) {
-				roomStates[roomCode].players[memberSocket.data.userId] = {
-					...initialPlayerState,
-					isHost: memberSocket.data.isHost || false,
-					username: memberSocket.data.username || "<Unknown>",
-					spectator: roomStates[roomCode].isMatchStarted ?? false,
-					color: getRandomColor(roomCode),
-				};
-			} else {
-				// things that can update
-				// host change
-				if (
-					memberSocket.data.isHost !==
-					roomStates[roomCode].players[memberSocket.data.userId].isHost
-				) {
-					roomStates[roomCode].players[memberSocket.data.userId].isHost =
-						memberSocket.data.isHost || false;
-				}
-			}
-		}
-	}
-	if (disconnectedId) {
-		roomStates[roomCode].players[disconnectedId].disconnected = true;
-		roomStates[roomCode].players[disconnectedId].isHost = false;
+function sendLobbyUpdate(io: ioServer, roomCode: string) {
+	if (!roomStates[roomCode]) {
+		console.warn(`sendLobbyUpdate: roomState for ${roomCode} not found`);
 	}
 	io.to(roomCode).emit(
 		"pvp:lobby-update",
