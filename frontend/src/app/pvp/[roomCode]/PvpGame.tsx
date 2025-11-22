@@ -9,7 +9,7 @@ import { usePvpStore } from "./store";
 export function PvpGame() {
 	const [passage, setPassage] = useState<string>("");
 	const [loading, setLoading] = useState(true);
-	const gameStarted = usePvpStore((s) => s.gameStarted);
+	const matchStarted = usePvpStore((s) => s.matchStarted);
 	const countdown = usePvpStore((s) => s.countdown);
 	const countingDown = usePvpStore((s) => s.countingDown);
 	const handleCountdownTick = usePvpStore((s) => s.handleCountdownTick);
@@ -80,7 +80,7 @@ export function PvpGame() {
 					) : null}
 				</div>
 			) : null}
-			<Passage words={passage.split(" ")} disabled={!gameStarted} />
+			<Passage words={passage.split(" ")} disabled={!matchStarted} />
 			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
 				{countingDown ? (
 					<div className="text-white flex items-center justify-center text-5xl font-bold">

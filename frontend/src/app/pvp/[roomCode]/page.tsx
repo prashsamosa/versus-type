@@ -39,7 +39,7 @@ export default function PvpPage() {
 	const countingDown = usePvpStore((s) => s.countingDown);
 	const setCountdownStarted = usePvpStore((s) => s.setCountingDown);
 	const players = usePvpStore((s) => s.players);
-	const gameStarted = usePvpStore((s) => s.gameStarted);
+	const matchStarted = usePvpStore((s) => s.matchStarted);
 	const myUserId = authClient.useSession().data?.user.id;
 	const isHost = players[myUserId || ""]?.isHost || false;
 	const matchEnded = usePvpStore((s) => s.matchEnded);
@@ -112,7 +112,7 @@ export default function PvpPage() {
 					<Button variant="secondary" onClick={handleExit}>
 						Exit
 					</Button>
-					{isHost && !countingDown && !gameStarted ? (
+					{isHost && !countingDown && !matchStarted ? (
 						<Button onClick={handleStartCountdown} disabled={waitingForPlayers}>
 							{waitingForPlayers
 								? "Waiting for players..."

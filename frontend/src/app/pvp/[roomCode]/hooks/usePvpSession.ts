@@ -26,7 +26,7 @@ export function usePvpSession() {
 	const setInitialIndex = usePvpStore((s) => s.setInitialIndex);
 	const setWpms = usePvpStore((s) => s.setWpms);
 	const players = usePvpStore((s) => s.players);
-	const gameStarted = usePvpStore((s) => s.gameStarted);
+	const matchStarted = usePvpStore((s) => s.matchStarted);
 	const initialIndex = usePvpStore((s) => s.initialIndex);
 
 	useEffect(() => {
@@ -109,7 +109,7 @@ export function usePvpSession() {
 		isPending,
 		latency,
 		players,
-		gameStarted,
+		matchStarted,
 		initialIndex,
 		disconnected,
 	};

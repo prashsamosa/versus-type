@@ -4,7 +4,7 @@ import { create } from "zustand";
 type PvpStore = {
 	players: LobbyInfo;
 	setPlayers: (players: LobbyInfo) => void;
-	gameStarted: boolean;
+	matchStarted: boolean;
 	handleStartGame: (started: boolean) => void;
 	countdown: number | null;
 	handleCountdownTick: (num: number | null) => void;
@@ -28,7 +28,7 @@ type PvpStore = {
 const initialState = {
 	players: {},
 	matchEnded: false,
-	gameStarted: false,
+	matchStarted: false,
 	countdown: null,
 	wpms: {},
 	oppTypingIndexes: {},
@@ -43,11 +43,11 @@ export const usePvpStore = create<PvpStore>((set) => ({
 	...initialState,
 	setPlayers: (players) => set({ players }),
 	handleStartGame: (started) =>
-		set({ gameStarted: started, countdown: null, countingDown: false }),
+		set({ matchStarted: started, countdown: null, countingDown: false }),
 	handleCountdownTick: (num) =>
 		set((state) => ({
 			countdown: num === 0 ? null : num,
-			gameStarted: num === 0 ? true : state.gameStarted,
+			matchStarted: num === 0 ? true : state.matchStarted,
 		})),
 	setWpms: (wpms) => set({ wpms }),
 	setOppTypingIndexes: (indexes) => set({ oppTypingIndexes: indexes }),
@@ -60,7 +60,7 @@ export const usePvpStore = create<PvpStore>((set) => ({
 	endMatch: () =>
 		set({
 			matchEnded: true,
-			gameStarted: false,
+			matchStarted: false,
 			countdown: null,
 			countingDown: false,
 		}),
@@ -68,7 +68,7 @@ export const usePvpStore = create<PvpStore>((set) => ({
 		set((state) => ({
 			...initialState,
 			players: state.players,
-			gameStarted: false,
+			matchStarted: false,
 			matchEnded: false,
 		})),
 	setCountingDown: (started) =>

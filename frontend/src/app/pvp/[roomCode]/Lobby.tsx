@@ -14,7 +14,7 @@ export function Lobby() {
 	const wpms = usePvpStore((s) => s.wpms);
 	const oppTypingIndexes = usePvpStore((s) => s.oppTypingIndexes);
 	const passageLength = usePvpStore((s) => s.passageLength);
-	const gameStarted = usePvpStore((s) => s.gameStarted);
+	const matchStarted = usePvpStore((s) => s.matchStarted);
 	const myUserId = authClient.useSession().data?.user.id;
 	const matchEnded = usePvpStore((s) => s.matchEnded);
 	const countingDown = usePvpStore((s) => s.countingDown);
@@ -72,7 +72,7 @@ export function Lobby() {
 							<div
 								className={
 									"flex items-center justify-end flex-2 transition duration-300 ease-in-out " +
-									(countingDown || gameStarted || matchEnded
+									(countingDown || matchStarted || matchEnded
 										? player.finished
 											? "md:translate-x-[calc(var(--container-3xs)+_2rem)] translate-x-[calc(5rem+_2rem)]"
 											: ""
