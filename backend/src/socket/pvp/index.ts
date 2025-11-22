@@ -1,80 +1,31 @@
-import type {
-	ioServer,
-	ioSocket,
-	LobbyInfo,
-	MatchResults,
-} from "@versus-type/shared";
+import type { ioServer, ioSocket, MatchResults } from "@versus-type/shared";
 import {
-	type AccuracyState,
 	getAccuracy,
 	recordKey,
 	resetAccuracy,
 } from "@versus-type/shared/accuracy";
-import {
-	type GeneratorConfig,
-	generateWords,
-} from "@versus-type/shared/passage-generator";
-import { eq, sql } from "drizzle-orm";
+import { generateWords } from "@versus-type/shared/passage-generator";
+import type { RoomStatus } from "@/db/schema";
 import { roomInfo } from "@/routes/pvp.router";
-import { db } from "../db";
+import { emitNewMessage, sendChatHistory } from "../chat.socket";
 import {
-	matches,
-	matchParticipants,
-	type RoomStatus,
-	rooms,
-	userStats,
-} from "../db/schema";
-import { emitNewMessage, sendChatHistory } from "./chat.socket";
-
-const MAX_ROOM_SIZE = 10;
-const COUNTDOWN_SECONDS = 3;
-
-type PlayerState = {
-	isHost?: boolean;
-	username?: string;
-	color: string;
-	spectator: boolean;
-	disconnected?: boolean;
-
-	// game-specific, needs RESET
-	typingIndex: number;
-	wpm?: number;
-	startedAt?: number;
-	accuracy?: number;
-	accState?: AccuracyState;
-	finished?: boolean;
-	timeTyped?: number;
-	ordinal?: number;
-	incorrectIdx: number | null;
-};
-
-type RoomState = {
-	status: "inProgress" | "waiting" | "closed";
-	passage: string;
-	hostId: string | null;
-	isMatchStarted: boolean;
-	isMatchEnded: boolean;
-	players: { [userId: string]: PlayerState };
-	dbId: string;
-	// currentMatchId: string | null;
-	// settings: GeneratorConfig;
-};
-
-const roomStates: Record<string, RoomState> = {};
-const passageConfig: GeneratorConfig = {
-	punctuation: false,
-	numbers: false,
-	wordCount: 50,
-};
-
-const initialPlayerState = {
-	typingIndex: 0,
-	isHost: false,
-	spectator: false,
-	accState: resetAccuracy(),
-	incorrectIdx: null,
-	timeTyped: 0,
-} satisfies Partial<PlayerState>;
+	deleteRoomFromDB,
+	getRoomIdFromDb,
+	updatePlayersInfoInDB,
+	updateRoomStatusInDb,
+} from "./dbservice";
+import {
+	COUNTDOWN_SECONDS,
+	initialPlayerState,
+	MAX_ROOM_SIZE,
+	participantCount,
+	passageConfig,
+	reinitializeRoomState,
+	roomStates,
+	toPlayersInfo,
+	typingPlayerCount,
+} from "./store";
+import { calcWpm, getRandomColor } from "./utils";
 
 export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("pvp:join", async (data, callback) => {
@@ -423,37 +374,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	});
 }
 
-function reinitializeRoomState(roomCode: string) {
-	const roomState = roomStates[roomCode];
-	roomState.isMatchEnded = false;
-	if (!roomState.passage) {
-		roomState.passage = generateWords(passageConfig).join(" ");
-	}
-	roomState.status = "inProgress";
-
-	const resetedPlayers: { [userId: string]: PlayerState } = {};
-	for (const userId in roomState.players) {
-		const player = roomState.players[userId];
-		if (player.disconnected) continue; // clear disconnectd players
-		resetedPlayers[userId] = {
-			...initialPlayerState,
-			isHost: player.isHost,
-			username: player.username,
-			spectator: false,
-			color: player.color,
-			disconnected: player.disconnected,
-		};
-	}
-	roomState.players = resetedPlayers;
-}
-
-function calcWpm(typingIndex: number, startedAt?: number): number {
-	if (!startedAt) return 0;
-	const elapsedTime = Date.now() - startedAt;
-	return typingIndex / 5 / (elapsedTime / 1000 / 60);
-}
-
-function startWpmUpdates(io: ioServer, roomCode: string) {
+export function startWpmUpdates(io: ioServer, roomCode: string) {
 	const timeoutId = setInterval(() => {
 		const roomState = roomStates[roomCode];
 		if (!roomState || !roomState.isMatchStarted) return;
@@ -482,7 +403,7 @@ function sendWpmUpdate(io: ioServer, roomCode: string) {
 	io.to(roomCode).emit("pvp:wpm-update", wpmInfo);
 }
 
-async function startCountdown(io: ioServer, roomCode: string) {
+export async function startCountdown(io: ioServer, roomCode: string) {
 	io.to(roomCode).emit("pvp:countdown", COUNTDOWN_SECONDS);
 	let countdown = COUNTDOWN_SECONDS;
 	const countdownInterval = setInterval(() => {
@@ -495,28 +416,12 @@ async function startCountdown(io: ioServer, roomCode: string) {
 	}, 1000);
 }
 
-async function updateRoomStatus(roomCode: string, status: RoomStatus) {
-	await db
-		.update(rooms)
-		.set({ status })
-		.where(eq(rooms.roomCode, roomCode))
-		.catch((err) => {
-			console.error("Error updating room status in DB:", err);
-		});
+export async function updateRoomStatus(roomCode: string, status: RoomStatus) {
+	await updateRoomStatusInDb(roomCode, status);
 	if (roomStates[roomCode]) roomStates[roomCode].status = status;
 }
 
-async function deleteRoomFromDB(roomCode: string) {
-	await db
-		.delete(rooms)
-		.where(eq(rooms.roomCode, roomCode))
-		.catch((err) => {
-			console.error("Error deleting room from DB:", err);
-		});
-	delete roomStates[roomCode];
-}
-
-function sendLobbyUpdate(io: ioServer, roomCode: string) {
+export function sendLobbyUpdate(io: ioServer, roomCode: string) {
 	if (!roomStates[roomCode]) {
 		console.warn(`sendLobbyUpdate: roomState for ${roomCode} not found`);
 	}
@@ -526,7 +431,7 @@ function sendLobbyUpdate(io: ioServer, roomCode: string) {
 	);
 }
 
-async function endMatch(roomCode: string, io: ioServer) {
+export async function endMatch(roomCode: string, io: ioServer) {
 	await updateRoomStatus(roomCode, "closed");
 	console.log(`Match in room ${roomCode} ended`);
 	const matchResults: MatchResults = {};
@@ -545,10 +450,10 @@ async function endMatch(roomCode: string, io: ioServer) {
 	roomState.passage = generateWords(passageConfig).join(" ");
 	io.to(roomCode).emit("pvp:match-ended", matchResults);
 
-	await updatePlayersInfoInDB(roomCode);
+	await updatePlayersInfoInDB(roomState);
 }
 
-async function closeRoom(roomCode: string, io: ioServer) {
+export async function closeRoom(roomCode: string, io: ioServer) {
 	await updateRoomStatus(roomCode, "closed");
 	delete roomStates[roomCode];
 	io.to(roomCode).emit("pvp:disconnect", { reason: "Room closed" });
@@ -564,141 +469,4 @@ async function closeRoom(roomCode: string, io: ioServer) {
 		}
 	}, 3000);
 	console.log(`Room ${roomCode} closed`);
-}
-
-async function updatePlayersInfoInDB(roomCode: string) {
-	const roomState = roomStates[roomCode];
-	const matchId = await db
-		.insert(matches)
-		.values({
-			passage: roomState.passage,
-			roomId: roomState.dbId,
-		})
-		.returning({ id: matches.id })
-		.then((r) => r[0]?.id);
-	if (!matchId) {
-		console.error(
-			"updatePlayersInfoInDB: couldn't create match record(matchId is null), aborting",
-		);
-		return;
-	}
-	for (const userId in roomState.players) {
-		if (
-			roomState.players[userId].spectator ||
-			!roomState.players[userId].finished
-		)
-			continue;
-		const player = roomState.players[userId];
-		if (!player.finished) continue;
-		const isWinner = player.ordinal === 1 ? 1 : 0;
-		const accuracy = player.accuracy ?? 0;
-		await db
-			.insert(matchParticipants)
-			.values({
-				matchId: matchId,
-				userId: userId,
-				ordinal: player.ordinal,
-				accuracy: accuracy,
-				wpm: player.wpm || 0,
-			})
-			.catch((err) => {
-				console.error("Error inserting match participant:", err);
-			});
-
-		await db
-			.update(userStats)
-			.set({
-				pvpMatches: sql`${userStats.pvpMatches} + 1`,
-				wins: sql`${userStats.wins} + ${isWinner ? 1 : 0}`,
-				avgWpmPvp: sql`(((${userStats.avgWpmPvp} * ${userStats.pvpMatches}) + ${player.wpm || 0}) / (${userStats.pvpMatches} + 1))`,
-				avgAccuracyPvp: sql`(((${userStats.avgAccuracyPvp} * ${userStats.pvpMatches}) + ${accuracy}) / (${userStats.pvpMatches} + 1))`,
-				highestWpm: sql`CASE WHEN ${player.wpm || 0} > ${userStats.highestWpm} THEN ${player.wpm || 0} ELSE ${userStats.highestWpm} END`,
-			})
-			.where(eq(userStats.userId, userId))
-			.catch((err) => {
-				console.error("Error updating user stats in DB:", err);
-			});
-	}
-}
-
-async function getRoomIdFromDb(roomCode: string): Promise<string | null> {
-	const room = await db
-		.select({ id: rooms.id })
-		.from(rooms)
-		.where(eq(rooms.roomCode, roomCode))
-		.limit(1)
-		.then((r) => r[0]);
-	if (!room) return null;
-	return room.id;
-}
-
-function toPlayersInfo(players: { [userId: string]: PlayerState }) {
-	const info: LobbyInfo = {};
-	for (const userId in players) {
-		const p = players[userId];
-		info[userId] = {
-			isHost: p.isHost,
-			username: p.username,
-			typingIndex: p.typingIndex,
-			wpm: p.wpm,
-			accuracy: p.accuracy,
-			spectator: p.spectator,
-			finished: p.finished,
-			ordinal: p.ordinal,
-			disconnected: p.disconnected,
-			color: p.color,
-		};
-	}
-	return info;
-}
-
-function participantCount(roomCode: string): number {
-	const roomState = roomStates[roomCode];
-	return Object.keys(roomState.players).reduce(
-		(count, userId) =>
-			roomState.players[userId].spectator ||
-			(roomState.players[userId].disconnected &&
-				!roomState.players[userId].finished)
-				? count
-				: count + 1,
-		0,
-	);
-}
-
-function typingPlayerCount(roomCode: string): number {
-	const roomState = roomStates[roomCode];
-	return Object.keys(roomState.players).reduce(
-		(count, userId) =>
-			roomState.players[userId].spectator ||
-			roomState.players[userId].disconnected ||
-			roomState.players[userId].finished
-				? count
-				: count + 1,
-		0,
-	);
-}
-
-function getRandomColor(roomCode: string) {
-	const colors = [
-		"#60A5FA",
-		"#34D399",
-		"#FBBF24",
-		"#A78BFA",
-		"#F472B6",
-		"#F87171",
-		"#818CF8",
-		"#14B8A6",
-	];
-	let notUsed = colors.slice();
-	if (roomStates[roomCode]) {
-		for (const userId in roomStates[roomCode].players) {
-			notUsed = notUsed.filter(
-				(c) => c !== roomStates[roomCode].players[userId].color,
-			);
-		}
-		if (notUsed.length === 0) {
-			return colors[Math.floor(Math.random() * colors.length)];
-		}
-	}
-	return notUsed[Math.floor(Math.random() * notUsed.length)];
 }
