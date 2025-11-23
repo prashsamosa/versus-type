@@ -99,3 +99,15 @@ export function typingPlayerCount(roomCode: string): number {
 		0,
 	);
 }
+
+export function activePlayersCount(roomCode: string): number {
+	const roomState = roomStates[roomCode];
+	return Object.keys(roomState.players).reduce(
+		(count, userId) =>
+			roomState.players[userId].spectator ||
+			roomState.players[userId].disconnected
+				? count
+				: count + 1,
+		0,
+	);
+}
