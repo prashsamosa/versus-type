@@ -61,7 +61,7 @@ export function PvpGame() {
 	}
 
 	return (
-		<div className="relative pt-12">
+		<div className="relative pt-10">
 			{passageConfig && !countingDown && !matchStarted ? (
 				<div className="absolute top-9 left-3 z-20 flex justify-start items-center">
 					<Badge variant="outline" className="text-muted-foreground text-sm">

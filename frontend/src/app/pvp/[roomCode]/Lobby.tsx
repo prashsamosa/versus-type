@@ -27,13 +27,13 @@ export function Lobby() {
 					{Object.keys(players).length === 1 ? "player" : "players"}
 				</Badge>
 			</SexyCardHeader>
-			<SexyCardContent>
+			<SexyCardContent className="pt-3">
 				{Object.entries(players).map(([userId, player]) => (
 					<div key={userId} className="flex justify-between items-center gap-1">
-						<div className="flex items-center gap-2 flex-1">
-							<div className="flex gap-2">
+						<div className="flex items-center gap-2 flex-1 min-w-0">
+							<div className="flex gap-2 min-w-0">
 								<span
-									className={`${userId === myUserId ? "font-bold" : ""} ${player.disconnected ? "line-through" : ""}`}
+									className={`truncate ${userId === myUserId ? "font-bold" : ""} ${player.disconnected ? "line-through" : ""}`}
 									style={{ color: player.color }}
 								>
 									{player.username}{" "}

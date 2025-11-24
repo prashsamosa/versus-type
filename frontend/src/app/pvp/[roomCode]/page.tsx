@@ -143,11 +143,11 @@ export default function PvpPage() {
 				<div className="p-16 relative">
 					<PvpGame />
 					{myUserId && players[myUserId]?.spectator ? (
-						<div className="absolute top-12 left-1/2 -translate-x-1/2">
+						<div className="absolute top-10 left-1/2 -translate-x-1/2">
 							<Tooltip>
 								<TooltipTrigger className="cursor-default">
 									<div
-										className="text-xl text-foreground opacity-70 flex items-center gap-2 bg-card border px-10 pb-2 pt-1.5 justify-center relative overflow-hidden"
+										className="text-xl text-foreground opacity-70 flex items-center gap-2 bg-input/60 border px-10 pb-2 pt-1.5 justify-center relative overflow-hidden"
 										style={{
 											WebkitMaskImage:
 												"linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)",
@@ -167,31 +167,27 @@ export default function PvpPage() {
 						</div>
 					) : null}
 				</div>
-				<div className="flex gap-4 p-4 w-full absolute bottom-0 left-0 z-30">
+				<div
+					className={
+						"flex gap-4 p-4 w-full absolute bottom-0 left-1/2 -translate-x-1/2 z-30 transition-all min-h-[290px] " +
+						(expanded
+							? "max-w-[1400px] h-[75vh] backdrop-blur-xs"
+							: "max-w-7xl h-[30vh]")
+					}
+				>
 					<button
 						onClick={() => setExpanded(!expanded)}
 						className={
-							"cursor-pointer flex justify-center absolute -top-1 left-1/2 -translate-y-1/2 -translate-x-1/2 w-[90%] py-1.5 transition " +
-							(expanded
-								? "bg-card opacity-100 -top-4 rounded-md hover:bg-secondary shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.3),0_4px_8px_rgba(0,0,0,0.1)]"
-								: "opacity-40 hover:opacity-100 hover:bg-card/45 rounded-b-none rounded-t-md")
+							"cursor-pointer flex justify-center absolute -top-1 left-1/2 -translate-y-1/2 -translate-x-1/2 w-[90%] py-1.5 transition opacity-40 hover:opacity-100 rounded-b-none rounded-t-md " +
+							(expanded ? "" : "hover:bg-card/40")
 						}
 					>
 						{expanded ? <ChevronDown /> : <ChevronUp />}
 					</button>
-					<div
-						className={
-							"flex-1 transition-all " +
-							(expanded ? "min-h-[65vh]" : "min-h-[30vh]")
-						}
-					>
+					<div className={"flex-1 transition-all min-w-0"}>
 						<Lobby />
 					</div>
-					<div
-						className={
-							"flex-1 transition-all " + (expanded ? "h-[65vh]" : "h-[30vh]")
-						}
-					>
+					<div className={"flex-1 transition-all "}>
 						<Chat />
 					</div>
 				</div>
