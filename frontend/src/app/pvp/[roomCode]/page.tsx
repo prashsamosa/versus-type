@@ -173,7 +173,7 @@ export default function PvpPage() {
 						className={
 							"cursor-pointer flex justify-center absolute -top-1 left-1/2 -translate-y-1/2 -translate-x-1/2 w-[90%] py-1.5 transition " +
 							(expanded
-								? "bg-card opacity-100 -top-4 rounded-md hover:bg-secondary"
+								? "bg-card opacity-100 -top-4 rounded-md hover:bg-secondary shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.3),0_4px_8px_rgba(0,0,0,0.1)]"
 								: "opacity-40 hover:opacity-100 hover:bg-card/45 rounded-b-none rounded-t-md")
 						}
 					>

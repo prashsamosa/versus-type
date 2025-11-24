@@ -1,6 +1,10 @@
 import { Crown, Eye, WifiOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import {
+	SexyCard,
+	SexyCardContent,
+	SexyCardHeader,
+} from "@/components/ui/sexy-card";
 import { authClient } from "@/lib/auth-client";
 import { usePvpStore } from "./store";
 
@@ -15,15 +19,15 @@ export function Lobby() {
 	const countingDown = usePvpStore((s) => s.countingDown);
 
 	return (
-		<Card className="h-full p-2 gap-2 relative">
-			<div className="border-b p-2 pb-3 flex justify-between items-center">
-				<div className="flex items-center gap-2 font-bold text-lg">Lobby</div>
+		<SexyCard>
+			<SexyCardHeader>
+				Lobby
 				<Badge>
 					{Object.keys(players).length}{" "}
 					{Object.keys(players).length === 1 ? "player" : "players"}
 				</Badge>
-			</div>
-			<div className="flex flex-col p-2 gap-2 overflow-y-auto overflow-x-hidden">
+			</SexyCardHeader>
+			<SexyCardContent>
 				{Object.entries(players).map(([userId, player]) => (
 					<div key={userId} className="flex justify-between items-center gap-1">
 						<div className="flex items-center gap-2 flex-1">
@@ -115,7 +119,7 @@ export function Lobby() {
 						)}
 					</div>
 				))}
-			</div>
-		</Card>
+			</SexyCardContent>
+		</SexyCard>
 	);
 }

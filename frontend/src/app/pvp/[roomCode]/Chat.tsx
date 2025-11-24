@@ -3,8 +3,12 @@
 import { MessageCircleMore } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+	SexyCard,
+	SexyCardContent,
+	SexyCardHeader,
+} from "@/components/ui/sexy-card";
 import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
 import { useChat } from "./hooks/useChat";
@@ -40,50 +44,61 @@ export default function Chat() {
 		e.currentTarget.reset();
 	}
 	return (
-		<Card className="h-full p-4 flex flex-col gap-2">
-			{!socket && (
-				<div className="text-destructive p-2">Socket not connected</div>
-			)}
-			<div
-				ref={scrollContainerRef}
-				className="overflow-y-auto flex-1"
-				onScroll={handleScroll}
-			>
-				{messages.length === 0 ? (
-					<div className="flex flex-col gap-2 items-center justify-center h-full text-muted-foreground text-xl">
-						<MessageCircleMore />
-						No messages yet
-					</div>
-				) : (
-					messages.map((msg, index) => {
-						const isOwnMessage = msg.userId === userId;
-						return (
-							<div key={index} className="mb-2 wrap-anywhere">
-								{msg.system ? (
-									<em className="opacity-70">{msg.message}</em>
-								) : (
-									<>
-										<strong
-											className={isOwnMessage ? "underline" : ""}
-											style={
-												msg.userId ? { color: players[msg.userId]?.color } : {}
-											}
-										>
-											{msg.username}:
-										</strong>{" "}
-										{msg.message}
-									</>
-								)}
-							</div>
-						);
-					})
+		<SexyCard className="flex flex-col h-full">
+			<SexyCardHeader>
+				Chat
+				{!socket && (
+					<div className="text-destructive p-2">Socket not connected</div>
 				)}
-				<div ref={messagesEndRef} />
-			</div>
-			<form onSubmit={handleSubmit} className="flex gap-2">
-				<Input type="text" name="inputMessage" className="grow border p-2" />
-				<Button type="submit">Send</Button>
-			</form>
-		</Card>
+			</SexyCardHeader>
+			<SexyCardContent className="flex flex-col justify-between pb-3">
+				<div
+					ref={scrollContainerRef}
+					className="overflow-y-auto"
+					onScroll={handleScroll}
+				>
+					{messages.length === 0 ? (
+						<div className="flex flex-col gap-2 items-center justify-center h-full text-muted-foreground text-xl">
+							<MessageCircleMore />
+							No messages yet
+						</div>
+					) : (
+						messages.map((msg, index) => {
+							const isOwnMessage = msg.userId === userId;
+							return (
+								<div key={index} className="mb-2 wrap-anywhere">
+									{msg.system ? (
+										<em className="opacity-70">{msg.message}</em>
+									) : (
+										<>
+											<strong
+												className={isOwnMessage ? "underline" : ""}
+												style={
+													msg.userId
+														? { color: players[msg.userId]?.color }
+														: {}
+												}
+											>
+												{msg.username}:
+											</strong>{" "}
+											{msg.message}
+										</>
+									)}
+								</div>
+							);
+						})
+					)}
+					<div ref={messagesEndRef} />
+				</div>
+				<form onSubmit={handleSubmit} className="flex gap-2 -mx-1">
+					<Input
+						type="text"
+						name="inputMessage"
+						className="grow border p-2 bg-input/15"
+					/>
+					<Button type="submit">Send</Button>
+				</form>
+			</SexyCardContent>
+		</SexyCard>
 	);
 }
