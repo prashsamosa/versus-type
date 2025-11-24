@@ -14,9 +14,11 @@ import { usePvpStore } from "./store";
 export default function Passage({
 	words,
 	disabled,
+	inputDisabled,
 }: {
 	words: string[];
 	disabled?: boolean;
+	inputDisabled?: boolean;
 }) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const charRefs = useRef<HTMLSpanElement[]>([]);
@@ -142,7 +144,7 @@ export default function Passage({
 				className="absolute opacity-0 -z-10"
 				value={typedText}
 				onChange={
-					disabled
+					disabled || inputDisabled
 						? () => {}
 						: (e) => {
 								setManualScrollOffset(null);
@@ -169,7 +171,7 @@ export default function Passage({
 					y={cursorPos.y}
 					color={color}
 					disabled={!focused}
-					glow={incorrect}
+					redGlow={incorrect}
 				/>
 			) : null}
 			{!disabled || isSpectator
@@ -184,6 +186,7 @@ export default function Passage({
 								disabled={
 									players[oppId]?.disconnected || players[oppId]?.finished
 								}
+								dim={!isSpectator && !finished}
 							/>
 						);
 					})

@@ -5,12 +5,18 @@ import {
 	ChevronDown,
 	ChevronUp,
 	Copy,
+	Eye,
 	WifiOff,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
 import Chat from "./Chat";
@@ -134,14 +140,38 @@ export default function PvpPage() {
 				</div>
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
-				<div className="p-16">
+				<div className="p-16 relative">
 					<PvpGame />
+					{myUserId && players[myUserId]?.spectator ? (
+						<div className="absolute top-12 left-1/2 -translate-x-1/2">
+							<Tooltip>
+								<TooltipTrigger className="cursor-default">
+									<div
+										className="text-xl text-foreground opacity-70 flex items-center gap-2 bg-card border px-10 pb-2 pt-1.5 justify-center relative overflow-hidden"
+										style={{
+											WebkitMaskImage:
+												"linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)",
+											maskImage:
+												"linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)",
+										}}
+									>
+										<Eye className="mt-0.5" size={20} /> <span>Spectating</span>
+									</div>
+								</TooltipTrigger>
+								<TooltipContent>
+									<span className="text-sm">
+										Wait for the next match to play
+									</span>
+								</TooltipContent>
+							</Tooltip>
+						</div>
+					) : null}
 				</div>
 				<div className="flex gap-4 p-4 w-full absolute bottom-0 left-0 z-30">
 					<button
 						onClick={() => setExpanded(!expanded)}
 						className={
-							"cursor-pointer flex justify-center absolute -top-1 left-1/2 -translate-y-1/2 -translate-x-1/2 w-[95%] py-1.5 transition " +
+							"cursor-pointer flex justify-center absolute -top-1 left-1/2 -translate-y-1/2 -translate-x-1/2 w-[90%] py-1.5 transition " +
 							(expanded
 								? "bg-card opacity-100 -top-4 rounded-md hover:bg-secondary"
 								: "opacity-40 hover:opacity-100 hover:bg-card/45 rounded-b-none rounded-t-md")

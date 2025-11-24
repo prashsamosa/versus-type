@@ -1,11 +1,6 @@
 import { Crown, Eye, WifiOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
 import { usePvpStore } from "./store";
 
@@ -22,19 +17,7 @@ export function Lobby() {
 	return (
 		<Card className="h-full p-2 gap-2 relative">
 			<div className="border-b p-2 pb-3 flex justify-between items-center">
-				<div className="flex items-center gap-2 font-bold text-lg">
-					Lobby
-					{myUserId && players[myUserId]?.spectator ? (
-						<Tooltip>
-							<TooltipTrigger className="cursor-default">
-								<Badge variant="secondary">
-									<Eye /> You're spectating
-								</Badge>
-							</TooltipTrigger>
-							<TooltipContent>Wait for the next match</TooltipContent>
-						</Tooltip>
-					) : null}
-				</div>
+				<div className="flex items-center gap-2 font-bold text-lg">Lobby</div>
 				<Badge>
 					{Object.keys(players).length}{" "}
 					{Object.keys(players).length === 1 ? "player" : "players"}
