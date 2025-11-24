@@ -16,7 +16,7 @@ export function useCursorPosition(
 
 	const lineHeightRef = useRef<number>(0);
 
-	useLayoutEffect(() => {
+	function calculatePosition() {
 		const span = charRefs.current?.[index];
 		const container = containerRef.current;
 		if (!span || !container) return;
@@ -46,7 +46,6 @@ export function useCursorPosition(
 			0,
 			(container?.scrollHeight ?? 0) - (container?.clientHeight ?? 0),
 		);
-		// const targetOffset = Math.max(stableOffsetTop - lineHeight, 0);
 		const targetOffset = Math.min(
 			Math.max(stableOffsetTop - lineHeight, 0),
 			maxScrollOffset,
@@ -65,11 +64,28 @@ export function useCursorPosition(
 			} else {
 				y = pt + (stableOffsetTop - targetOffset);
 			}
-
 			setCursorPos({ x, y });
 		});
 
 		return () => cancelAnimationFrame(raf);
+	}
+
+	useLayoutEffect(() => {
+		const cleanup = calculatePosition();
+		let resizeCleanup: (() => void) | undefined;
+
+		const handleResize = () => {
+			resizeCleanup?.();
+			resizeCleanup = calculatePosition();
+		};
+
+		window.addEventListener("resize", handleResize);
+
+		return () => {
+			window.removeEventListener("resize", handleResize);
+			cleanup?.();
+			resizeCleanup?.();
+		};
 	}, [index, manualScrollOffset, containerRef, charRefs]);
 
 	return {
