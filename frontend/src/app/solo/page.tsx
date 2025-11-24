@@ -1,6 +1,6 @@
 import {
 	type GeneratorConfig,
-	generateWords,
+	generatePassage,
 } from "@versus-type/shared/passage-generator";
 import Passage from "./Passage";
 
@@ -10,8 +10,8 @@ const config: GeneratorConfig = {
 	numbers: false,
 };
 
-export default function SoloPage() {
-	const words = generateWords(config);
+export default async function SoloPage() {
+	const words = (await generatePassage(config)).split(" ");
 
 	return (
 		<div className="bg-background flex items-center justify-center min-h-screen py-2">

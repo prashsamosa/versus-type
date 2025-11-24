@@ -7,7 +7,7 @@ import {
 } from "@versus-type/shared/accuracy";
 import {
 	type GeneratorConfig,
-	generateWords,
+	generatePassage,
 } from "@versus-type/shared/passage-generator";
 import { useRef, useState } from "react";
 
@@ -44,8 +44,8 @@ export function useTypingTest(config: GeneratorConfig, initialWords: string[]) {
 		}
 	}
 
-	function restartTest() {
-		setWords(generateWords(config));
+	async function restartTest() {
+		setWords((await generatePassage(config)).split(" "));
 		setTypedText("");
 		startRef.current = null;
 		endRef.current = null;
@@ -54,10 +54,10 @@ export function useTypingTest(config: GeneratorConfig, initialWords: string[]) {
 		setFinished(false);
 	}
 
-	function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+	async function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
 		if (e.key === "Tab") {
 			e.preventDefault();
-			restartTest();
+			await restartTest();
 		}
 	}
 

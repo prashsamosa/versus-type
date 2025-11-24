@@ -1,31 +1,44 @@
-import english from "./wordlist/english.json";
-
-const wordList = english.words;
-const punctuations1 = [",", "."];
-const punctuations2 = [".", "?", "!"];
-
 function getRandomElement(arr: string[]) {
 	return arr[Math.floor(Math.random() * arr.length)];
 }
 
+const languageFile = {
+	"English 200": () => import("./wordlist/english.json"),
+	"English 1k": () => import("./wordlist/english_1k.json"),
+	"English 10k": () => import("./wordlist/english_10k.json"),
+};
+
 export type GeneratorConfig = {
+	language?: keyof typeof languageFile;
 	wordCount?: number;
 	punctuation?: boolean;
 	numbers?: boolean;
 };
 
-export function generateWords(config: GeneratorConfig = {}) {
-	const { wordCount = 50, punctuation = true, numbers = true } = config;
-	if (wordCount <= 0) {
-		return [];
-	}
+export async function generatePassage(
+	config: GeneratorConfig = {},
+): Promise<string> {
+	const punctuations1 = [",", "."];
+	const punctuations2 = [".", "?", "!"];
+
+	const {
+		wordCount = 50,
+		punctuation = true,
+		numbers = true,
+		language = "English 200",
+	} = config;
+	const loader = languageFile[language || "English 200"];
+	if (!loader) throw new Error(`Unkown language: ${language}`);
+	const wordList = (await loader()).default;
+
+	if (wordCount <= 0) return "";
 
 	const generatedWords = [];
 	let lastWord = "";
 
 	for (let i = 0; i < wordCount; i++) {
 		let word = getRandomElement(wordList);
-		if (word === "I" && !config.punctuation) word = "i";
+		if (word === "I" && !punctuation) word = "i";
 
 		// capitalize the first word or words after a period/question mark/exclamation point
 		if (punctuation && (i === 0 || /[.?!]/.test(lastWord.slice(-1)))) {
@@ -50,5 +63,5 @@ export function generateWords(config: GeneratorConfig = {}) {
 		lastWord = word;
 	}
 
-	return generatedWords;
+	return generatedWords.join(" ");
 }

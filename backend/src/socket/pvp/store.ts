@@ -2,7 +2,7 @@ import { resetAccuracy } from "@versus-type/shared/accuracy";
 import type { LobbyInfo } from "@versus-type/shared/index";
 import {
 	type GeneratorConfig,
-	generateWords,
+	generatePassage,
 } from "@versus-type/shared/passage-generator";
 import type { PlayerState, RoomState } from "./types";
 
@@ -30,11 +30,11 @@ export const initialPlayerState = {
 	incorrectIdx: null,
 } satisfies Partial<PlayerState>;
 
-export function reinitializeRoomState(roomCode: string) {
+export async function reinitializeRoomState(roomCode: string) {
 	const roomState = roomStates[roomCode];
 	roomState.isMatchEnded = false;
 	if (!roomState.passage) {
-		roomState.passage = generateWords(passageConfig).join(" ");
+		roomState.passage = await generatePassage(passageConfig);
 	}
 	roomState.status = "inProgress";
 

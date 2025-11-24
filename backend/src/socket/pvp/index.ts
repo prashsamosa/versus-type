@@ -4,7 +4,7 @@ import {
 	recordKey,
 	resetAccuracy,
 } from "@versus-type/shared/accuracy";
-import { generateWords } from "@versus-type/shared/passage-generator";
+import { generatePassage } from "@versus-type/shared/passage-generator";
 import type { RoomStatus } from "@/db/schema";
 import { roomInfo } from "@/routes/pvp.router";
 import { emitNewMessage, sendChatHistory } from "../chat.socket";
@@ -102,7 +102,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		const player = roomStates[roomCode].players[socket.data.userId];
 		// TODO: allow reconnection of the HOST too, ie, room won't close immediately if last one leaves
 		if (isHost) {
-			roomState.passage = generateWords(passageConfig).join(" ");
+			roomState.passage = await generatePassage(passageConfig);
 			callback({
 				success: true,
 				message: `Room hosted with code ${roomCode}`,
@@ -447,7 +447,7 @@ export async function endMatch(roomCode: string, io: ioServer) {
 	roomState.isMatchStarted = false;
 	roomState.isMatchEnded = true;
 	roomState.status = "waiting";
-	roomState.passage = generateWords(passageConfig).join(" ");
+	roomState.passage = await generatePassage(passageConfig);
 	io.to(roomCode).emit("pvp:match-ended", matchResults);
 
 	await updatePlayersInfoInDB(roomState);
