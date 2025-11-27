@@ -21,6 +21,16 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 	const endRef = useRef<number | null>(null);
 	const prevInputRef = useRef("");
 
+	function resetTypingState() {
+		setTypedText("");
+		setFinished(false);
+		setShakeWordIndex(null);
+		setIncorrect(false);
+		startRef.current = null;
+		endRef.current = null;
+		prevInputRef.current = "";
+	}
+
 	function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
 		if (finished) return;
 		const val = e.target.value;
@@ -85,5 +95,6 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 		handleInputChange,
 		shakeWordIndex,
 		incorrect,
+		resetTypingState,
 	};
 }

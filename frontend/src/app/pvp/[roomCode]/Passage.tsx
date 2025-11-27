@@ -28,8 +28,22 @@ export default function Passage({
 	const updateOppTypingIndex = usePvpStore((s) => s.updateOppTypingIndex);
 	const initialIndex = usePvpStore((s) => s.initialIndex);
 
-	const { typedText, finished, handleInputChange, shakeWordIndex, incorrect } =
-		usePvpTypingState(words, initialIndex);
+	const {
+		typedText,
+		finished,
+		handleInputChange,
+		shakeWordIndex,
+		incorrect,
+		resetTypingState,
+	} = usePvpTypingState(words, initialIndex);
+
+	const matchEnded = usePvpStore((s) => s.matchEnded);
+
+	useEffect(() => {
+		if (matchEnded) {
+			resetTypingState();
+		}
+	}, [words, matchEnded]);
 
 	const [manualScrollOffset, setManualScrollOffset] = useState<number | null>(
 		null,

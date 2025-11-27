@@ -22,7 +22,6 @@ type PvpStore = {
 	endMatch: () => void;
 	initializeNextMatchState: () => void;
 	resetStore: () => void;
-	matchesPlayed: number;
 	countingDown: boolean;
 	setCountingDown: (started: boolean) => void;
 	chatMessages: ChatMessage[];
@@ -43,7 +42,6 @@ const initialState = {
 	oppTypingIndexes: {},
 	initialIndex: 0,
 	passageLength: 0,
-	matchesPlayed: 0,
 	countingDown: false,
 	chatMessages: [],
 	passage: "",
@@ -82,6 +80,8 @@ export const usePvpStore = create<PvpStore>((set) => ({
 	initializeNextMatchState: () =>
 		set((state) => ({
 			...initialState,
+			passage: state.passage,
+			passageConfig: state.passageConfig,
 			matchStarted: false,
 			matchEnded: false,
 			players: Object.entries(state.players).reduce((acc, [userId, player]) => {

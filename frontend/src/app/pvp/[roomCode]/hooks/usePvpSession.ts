@@ -32,6 +32,7 @@ export function usePvpSession() {
 	const setChatMessages = usePvpStore((s) => s.setChatMessages);
 	const setPassage = usePvpStore((s) => s.setPassage);
 	const setPassageConfig = usePvpStore((s) => s.setPassageConfig);
+	const matchEnded = usePvpStore((s) => s.matchEnded);
 
 	useEffect(() => {
 		if (isPending) return;
@@ -82,6 +83,8 @@ export function usePvpSession() {
 			"passage:put": (passage, passageConfig) => {
 				setPassage(passage);
 				setPassageConfig(passageConfig);
+				if (matchEnded) {
+				}
 			},
 			disconnect: () => {
 				setDisconnected(true);
