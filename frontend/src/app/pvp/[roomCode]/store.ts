@@ -54,6 +54,8 @@ export const usePvpStore = create<PvpStore>((set) => ({
 			countdown: num === 0 ? null : num,
 			matchStarted: num === 0 ? true : state.matchStarted,
 			countingDown: num !== null && num > 0,
+			oppTypingIndexes: {},
+			wpms: {},
 		})),
 	setWpms: (wpms) => set({ wpms }),
 	setOppTypingIndexes: (indexes) => set({ oppTypingIndexes: indexes }),

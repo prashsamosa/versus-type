@@ -201,8 +201,10 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					const newHostSocket = io.sockets.sockets.get(newHostSocketId);
 					if (newHostSocket) {
 						const newHostUserId = newHostSocket.data.userId;
+						if (!newHostUserId) return;
 						newHostSocket.data.isHost = true;
 						roomState.hostId = newHostUserId;
+						if (!roomState.players[newHostUserId]) return;
 						roomState.players[newHostUserId].isHost = true;
 						disconnectedPlayer.isHost = false;
 						console.log(
@@ -266,14 +268,15 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			success: true,
 			message: "Starting countdown",
 		});
-		reinitializeRoomState(roomCode);
+		await reinitializeRoomState(roomCode);
 		io.to(roomCode).emit("pvp:lobby-update", toPlayersInfo(roomState.players));
 		startCountdown(io, roomCode);
 		startWpmUpdates(io, roomCode);
-		for (const [userId, p] of Object.entries(roomState.players)) {
-			socket.emit("pvp:progress-update", {
+		for (const [userId] of Object.entries(roomState.players)) {
+			console.log("sending reset progress of", userId);
+			io.to(roomCode).emit("pvp:progress-update", {
 				userId,
-				typingIndex: p.typingIndex, // = 0 after reinitialize
+				typingIndex: 0,
 			});
 		}
 	});
