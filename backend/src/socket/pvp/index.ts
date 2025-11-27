@@ -278,6 +278,11 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			message: "Starting countdown",
 		});
 		await reinitializeRoomState(roomCode);
+		io.to(roomCode).emit(
+			"passage:put",
+			roomStates[roomCode].passage,
+			passageConfig,
+		);
 		io.to(roomCode).emit("pvp:lobby-update", toPlayersInfo(roomState.players));
 		startCountdown(io, roomCode);
 		startWpmUpdates(io, roomCode);
