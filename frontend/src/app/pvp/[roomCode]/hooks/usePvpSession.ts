@@ -29,6 +29,7 @@ export function usePvpSession() {
 	const matchStarted = usePvpStore((s) => s.matchStarted);
 	const initialIndex = usePvpStore((s) => s.initialIndex);
 	const setOppTypingIndexes = usePvpStore((s) => s.setOppTypingIndexes);
+	const setChatMessages = usePvpStore((s) => s.setChatMessages);
 
 	useEffect(() => {
 		if (isPending) return;
@@ -58,6 +59,7 @@ export function usePvpSession() {
 					setInitialIndex(response.typingIndex ?? 0);
 					if (response.isStarted && response.oppTypingIndexes)
 						setOppTypingIndexes(response.oppTypingIndexes);
+					if (response.chatHistory) setChatMessages(response.chatHistory);
 				}
 			})
 			.catch((err) => {

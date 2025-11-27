@@ -1,33 +1,28 @@
-import type { ChatMessage } from "@versus-type/shared";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
 	type EventHandlers,
 	registerSocketHandlers,
 } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
+import { usePvpStore } from "../store";
 
 export function useChat() {
-	const [messages, setMessages] = useState<ChatMessage[]>([]);
+	const messages = usePvpStore((s) => s.chatMessages);
+	const addMessage = usePvpStore((s) => s.addChatMessage);
 
 	useEffect(() => {
 		if (!socket) return;
 
 		const eventHandlers: EventHandlers = {
 			"chat:new-message": (data) => {
-				setMessages((prev) => [...prev, data]);
-			},
-			"chat:history": (data) => {
-				setMessages(data);
+				addMessage(data);
 			},
 			"chat:error": (data) => {
-				setMessages((prev) => [
-					...prev,
-					{
-						username: "",
-						system: true,
-						message: `Chat error: ${data.message}`,
-					},
-				]);
+				addMessage({
+					username: "",
+					system: true,
+					message: `Chat error: ${data.message}`,
+				});
 			},
 		};
 		const unregister = registerSocketHandlers(socket, eventHandlers);

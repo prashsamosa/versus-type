@@ -17,63 +17,59 @@ export function Lobby() {
 	const myUserId = authClient.useSession().data?.user.id;
 	const matchEnded = usePvpStore((s) => s.matchEnded);
 	const countingDown = usePvpStore((s) => s.countingDown);
-
+	const playerCnt = Object.values(players).filter(
+		(player) => !player.disconnected,
+	).length;
 	return (
 		<SexyCard>
 			<SexyCardHeader>
 				Lobby
 				<Badge>
-					{Object.keys(players).length}{" "}
-					{Object.keys(players).length === 1 ? "player" : "players"}
+					{playerCnt} {playerCnt === 1 ? "player" : "players"}
 				</Badge>
 			</SexyCardHeader>
 			<SexyCardContent className="pt-3">
 				{Object.entries(players).map(([userId, player]) => (
-					<div key={userId} className="flex justify-between items-center gap-1">
-						<div className="flex items-center gap-2 flex-1 min-w-0">
-							<div className="flex gap-2 min-w-0">
-								<span
-									className={`truncate ${userId === myUserId ? "font-bold" : ""} ${player.disconnected ? "line-through" : ""}`}
-									style={{ color: player.color }}
-								>
-									{player.username}{" "}
-								</span>
-								{player.isHost ? (
-									<Badge variant="secondary" className="mt-0.5">
-										Host
-									</Badge>
-								) : null}
-								{player.disconnected ? (
-									<Badge variant="secondary" className="mt-0.5">
-										<WifiOff />
-									</Badge>
-								) : player.spectator ? (
-									<Badge variant="secondary" className="mt-0.5">
-										<Eye />
-									</Badge>
-								) : null}
-							</div>
+					<div key={userId} className="flex items-center gap-2">
+						<div
+							className={
+								"flex items-center gap-2 min-w-0 shrink-0 " +
+								(matchStarted || matchEnded || countingDown
+									? "w-[40%]"
+									: "flex-1")
+							}
+						>
+							<span
+								className={`truncate ${userId === myUserId ? "font-bold" : ""} ${player.disconnected ? "line-through" : ""}`}
+								style={{ color: player.color }}
+							>
+								{player.username}
+							</span>
+							{player.isHost ? (
+								<Badge variant="secondary" className="shrink-0">
+									Host
+								</Badge>
+							) : null}
+							{player.disconnected ? (
+								<Badge variant="secondary" className="shrink-0">
+									<WifiOff />
+								</Badge>
+							) : player.spectator ? (
+								<Badge variant="secondary" className="shrink-0">
+									<Eye />
+								</Badge>
+							) : null}
 						</div>
 						{player.spectator || player.disconnected ? null : (
-							<div
-								className={
-									"flex items-center justify-end flex-2 transition duration-300 ease-in-out " +
-									(countingDown || matchStarted || matchEnded
-										? player.finished
-											? "md:translate-x-[calc(var(--container-3xs)+_2rem)] translate-x-[calc(5rem+_2rem)]"
-											: ""
-										: "translate-x-full")
-								}
-							>
-								<div className="flex items-center gap-2 min-w-[80px] justify-end">
-									<Crown
-										className={`text-yellow-400 size-4 transition ease-in-out shrink-0 ${player.ordinal === 1 ? "" : "scale-0"}`}
-									/>{" "}
-									{player.ordinal && player.ordinal > 1 ? (
+							<div className="flex items-center justify-end flex-1">
+								<div className="flex items-center gap-2 shrink-0">
+									{player.ordinal === 1 ? (
+										<Crown className="text-yellow-400 size-4 shrink-0" />
+									) : player.ordinal && player.ordinal > 1 ? (
 										<Badge
 											variant="secondary"
 											className={
-												"mt-0.5 font-bold " +
+												"font-bold shrink-0 " +
 												(player.ordinal === 2
 													? "bg-gray-400 text-background"
 													: player.ordinal === 3
@@ -91,7 +87,7 @@ export function Lobby() {
 									) : null}
 									<Badge
 										variant="outline"
-										className="text-right text-nowrap text-md"
+										className="text-right text-nowrap text-md shrink-0"
 									>
 										{Math.round(wpms[userId] ?? 0)}{" "}
 										<span className="opacity-50">WPM</span>
@@ -99,18 +95,25 @@ export function Lobby() {
 									{player.finished ? (
 										<Badge
 											variant="outline"
-											className="text-right text-nowrap text-md"
+											className="text-right text-nowrap text-md shrink-0"
 										>
 											{Math.round(player.accuracy ?? 0)}%{" "}
 											<span className="opacity-50">Acc</span>
 										</Badge>
 									) : null}
 								</div>
-								<div className="md:w-3xs w-[5rem] mx-4 bg-muted rounded h-2 overflow-hidden ">
+								<div
+									className={
+										"bg-muted rounded h-2 overflow-hidden transition-all ease-out " +
+										(player.finished
+											? "w-0 min-w-0 ml-0"
+											: "flex-1 min-w-[3rem] ml-2")
+									}
+								>
 									<div
 										className="h-full bg-accent transition-all duration-100 rounded"
 										style={{
-											width: `calc(${((oppTypingIndexes[userId] ?? player.typingIndex) / Math.max(1, passageLength)) * 100}%)`,
+											width: `${((oppTypingIndexes[userId] ?? player.typingIndex) / Math.max(1, passageLength)) * 100}%`,
 											backgroundColor: player.color || "#666",
 										}}
 									/>

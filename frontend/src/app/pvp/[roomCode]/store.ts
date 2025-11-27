@@ -1,4 +1,4 @@
-import type { LobbyInfo, WpmInfo } from "@versus-type/shared";
+import type { ChatMessage, LobbyInfo, WpmInfo } from "@versus-type/shared";
 import { create } from "zustand";
 
 type PvpStore = {
@@ -24,6 +24,9 @@ type PvpStore = {
 	matchesPlayed: number;
 	countingDown: boolean;
 	setCountingDown: (started: boolean) => void;
+	chatMessages: ChatMessage[];
+	setChatMessages: (messages: ChatMessage[]) => void;
+	addChatMessage: (message: ChatMessage) => void;
 };
 
 const initialState = {
@@ -37,6 +40,7 @@ const initialState = {
 	passageLength: 0,
 	matchesPlayed: 0,
 	countingDown: false,
+	chatMessages: [],
 } satisfies Partial<PvpStore>;
 // why 'satisfies' instead of type annotation? Coz TS magic: type annotation infers this type to initialState, which makes TS cry later when we spread initialState in create. Using satisfies doesn't infer the type, and we get sexy autocomplete.
 
@@ -85,4 +89,7 @@ export const usePvpStore = create<PvpStore>((set) => ({
 		})),
 	setCountingDown: (started) => set({ countingDown: started }),
 	resetStore: () => set(initialState),
+	setChatMessages: (messages) => set({ chatMessages: messages }),
+	addChatMessage: (message) =>
+		set((state) => ({ chatMessages: [...state.chatMessages, message] })),
 }));

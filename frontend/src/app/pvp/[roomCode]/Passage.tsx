@@ -165,15 +165,6 @@ export default function Passage({
 				shakeWordIndex={shakeWordIndex}
 			/>
 
-			{!disabled && !finished && !isSpectator ? (
-				<Cursor
-					x={cursorPos.x}
-					y={cursorPos.y}
-					color={color}
-					disabled={!focused}
-					redGlow={incorrect}
-				/>
-			) : null}
 			{!disabled || isSpectator
 				? Object.entries(oppCursorPoses).map(([oppId, pos]) => {
 						if (oppId === userId || players[oppId]?.finished) return null;
@@ -191,6 +182,16 @@ export default function Passage({
 						);
 					})
 				: null}
+
+			{!disabled && !finished && !isSpectator ? (
+				<Cursor
+					x={cursorPos.x}
+					y={cursorPos.y}
+					color={color}
+					disabled={!focused}
+					redGlow={incorrect}
+				/>
+			) : null}
 		</div>
 	);
 }
