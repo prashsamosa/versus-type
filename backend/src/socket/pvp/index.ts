@@ -4,7 +4,10 @@ import {
 	recordKey,
 	resetAccuracy,
 } from "@versus-type/shared/accuracy";
-import { generatePassage } from "@versus-type/shared/passage-generator";
+import {
+	GeneratorConfigSchema,
+	generatePassage,
+} from "@versus-type/shared/passage-generator";
 import type { RoomStatus } from "@/db/schema";
 import { roomInfo } from "@/routes/pvp.router";
 import { chatMessages, emitNewMessage } from "../chat.socket";
@@ -369,12 +372,48 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		}
 	});
 
-	socket.on("pvp:get-passage", (callback) => {
-		console.log("pvp:get-passage called by", socket.data.userId);
+	socket.on("passage:get", (callback) => {
 		const roomCode = socket.data.roomCode;
 		if (!roomCode || !roomStates[roomCode])
 			return callback({ passage: "", config: passageConfig });
 		callback({ passage: roomStates[roomCode].passage, config: passageConfig });
+	});
+
+	socket.on("passage:config-change", async (config, callback) => {
+		if (!socket.data.isHost) {
+			console.log(
+				`Non-host player ${socket.id}(${socket.data.username}) tryna change passage config`,
+			);
+			return;
+		}
+		const roomCode = socket.data.roomCode;
+		if (!roomCode || !roomStates[roomCode]) {
+			console.warn(
+				`passage:config-change: roomState for ${roomCode} not found`,
+			);
+			callback("");
+			return;
+		}
+		if (roomStates[roomCode].isMatchStarted) {
+			console.log(
+				`Host player ${socket.id}(${socket.data.username}) tryna change passage config during an ongoing match`,
+			);
+			callback(roomStates[roomCode].passage);
+			return;
+		}
+		const result = GeneratorConfigSchema.safeParse(config);
+		if (!result.success) {
+			console.warn(
+				`Invalid passage config from ${socket.data.userId}:`,
+				result.error,
+			);
+			callback(roomStates[roomCode].passage);
+			return;
+		}
+		Object.assign(passageConfig, result.data);
+		const newPassage = await generatePassage(passageConfig);
+		roomStates[roomCode].passage = newPassage;
+		callback(newPassage);
 	});
 }
 

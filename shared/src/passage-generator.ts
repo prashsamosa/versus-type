@@ -1,3 +1,5 @@
+import z from "zod";
+
 function getRandomElement(arr: string[]) {
 	return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -7,13 +9,16 @@ const languageFile = {
 	"English 1k": () => import("./wordlist/english_1k.json"),
 	"English 10k": () => import("./wordlist/english_10k.json"),
 };
+export const languageOptions = Object.keys(languageFile);
 
-export type GeneratorConfig = {
-	language?: keyof typeof languageFile;
-	wordCount?: number;
-	punctuation?: boolean;
-	numbers?: boolean;
-};
+type LanguageKey = keyof typeof languageFile;
+export const GeneratorConfigSchema = z.object({
+	language: z.enum(Object.keys(languageFile) as [LanguageKey]).optional(),
+	wordCount: z.number().min(0).optional(),
+	punctuation: z.boolean().optional(),
+	numbers: z.boolean().optional(),
+});
+export type GeneratorConfig = z.infer<typeof GeneratorConfigSchema>;
 
 export async function generatePassage(
 	config: GeneratorConfig = {},

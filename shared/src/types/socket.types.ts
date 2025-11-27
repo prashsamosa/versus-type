@@ -70,9 +70,6 @@ export interface ClientToServerEvents {
 	) => void;
 	"pvp:key-press": (key: string) => void;
 	"pvp:backspace": (amount: number) => void;
-	"pvp:get-passage": (
-		callback: (data: { passage: string; config: GeneratorConfig }) => void,
-	) => void;
 	ping: (callback: () => void) => void;
 	"pvp:join": (
 		data: {
@@ -83,6 +80,14 @@ export interface ClientToServerEvents {
 	) => void;
 
 	"chat:send-message": (data: { message: string }) => void;
+
+	"passage:get": (
+		callback: (data: { passage: string; config: GeneratorConfig }) => void,
+	) => void;
+	"passage:config-change": (
+		config: GeneratorConfig,
+		callback: (passage: string) => void,
+	) => void;
 }
 
 export interface InterServerEvents {}
