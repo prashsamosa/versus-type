@@ -36,7 +36,7 @@ export function SexyCardHeader({
 	return (
 		<div
 			className={cn(
-				"py-2 px-4 flex justify-between items-center text-md text-foreground/80 font-semibold",
+				"py-2 px-4 flex justify-between items-center text-md text-foreground/80 font-semibold shadow-[inset_0_2px_3px_rgba(255,255,255,0.03)]",
 				"border-b",
 				"bg-cardheader",
 				className,
