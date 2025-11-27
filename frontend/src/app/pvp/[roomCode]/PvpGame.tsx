@@ -2,7 +2,7 @@ import {
 	type GeneratorConfig,
 	languageOptions,
 } from "@versus-type/shared/passage-generator";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { BadgeToggle } from "@/components/ui/badge-toggle";
 import {
@@ -21,8 +21,10 @@ import { usePvpStore } from "./store";
 const WORD_COUNT_OPTIONS = [10, 25, 50, 75, 100, 150, 200, 250, 300, 500];
 
 export function PvpGame() {
-	const [passage, setPassage] = useState<string>("");
-	const [loading, setLoading] = useState(true);
+	const passage = usePvpStore((s) => s.passage);
+	const passageConfig = usePvpStore((s) => s.passageConfig);
+	const setPassage = usePvpStore((s) => s.setPassage);
+	const setPassageConfig = usePvpStore((s) => s.setPassageConfig);
 	const matchStarted = usePvpStore((s) => s.matchStarted);
 	const countdown = usePvpStore((s) => s.countdown);
 	const countingDown = usePvpStore((s) => s.countingDown);
@@ -31,56 +33,30 @@ export function PvpGame() {
 	const isHost = userId ? players[userId]?.isHost || false : false;
 	const isSpectating = usePvpStore((s) => s.players[userId || ""]?.spectator);
 	const handleCountdownTick = usePvpStore((s) => s.handleCountdownTick);
-	const setPassageLength = usePvpStore((s) => s.setPassageLength);
-	const [passageConfig, setPassageConfig] = useState<GeneratorConfig | null>(
-		null,
-	);
-	console.log("##########", isHost);
 
 	function handleConfigChange(newConfig: GeneratorConfig) {
 		if (!socket || !isHost) return;
 		setPassageConfig(newConfig);
-		socket.emitWithAck("passage:config-change", newConfig).then((passage) => {
-			setPassage(passage);
-			setPassageLength(passage.length);
-		});
-	}
-
-	function fetchPassage() {
-		if (!socket) return;
-		setLoading(true);
 		socket
-			.emitWithAck("passage:get")
-			.then((data) => {
-				const { passage: receivedPassage, config } = data;
-				setPassage(receivedPassage);
-				setPassageLength(receivedPassage.length);
-				setPassageConfig(config);
-				setLoading(false);
-			})
-			.catch(() => {
-				setLoading(false);
+			.emitWithAck("passage:config-change", newConfig)
+			.then((newPassage) => {
+				setPassage(newPassage);
 			});
 	}
 
 	useEffect(() => {
 		if (!socket) return;
-		fetchPassage();
 		const unregister = registerSocketHandlers(socket, {
 			"pvp:countdown": (num) => {
 				handleCountdownTick(num);
 			},
 		});
 		return unregister;
-	}, [socket, handleCountdownTick, setPassageLength]);
+	}, [socket, handleCountdownTick]);
 
-	useEffect(() => {
-		if (countingDown) fetchPassage();
-	}, [countingDown]);
-
-	if (loading) {
+	if (!passage) {
 		return (
-			<div className="border rounded p-4 mb-4 h-[50vh] w-[70vw] flex items-center justify-center">
+			<div className="border rounded-md p-4 mb-4 h-[40vh] w-[70vw] flex items-center justify-center">
 				<p className="text-center text-gray-500">Loading...</p>
 			</div>
 		);

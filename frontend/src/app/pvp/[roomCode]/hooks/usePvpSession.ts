@@ -30,6 +30,8 @@ export function usePvpSession() {
 	const initialIndex = usePvpStore((s) => s.initialIndex);
 	const setOppTypingIndexes = usePvpStore((s) => s.setOppTypingIndexes);
 	const setChatMessages = usePvpStore((s) => s.setChatMessages);
+	const setPassage = usePvpStore((s) => s.setPassage);
+	const setPassageConfig = usePvpStore((s) => s.setPassageConfig);
 
 	useEffect(() => {
 		if (isPending) return;
@@ -60,6 +62,8 @@ export function usePvpSession() {
 					if (response.isStarted && response.oppTypingIndexes)
 						setOppTypingIndexes(response.oppTypingIndexes);
 					if (response.chatHistory) setChatMessages(response.chatHistory);
+					if (response.passage) setPassage(response.passage);
+					if (response.passageConfig) setPassageConfig(response.passageConfig);
 				}
 			})
 			.catch((err) => {
@@ -74,6 +78,10 @@ export function usePvpSession() {
 			},
 			"pvp:wpm-update": (data) => {
 				setWpms(data);
+			},
+			"passage:put": (passage, passageConfig) => {
+				setPassage(passage);
+				setPassageConfig(passageConfig);
 			},
 			disconnect: () => {
 				setDisconnected(true);
