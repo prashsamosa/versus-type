@@ -25,11 +25,6 @@ export function registerChatHandlers(io: ioServer, socket: ioSocket) {
 	});
 }
 
-export function sendChatHistory(socket: ioSocket, roomCode: string) {
-	const messages = chatMessages.get(roomCode) || [];
-	socket.emit("chat:history", messages);
-}
-
 export function emitNewMessage(
 	io: ioServer,
 	roomCode: string,

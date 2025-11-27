@@ -33,6 +33,7 @@ export type JoinResponse = {
 	isStarted?: boolean;
 	typingIndex?: number;
 	oppTypingIndexes?: { [userId: string]: number };
+	chatHistory?: ChatMessage[];
 };
 
 export type WpmInfo = {
@@ -59,7 +60,6 @@ export interface ServerToClientEvents {
 	"pvp:wpm-update": (data: WpmInfo) => void;
 
 	"chat:new-message": (data: ChatMessage) => void;
-	"chat:history": (messages: ChatMessage[]) => void;
 
 	"chat:error": (data: { message: string }) => void;
 }

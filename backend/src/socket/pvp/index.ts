@@ -7,7 +7,7 @@ import {
 import { generatePassage } from "@versus-type/shared/passage-generator";
 import type { RoomStatus } from "@/db/schema";
 import { roomInfo } from "@/routes/pvp.router";
-import { emitNewMessage, sendChatHistory } from "../chat.socket";
+import { chatMessages, emitNewMessage } from "../chat.socket";
 import {
 	deleteRoomFromDB,
 	getRoomIdFromDb,
@@ -133,6 +133,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					isStarted: roomStates[roomCode].isMatchStarted,
 					typingIndex: player.typingIndex,
 					oppTypingIndexes,
+					chatHistory: chatMessages.get(roomCode) || [],
 				});
 			} else {
 				emitNewMessage(io, roomCode, {
@@ -144,6 +145,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					success: true,
 					message: `Joined room ${roomCode}`,
 					oppTypingIndexes,
+					chatHistory: chatMessages.get(roomCode) || [],
 				});
 			}
 		}
@@ -157,7 +159,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				color: getRandomColor(roomCode),
 			};
 		}
-		sendChatHistory(socket, roomCode);
 		sendLobbyUpdate(io, roomCode);
 	});
 
