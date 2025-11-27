@@ -109,6 +109,8 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			callback({
 				success: true,
 				message: `Room hosted with code ${roomCode}`,
+				passage: roomStates[roomCode].passage,
+				passageConfig,
 			});
 		} else {
 			const oppTypingIndexes = roomState.isMatchStarted
@@ -137,6 +139,8 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					typingIndex: player.typingIndex,
 					oppTypingIndexes,
 					chatHistory: chatMessages.get(roomCode) || [],
+					passage: roomStates[roomCode].passage,
+					passageConfig,
 				});
 			} else {
 				emitNewMessage(io, roomCode, {
@@ -149,6 +153,8 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					message: `Joined room ${roomCode}`,
 					oppTypingIndexes,
 					chatHistory: chatMessages.get(roomCode) || [],
+					passage: roomStates[roomCode].passage,
+					passageConfig,
 				});
 			}
 		}
@@ -372,13 +378,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		}
 	});
 
-	socket.on("passage:get", (callback) => {
-		const roomCode = socket.data.roomCode;
-		if (!roomCode || !roomStates[roomCode])
-			return callback({ passage: "", config: passageConfig });
-		callback({ passage: roomStates[roomCode].passage, config: passageConfig });
-	});
-
 	socket.on("passage:config-change", async (config, callback) => {
 		if (!socket.data.isHost) {
 			console.log(
@@ -414,6 +413,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		const newPassage = await generatePassage(passageConfig);
 		roomStates[roomCode].passage = newPassage;
 		callback(newPassage);
+		io.to(roomCode).emit("passage:put", newPassage, passageConfig);
 	});
 }
 

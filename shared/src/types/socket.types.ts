@@ -33,6 +33,8 @@ export type JoinResponse = {
 	isStarted?: boolean;
 	typingIndex?: number;
 	oppTypingIndexes?: { [userId: string]: number };
+	passage?: string;
+	passageConfig?: GeneratorConfig;
 	chatHistory?: ChatMessage[];
 };
 
@@ -60,7 +62,7 @@ export interface ServerToClientEvents {
 	"pvp:wpm-update": (data: WpmInfo) => void;
 
 	"chat:new-message": (data: ChatMessage) => void;
-
+	"passage:put": (passage: string, passageConfig: GeneratorConfig) => void;
 	"chat:error": (data: { message: string }) => void;
 }
 
@@ -81,9 +83,6 @@ export interface ClientToServerEvents {
 
 	"chat:send-message": (data: { message: string }) => void;
 
-	"passage:get": (
-		callback: (data: { passage: string; config: GeneratorConfig }) => void,
-	) => void;
 	"passage:config-change": (
 		config: GeneratorConfig,
 		callback: (passage: string) => void,
