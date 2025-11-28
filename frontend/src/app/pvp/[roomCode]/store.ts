@@ -2,6 +2,31 @@ import type { ChatMessage, LobbyInfo, WpmInfo } from "@versus-type/shared";
 import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { create } from "zustand";
 
+export type GameConfig = {
+	showOppCursors: boolean;
+};
+
+const GAME_CONFIG_KEY = "pvp-game-config";
+const defaultGameConfig: GameConfig = { showOppCursors: true };
+
+function loadGameConfig(): GameConfig {
+	if (typeof window === "undefined") return defaultGameConfig;
+	try {
+		const stored = localStorage.getItem(GAME_CONFIG_KEY);
+		if (stored) {
+			return { ...defaultGameConfig, ...JSON.parse(stored) };
+		}
+	} catch {}
+	return defaultGameConfig;
+}
+
+function saveGameConfig(config: GameConfig) {
+	if (typeof window === "undefined") return;
+	try {
+		localStorage.setItem(GAME_CONFIG_KEY, JSON.stringify(config));
+	} catch {}
+}
+
 type PvpStore = {
 	players: LobbyInfo;
 	setPlayers: (players: LobbyInfo) => void;
@@ -31,6 +56,8 @@ type PvpStore = {
 	setPassage: (passage: string) => void;
 	passageConfig: GeneratorConfig | null;
 	setPassageConfig: (config: GeneratorConfig | null) => void;
+	config: GameConfig;
+	setConfig: (config: GameConfig) => void;
 };
 
 const initialState = {
@@ -46,6 +73,7 @@ const initialState = {
 	chatMessages: [],
 	passage: "",
 	passageConfig: null,
+	config: loadGameConfig(),
 } satisfies Partial<PvpStore>;
 // why 'satisfies' instead of type annotation? Coz TS magic: type annotation infers this type to initialState, which makes TS cry later when we spread initialState in create. Using satisfies doesn't infer the type, and we get sexy autocomplete.
 
@@ -103,4 +131,8 @@ export const usePvpStore = create<PvpStore>((set) => ({
 		set((state) => ({ chatMessages: [...state.chatMessages, message] })),
 	setPassage: (passage) => set({ passage, passageLength: passage.length }),
 	setPassageConfig: (config) => set({ passageConfig: config }),
+	setConfig: (config) => {
+		saveGameConfig(config);
+		set({ config });
+	},
 }));

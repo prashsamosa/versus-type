@@ -6,12 +6,22 @@ import {
 	ChevronUp,
 	Copy,
 	Eye,
+	Settings,
 	WifiOff,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
 	Tooltip,
 	TooltipContent,
@@ -53,6 +63,8 @@ export default function PvpPage() {
 		(s) => s.initializeNextMatchState,
 	);
 	const resetStore = usePvpStore((s) => s.resetStore);
+	const config = usePvpStore((s) => s.config);
+	const setConfig = usePvpStore((s) => s.setConfig);
 	const [expanded, setExpanded] = useState(false);
 
 	useEffect(() => {
@@ -125,6 +137,28 @@ export default function PvpPage() {
 					) : (
 						<LatencyStatus latency={latency} />
 					)}
+					<Dialog>
+						<DialogTrigger asChild>
+							<Button variant="outline" size="icon">
+								<Settings className="size-4" />
+							</Button>
+						</DialogTrigger>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Game Settings</DialogTitle>
+							</DialogHeader>
+							<div className="flex items-center justify-between py-2">
+								<Label htmlFor="show-opp-cursors">Show opponent cursors</Label>
+								<Switch
+									id="show-opp-cursors"
+									checked={config.showOppCursors}
+									onCheckedChange={(checked) =>
+										setConfig({ ...config, showOppCursors: checked })
+									}
+								/>
+							</div>
+						</DialogContent>
+					</Dialog>
 					<Button variant="secondary" onClick={handleExit}>
 						Exit
 					</Button>
@@ -169,16 +203,16 @@ export default function PvpPage() {
 				</div>
 				<div
 					className={
-						"flex gap-4 p-4 w-full absolute bottom-0 left-1/2 -translate-x-1/2 z-30 transition-all min-h-[290px] " +
+						"flex gap-4 p-4 w-full pt-9 absolute bottom-0 left-1/2 -translate-x-1/2 z-30 transition-all min-h-[290px] " +
 						(expanded
-							? "max-w-[1400px] h-[75vh] backdrop-blur-xs"
+							? "max-w-[1400px] h-[79vh] backdrop-blur-xs"
 							: "max-w-7xl h-[30vh]")
 					}
 				>
 					<button
 						onClick={() => setExpanded(!expanded)}
 						className={
-							"cursor-pointer flex justify-center absolute -top-1 left-1/2 -translate-y-1/2 -translate-x-1/2 w-[90%] py-1.5 transition opacity-40 hover:opacity-100 rounded-b-none rounded-t-md " +
+							"cursor-pointer flex justify-center absolute left-1/2 top-0.5 -z-10 -translate-x-1/2 w-[90%] py-1.5 transition opacity-40 hover:opacity-100 rounded-b-none rounded-t-md backdrop-blur-xs bg-card/50 " +
 							(expanded ? "" : "hover:bg-card/40")
 						}
 					>

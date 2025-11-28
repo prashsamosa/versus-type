@@ -60,9 +60,9 @@ export function Lobby() {
 								</Badge>
 							) : null}
 						</div>
-						{player.spectator || player.disconnected ? null : (
-							<div className="flex items-center justify-end flex-1">
-								<div className="flex items-center gap-2 shrink-0">
+						{player.spectator ? null : (
+							<div className="flex items-center flex-1 gap-0">
+								<div className="flex items-center gap-2 justify-end min-w-0 flex-1">
 									{player.ordinal === 1 ? (
 										<Crown className="text-yellow-400 size-4 shrink-0" />
 									) : player.ordinal && player.ordinal > 1 ? (
@@ -104,10 +104,8 @@ export function Lobby() {
 								</div>
 								<div
 									className={
-										"bg-muted rounded h-2 overflow-hidden transition-all ease-out " +
-										(player.finished
-											? "w-0 min-w-0 ml-0"
-											: "flex-1 min-w-[3rem] ml-2")
+										"bg-muted rounded h-2 overflow-hidden transition-all ease-out shrink-0 " +
+										(player.finished ? "w-0 ml-0" : "flex-3 min-w-[3rem] ml-2")
 									}
 								>
 									<div

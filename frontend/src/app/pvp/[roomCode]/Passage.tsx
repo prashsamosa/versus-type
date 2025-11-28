@@ -27,6 +27,7 @@ export default function Passage({
 	const oppTypingIndexes = usePvpStore((s) => s.oppTypingIndexes);
 	const updateOppTypingIndex = usePvpStore((s) => s.updateOppTypingIndex);
 	const initialIndex = usePvpStore((s) => s.initialIndex);
+	const showOppCursors = usePvpStore((s) => s.config.showOppCursors);
 
 	const {
 		typedText,
@@ -64,6 +65,7 @@ export default function Passage({
 		charRefs,
 		scrollOffset,
 		manualScrollOffset,
+		showOppCursors,
 	);
 
 	const userId = authClient.useSession()?.data?.user?.id;
@@ -179,7 +181,7 @@ export default function Passage({
 				shakeWordIndex={shakeWordIndex}
 			/>
 
-			{!disabled || isSpectator
+			{(!disabled || isSpectator) && showOppCursors
 				? Object.entries(oppCursorPoses).map(([oppId, pos]) => {
 						if (oppId === userId || players[oppId]?.finished) return null;
 						return (

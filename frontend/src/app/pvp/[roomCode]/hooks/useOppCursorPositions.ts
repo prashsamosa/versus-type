@@ -13,18 +13,20 @@ export function useOppCursorPositions(
 	charRefs: React.RefObject<HTMLSpanElement[]>,
 	scrollOffset: number,
 	manualScrollOffset: number | null = null,
+	enabled = true,
 ) {
 	const [oppCursorPoses, setOppCursorPoses] = useState<
 		Record<string, CursorData>
-	>(
-		Object.fromEntries(
-			Object.keys(typingIndexes).map((userId) => [userId, { x: 0, y: 0 }]),
-		),
-	);
+	>({});
 
 	const lineHeightRefs = useRef<Record<string, number>>({});
 
 	useLayoutEffect(() => {
+		if (!enabled) {
+			setOppCursorPoses({});
+			return;
+		}
+
 		const cleanups: (() => void)[] = [];
 
 		const activeOffset =
@@ -72,7 +74,14 @@ export function useOppCursorPositions(
 		return () => {
 			for (const cleanup of cleanups) cleanup();
 		};
-	}, [typingIndexes, containerRef, charRefs, scrollOffset, manualScrollOffset]);
+	}, [
+		typingIndexes,
+		containerRef,
+		charRefs,
+		scrollOffset,
+		manualScrollOffset,
+		enabled,
+	]);
 
 	return {
 		oppCursorPoses,
