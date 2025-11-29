@@ -1,6 +1,7 @@
 import type { ChatMessage, ioServer, ioSocket } from "@versus-type/shared";
 
 export const chatMessages = new Map<string, Array<ChatMessage>>();
+const MAX_CHAT_MESSAGES = 100;
 
 export function registerChatHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("chat:send-message", (data) => {
@@ -35,6 +36,7 @@ export function emitNewMessage(
 		chatMessages.set(roomCode, []);
 	}
 	const messages = chatMessages.get(roomCode);
+	if (messages && messages.length >= MAX_CHAT_MESSAGES) messages.shift();
 	messages?.push(newMessage);
 
 	io.to(roomCode).emit("chat:new-message", newMessage);
