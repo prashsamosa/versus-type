@@ -1,15 +1,26 @@
-"use client";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 
-export default function JoinPage() {
+export function JoinModal({
+	open,
+	onOpenChange,
+}: {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+}) {
 	const ref = useRef<HTMLInputElement>(null);
 	const router = useRouter();
 	const [loading, setLoading] = useState(false);
+
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 		setLoading(true);
@@ -26,15 +37,18 @@ export default function JoinPage() {
 	}
 
 	return (
-		<div className="flex flex-col justify-center bg-background min-h-screen m-auto">
-			<Card className="w-[350px] mx-auto mb-4 p-4">
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent className="sm:max-w-[350px]">
+				<DialogHeader>
+					<DialogTitle className="text-center">Join a Match</DialogTitle>
+				</DialogHeader>
 				<form onSubmit={handleSubmit}>
 					<Input placeholder="Match Code" ref={ref} />
 					<Button type="submit" className="w-full mt-4" disabled={loading}>
 						{loading ? "Joining..." : "Join Match"}
 					</Button>
 				</form>
-			</Card>
-		</div>
+			</DialogContent>
+		</Dialog>
 	);
 }

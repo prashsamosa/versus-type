@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -7,9 +10,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { HostModal } from "./host-modal";
+import { JoinModal } from "./join-modal";
 import { LogoutButton } from "./logoutButton";
 
 export default function Home() {
+	const [hostOpen, setHostOpen] = useState(false);
+	const [joinOpen, setJoinOpen] = useState(false);
+
 	return (
 		<div className="min-h-screen flex items-center justify-center p-4">
 			<div className="container max-w-4xl mx-auto">
@@ -34,17 +42,17 @@ export default function Home() {
 									className="w-full mt-2"
 									size="lg"
 									variant="secondary"
-									asChild
+									onClick={() => setHostOpen(true)}
 								>
-									<Link href="/pvp/host">Host</Link>
+									Host
 								</Button>
 								<Button
 									className="w-full mt-2"
 									size="lg"
 									variant="outline"
-									asChild
+									onClick={() => setJoinOpen(true)}
 								>
-									<Link href="/pvp/join">Join</Link>
+									Join
 								</Button>
 							</CardContent>
 						</Card>
@@ -85,6 +93,9 @@ export default function Home() {
 					</div>
 				</div>
 			</div>
+
+			<HostModal open={hostOpen} onOpenChange={setHostOpen} />
+			<JoinModal open={joinOpen} onOpenChange={setJoinOpen} />
 		</div>
 	);
 }

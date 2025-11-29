@@ -1,15 +1,25 @@
-"use client";
 import { MAX_PLAYERS } from "@versus-type/shared/consts";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { authClient } from "@/lib/auth-client";
 import { hostMatch } from "@/services/pvp.client";
 
-export default function HostPage() {
+export function HostModal({
+	open,
+	onOpenChange,
+}: {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+}) {
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [maxPlayers, setMaxPlayers] = useState(8);
 	const [loading, setLoading] = useState(false);
@@ -32,9 +42,11 @@ export default function HostPage() {
 	}
 
 	return (
-		<div className="flex flex-col justify-center bg-background min-h-screen m-auto">
-			<Card className="w-[350px] mx-auto mb-4 p-4">
-				<div className="text-center text-2xl font-bold mb-4">Host a Match</div>
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent className="sm:max-w-[350px]">
+				<DialogHeader>
+					<DialogTitle className="text-center">Host a Match</DialogTitle>
+				</DialogHeader>
 				<div className="flex flex-col space-y-4">
 					<div className="flex items-center space-x-2">
 						<Label htmlFor="private-switch">Private</Label>
@@ -73,7 +85,7 @@ export default function HostPage() {
 					</Button>
 					{error && <p className="text-destructive text-center">{error}</p>}
 				</div>
-			</Card>
-		</div>
+			</DialogContent>
+		</Dialog>
 	);
 }
