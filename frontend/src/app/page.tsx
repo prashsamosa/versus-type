@@ -10,6 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { BrowseModal } from "./browse-modal";
 import { HostModal } from "./host-modal";
 import { JoinModal } from "./join-modal";
 import { LogoutButton } from "./logoutButton";
@@ -17,6 +18,7 @@ import { LogoutButton } from "./logoutButton";
 export default function Home() {
 	const [hostOpen, setHostOpen] = useState(false);
 	const [joinOpen, setJoinOpen] = useState(false);
+	const [browseOpen, setBrowseOpen] = useState(false);
 
 	return (
 		<div className="min-h-screen flex items-center justify-center p-4">
@@ -53,6 +55,14 @@ export default function Home() {
 									onClick={() => setJoinOpen(true)}
 								>
 									Join
+								</Button>
+								<Button
+									className="w-full mt-2"
+									size="lg"
+									variant="ghost"
+									onClick={() => setBrowseOpen(true)}
+								>
+									Browse Rooms
 								</Button>
 							</CardContent>
 						</Card>
@@ -96,6 +106,7 @@ export default function Home() {
 
 			<HostModal open={hostOpen} onOpenChange={setHostOpen} />
 			<JoinModal open={joinOpen} onOpenChange={setJoinOpen} />
+			<BrowseModal open={browseOpen} onOpenChange={setBrowseOpen} />
 		</div>
 	);
 }
