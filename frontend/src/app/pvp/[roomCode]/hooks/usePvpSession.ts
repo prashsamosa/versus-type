@@ -32,7 +32,6 @@ export function usePvpSession() {
 	const setChatMessages = usePvpStore((s) => s.setChatMessages);
 	const setPassage = usePvpStore((s) => s.setPassage);
 	const setPassageConfig = usePvpStore((s) => s.setPassageConfig);
-	const matchEnded = usePvpStore((s) => s.matchEnded);
 
 	useEffect(() => {
 		if (isPending) return;
@@ -58,13 +57,19 @@ export function usePvpSession() {
 				if (!response.success) {
 					setSocketError(response.message ?? "Failed to join match");
 				} else {
-					handleStartMatch(!!response.isStarted);
-					setInitialIndex(response.typingIndex ?? 0);
-					if (response.isStarted && response.oppTypingIndexes)
-						setOppTypingIndexes(response.oppTypingIndexes);
-					if (response.chatHistory) setChatMessages(response.chatHistory);
-					if (response.passage) setPassage(response.passage);
-					if (response.passageConfig) setPassageConfig(response.passageConfig);
+					if (!response.gameState) return;
+					const gameState = response.gameState;
+
+					handleStartMatch(!!gameState.isStarted);
+
+					setInitialIndex(gameState.typingIndex ?? 0);
+
+					if (gameState.isStarted && gameState.oppTypingIndexes)
+						setOppTypingIndexes(gameState.oppTypingIndexes);
+					if (gameState.chatHistory) setChatMessages(gameState.chatHistory);
+					if (gameState.passage) setPassage(gameState.passage);
+					if (gameState.passageConfig)
+						setPassageConfig(gameState.passageConfig);
 				}
 			})
 			.catch((err) => {
@@ -83,8 +88,6 @@ export function usePvpSession() {
 			"passage:put": (passage, passageConfig) => {
 				setPassage(passage);
 				setPassageConfig(passageConfig);
-				if (matchEnded) {
-				}
 			},
 			disconnect: () => {
 				setDisconnected(true);

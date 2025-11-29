@@ -20,7 +20,6 @@ const WORD_COUNT_OPTIONS = [10, 25, 50, 75, 100, 150, 200, 250, 300, 500];
 export function PassageConfigPanel() {
 	const passageConfig = usePvpStore((s) => s.passageConfig);
 	const setPassageConfig = usePvpStore((s) => s.setPassageConfig);
-	const setPassage = usePvpStore((s) => s.setPassage);
 	const userId = authClient.useSession()?.data?.user?.id;
 	const players = usePvpStore((s) => s.players);
 	const isHost = userId ? players[userId]?.isHost || false : false;
@@ -30,11 +29,7 @@ export function PassageConfigPanel() {
 	function handleConfigChange(newConfig: GeneratorConfig) {
 		if (!socket || !isHost) return;
 		setPassageConfig(newConfig);
-		socket
-			.emitWithAck("passage:config-change", newConfig)
-			.then((newPassage) => {
-				setPassage(newPassage);
-			});
+		socket.emit("passage:config-change", newConfig);
 	}
 	if (!passageConfig || countingDown || matchStarted) return null;
 
