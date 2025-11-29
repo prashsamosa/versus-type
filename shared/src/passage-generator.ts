@@ -13,15 +13,15 @@ export const languageOptions = Object.keys(languageFile);
 
 type LanguageKey = keyof typeof languageFile;
 export const GeneratorConfigSchema = z.object({
-	language: z.enum(Object.keys(languageFile) as [LanguageKey]).optional(),
-	wordCount: z.number().min(0).optional(),
-	punctuation: z.boolean().optional(),
-	numbers: z.boolean().optional(),
+	language: z.enum(Object.keys(languageFile) as [LanguageKey]),
+	wordCount: z.number().min(0),
+	punctuation: z.boolean(),
+	numbers: z.boolean(),
 });
 export type GeneratorConfig = z.infer<typeof GeneratorConfigSchema>;
 
 export async function generatePassage(
-	config: GeneratorConfig = {},
+	config: GeneratorConfig,
 ): Promise<string> {
 	const punctuations1 = [",", "."];
 	const punctuations2 = [".", "?", "!"];

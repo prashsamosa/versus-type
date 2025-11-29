@@ -53,6 +53,7 @@ pvpRouter.get("/rooms", (_, res) => {
 					).length,
 					maxPlayers: roomState.maxPlayers,
 					status: roomState.status === "inProgress" ? "inProgress" : "waiting",
+					passageConfig: roomState.passageConfig,
 				}) satisfies RoomInfo,
 		);
 

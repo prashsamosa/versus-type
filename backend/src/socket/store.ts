@@ -25,6 +25,7 @@ function createInitialRoomState() {
 }
 
 const initialPassageConfig = {
+	language: "English 200",
 	punctuation: false,
 	numbers: false,
 	wordCount: 50,
