@@ -7,20 +7,28 @@ export const COUNTDOWN_SECONDS = 3;
 
 export const roomStates: Record<string, RoomState> = {};
 
-const initialRoomState = {
-	status: "waiting",
-	hostId: null,
-	isMatchStarted: false,
-	isMatchEnded: false,
-	players: {},
-	maxPlayers: 8,
-	chat: [],
-	passageConfig: {
-		punctuation: false,
-		numbers: false,
-		wordCount: 50,
-	},
-} satisfies Partial<RoomState>;
+// why is this a function?
+// it has objects like players, chat, passageConfig that need to be unique per room
+// if we just do initialRoomState = { ... }, and use spread operator later to copy it, its a shallow copy
+// ie, all those objects will be shared between rooms. mfw I realized players are leaking between rooms lol
+function createInitialRoomState() {
+	return {
+		status: "waiting",
+		hostId: null,
+		isMatchStarted: false,
+		isMatchEnded: false,
+		players: {},
+		maxPlayers: 8,
+		chat: [],
+		passageConfig: initialPassageConfig,
+	} satisfies Partial<RoomState>;
+}
+
+const initialPassageConfig = {
+	punctuation: false,
+	numbers: false,
+	wordCount: 50,
+} satisfies RoomState["passageConfig"];
 
 export const initialPlayerState = {
 	typingIndex: 0,
@@ -64,10 +72,12 @@ export async function initializeRoom(roomCode: string, settings: RoomSettings) {
 	const { isPrivate, maxPlayers } = settings;
 	const type: RoomType = isPrivate ? "private" : "public";
 	roomStates[roomCode] = {
-		...initialRoomState,
+		...createInitialRoomState(),
+		players: {},
+		chat: [],
 		type,
 		maxPlayers,
-		passage: await generatePassage(initialRoomState.passageConfig),
+		passage: await generatePassage(initialPassageConfig),
 	};
 }
 
