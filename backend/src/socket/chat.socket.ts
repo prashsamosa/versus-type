@@ -1,6 +1,6 @@
 import type { ChatMessage, ioServer, ioSocket } from "@versus-type/shared";
+import { roomStates } from "./store";
 
-export const chatMessages = new Map<string, Array<ChatMessage>>();
 const MAX_CHAT_MESSAGES = 100;
 
 export function registerChatHandlers(io: ioServer, socket: ioSocket) {
@@ -32,11 +32,18 @@ export function emitNewMessage(
 	newMessage: ChatMessage,
 ) {
 	console.log("Emitting message to", roomCode, newMessage);
-	if (!chatMessages.has(roomCode)) {
-		chatMessages.set(roomCode, []);
+	const roomState = roomStates[roomCode];
+	if (!roomState) {
+		console.warn(
+			"emitNewMessage: Room state not found for room code:",
+			roomCode,
+		);
+		return;
 	}
-	const messages = chatMessages.get(roomCode);
+
+	const messages = roomState.chat;
 	if (messages && messages.length >= MAX_CHAT_MESSAGES) messages.shift();
+
 	messages?.push(newMessage);
 
 	io.to(roomCode).emit("chat:new-message", newMessage);

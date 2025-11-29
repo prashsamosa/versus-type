@@ -1,7 +1,7 @@
 import type { ioServer } from "@versus-type/shared";
 import { registerChatHandlers } from "./chat.socket";
+import { registerPvpSessionHandlers } from "./game";
 import { authWithDuplicateCheck, cleanupUserSocket } from "./middleware";
-import { registerPvpSessionHandlers } from "./pvp";
 
 export function initializeSocket(io: ioServer) {
 	io.use(authWithDuplicateCheck);

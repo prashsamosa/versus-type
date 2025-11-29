@@ -1,4 +1,5 @@
 import type { AccuracyState } from "@versus-type/shared/accuracy";
+import type { ChatMessage } from "@versus-type/shared/index";
 import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 
 export type PlayerState = {
@@ -31,5 +32,6 @@ export type RoomState = {
 	isMatchEnded: boolean;
 	players: { [userId: string]: PlayerState };
 	passageConfig: GeneratorConfig;
+	chat: ChatMessage[];
 	// currentMatchId: string | null;
 };

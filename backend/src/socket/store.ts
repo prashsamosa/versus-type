@@ -19,6 +19,7 @@ const initialRoomState = {
 		numbers: false,
 		wordCount: 50,
 	},
+	chat: [],
 } satisfies Partial<RoomState>;
 
 export const initialPlayerState = {

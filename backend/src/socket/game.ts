@@ -8,7 +8,7 @@ import {
 	GeneratorConfigSchema,
 	generatePassage,
 } from "@versus-type/shared/passage-generator";
-import { chatMessages, emitNewMessage } from "../chat.socket";
+import { emitNewMessage } from "./chat.socket";
 import { updatePlayersInfoInDB } from "./dbservice";
 import {
 	COUNTDOWN_SECONDS,
@@ -108,7 +108,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				isStarted: roomState.isMatchStarted,
 				typingIndex: player?.typingIndex || 0,
 				oppTypingIndexes,
-				chatHistory: chatMessages.get(roomCode) || [],
+				chatHistory: roomState.chat,
 				passage: roomState.passage,
 				passageConfig: roomState.passageConfig,
 			},
