@@ -390,7 +390,7 @@ function startWpmUpdates(io: ioServer, roomCode: string) {
 		}
 		for (const userId in roomState.players) {
 			const player = roomState.players[userId];
-			if (player.finished) continue;
+			if (player.finished || player.disconnected || player.spectator) continue;
 			player.wpm = calcWpm(player.typingIndex, player.startedAt);
 		}
 

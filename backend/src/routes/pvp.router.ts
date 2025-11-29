@@ -1,4 +1,4 @@
-import { roomSettingsSchema } from "@versus-type/shared";
+import { type RoomInfo, roomSettingsSchema } from "@versus-type/shared";
 import { Router } from "express";
 import { customAlphabet } from "nanoid";
 import { initializeRoom, roomStates } from "@/socket/store";
@@ -32,4 +32,25 @@ pvpRouter.post("/room-status", async (req, res) => {
 	}
 	if (status === "closed") status = "notFound";
 	res.json({ status });
+});
+
+pvpRouter.get("/rooms", (_, res) => {
+	const publicRooms = Object.entries(roomStates)
+		.filter(
+			([, roomState]) =>
+				roomState.type === "public" && roomState.status !== "closed",
+		)
+		.map(
+			([roomCode, roomState]) =>
+				({
+					roomCode,
+					players: Object.values(roomState.players).filter(
+						(player) => !player.spectator && !player.disconnected,
+					).length,
+					maxPlayers: roomState.maxPlayers,
+					status: roomState.status === "inProgress" ? "inProgress" : "waiting",
+				}) satisfies RoomInfo,
+		);
+
+	res.json(publicRooms);
 });

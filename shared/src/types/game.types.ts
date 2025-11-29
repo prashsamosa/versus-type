@@ -29,6 +29,13 @@ export type LobbyInfo = {
 	[userId: string]: PlayerInfo;
 };
 
+export type RoomInfo = {
+	roomCode: string;
+	players: number;
+	status: "inProgress" | "waiting";
+	maxPlayers: number;
+};
+
 export type JoinResponse = {
 	success: boolean;
 	message?: string;
