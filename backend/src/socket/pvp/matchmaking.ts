@@ -2,10 +2,8 @@ import { activePlayersCount } from "./store";
 import type { RoomState } from "./types";
 
 type TBDRoomState = RoomState & {
-	isPrivate: boolean;
-	countdown: number;
 	maxPlayers: number;
-	type: "public" | "private" | "matchmaking";
+	type: "public" | "private" | "single_match";
 	avgWpm: number;
 	lastMatchEndedAt: number;
 };
@@ -16,11 +14,10 @@ export function findBestMatch(
 	totalOnlinePlayers: number,
 ): string | null {
 	// TUNABLES
-	const MATCHMAKING_ROOM_BASE = 100;
-	const HOSTED_ROOM_BASE = 70;
+	const BASE_SCORE = 100;
 
 	let ONE_PLAYER_BONUS: number;
-	const SWEET_SPOT_PLAYER_COUNT = 5;
+	const SWEET_SPOT_PLAYER_COUNT = 4;
 	let MAX_SWEET_SPOT_BONUS: number;
 
 	const WAITING_BONUS = 40;
@@ -28,10 +25,6 @@ export function findBestMatch(
 	let WPM_GAP_PENALTY: number; // multiplier for each WPM point difference
 	const MIN_WPM_GAP = 20;
 	const WPM_DIFF_POWER = 1.1;
-
-	// right now, inactivity is calculated by time since last match ended
-	const INACTIVE_MINUTE_PENALTY = 12; // penalty per inactivity minute
-	const INACTIVITY_THRESHOLD_MS = 4 * 60 * 1000; // 4 minutes
 
 	let MIN_SCORE_THRESHOLD: number;
 
@@ -61,17 +54,12 @@ export function findBestMatch(
 		const room = rooms[roomCode];
 		const activeCount = activePlayersCount(roomCode);
 		// filter
-		if (
-			room.type === "private" ||
-			room.status === "closed" ||
-			activeCount >= room.maxPlayers
-		) {
+		if (room.type !== "single_match" || activeCount >= room.maxPlayers) {
 			continue;
 		}
 
 		// base score on type
-		let score =
-			room.type === "matchmaking" ? MATCHMAKING_ROOM_BASE : HOSTED_ROOM_BASE;
+		let score = BASE_SCORE;
 
 		// waiting rooms
 		if (room.status === "waiting") score += WAITING_BONUS;
@@ -85,13 +73,6 @@ export function findBestMatch(
 		const wpmDiff = Math.abs(room.avgWpm - playerStats.avgWpm);
 		score -=
 			Math.max(0, (wpmDiff - MIN_WPM_GAP) ** WPM_DIFF_POWER) * WPM_GAP_PENALTY;
-
-		// inactive hosted rooms
-		const inactivePeriod =
-			room.type === "matchmaking" ? 0 : Date.now() - room.lastMatchEndedAt;
-		if (inactivePeriod > INACTIVITY_THRESHOLD_MS) {
-			score -= (inactivePeriod / 60000) * INACTIVE_MINUTE_PENALTY;
-		}
 
 		if (score > maxScore) {
 			maxScore = score;
