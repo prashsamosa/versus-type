@@ -1,6 +1,8 @@
+import type { RoomSettings } from "@versus-type/shared/index";
 import { API_URL } from "@/const";
 
-export async function hostMatch(isPrivate: boolean) {
+export async function hostMatch(settings: RoomSettings) {
+	console.log(settings);
 	try {
 		const response = await fetch(`${API_URL}/pvp/host`, {
 			method: "POST",
@@ -8,10 +10,11 @@ export async function hostMatch(isPrivate: boolean) {
 				"Content-Type": "application/json",
 			},
 			credentials: "include",
-			body: JSON.stringify({ private: isPrivate }),
+			body: JSON.stringify(settings),
 		});
 		if (!response.ok) {
-			throw new Error(`Error fetching match status: ${response.statusText}`);
+			const errMsg = (await response.json()).error || response.statusText;
+			throw new Error(`Error creating room: ${errMsg}`);
 		}
 		const data = await response.json();
 		const roomCode = data.roomCode;
