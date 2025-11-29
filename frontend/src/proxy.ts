@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -10,14 +9,10 @@ export const config = {
 
 const SESSION_COOKIE_NAME = "better-auth.session_token";
 
-export default async function middleware(req: NextRequest) {
-	// IMP: This only checks the cookie, not the session validity.
-	// TODO: Handle loop for corrupt cookie: / (invalid session) -> /sign-in (cookie present) -> / (invalid session) -> ...
-	// use signOut to clear the cookie.
-
+export default async function proxy(req: NextRequest) {
 	const { pathname } = req.nextUrl;
 
-	const sessionCookie = (await cookies()).get(SESSION_COOKIE_NAME);
+	const sessionCookie = req.cookies.get(SESSION_COOKIE_NAME);
 	const isAuthenticated = !!sessionCookie;
 
 	const guestOnlyPaths = ["/sign-in", "/sign-up"];

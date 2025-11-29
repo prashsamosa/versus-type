@@ -16,7 +16,7 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 	const [typedText, setTypedText] = useState("");
 	const [finished, setFinished] = useState(false);
 	const [shakeWordIndex, setShakeWordIndex] = useState<number | null>(null);
-	const [incorrect, setIncorrect] = useState(false); // TODO: useRef?
+	const [incorrect, setIncorrect] = useState(false);
 	const startRef = useRef<number | null>(null);
 	const endRef = useRef<number | null>(null);
 	const prevInputRef = useRef("");

@@ -73,7 +73,7 @@ export default function PvpPage() {
 		};
 	}, [resetStore]);
 
-	const waitingForPlayers = Object.keys(players).length < 1; // TODO: change to 2
+	const waitingForPlayers = Object.keys(players).length < 1; // TODO: change to 2 for matchmaking rooms
 
 	if (isPending) {
 		return (

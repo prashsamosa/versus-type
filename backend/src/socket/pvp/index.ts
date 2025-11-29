@@ -76,14 +76,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			});
 		}
 
-		// TODO: THINK: null match and matchParticipants before match start VS after match end
-
-		// await db.insert(matchParticipants).values({
-		//   matchId: roomStates[roomCode].currentMatchId!,
-		//   ordinal: null,
-		//   userId: socket.data.userId,
-		// });
-
 		socket.data.username = username;
 		socket.data.roomCode = roomCode;
 		if (isHost) socket.data.isHost = true;
@@ -103,7 +95,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		);
 
 		const player = roomStates[roomCode].players[socket.data.userId];
-		// TODO: allow reconnection of the HOST too, ie, room won't close immediately if last one leaves
 		if (isHost) {
 			roomState.passage = await generatePassage(passageConfig);
 			callback({
