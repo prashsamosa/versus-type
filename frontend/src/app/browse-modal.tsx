@@ -50,10 +50,9 @@ export function BrowseModal({
 		}
 		router.push(`/pvp/${roomCode}`);
 	}
-
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[450px]" showCloseButton={false}>
+			<DialogContent className="sm:max-w-[500px]" showCloseButton={false}>
 				<DialogHeader className="flex flex-row -mt-2 -mr-1.5 justify-between items-center">
 					<DialogTitle>Browse Rooms</DialogTitle>
 					<div>
@@ -99,24 +98,44 @@ export function BrowseModal({
 								variant="outline"
 								key={room.roomCode}
 								onClick={() => handleJoin(room.roomCode)}
-								className="w-full justify-between"
+								className="w-full justify-between px-4 py-3 h-auto"
 							>
-								<div>
-									<span className="font-medium font-mono">{room.roomCode}</span>
+								<div className="flex items-center gap-4">
+									<span className="text-sm font-medium">
+										{room.players}/{room.maxPlayers}
+									</span>
 									<span
-										className={`text-sm ml-2 
-                      ${
-												room.status === "waiting"
-													? "text-green-300/80"
-													: "text-yellow-400/80"
-											}`}
+										className={`text-sm ${
+											room.status === "waiting"
+												? "text-green-300/80"
+												: "text-yellow-400/80"
+										}`}
 									>
 										{room.status === "waiting" ? "Waiting" : "In Progress"}
 									</span>
 								</div>
-								<div className="text-sm">
-									{room.players}/{room.maxPlayers}
+								<div className="flex items-center gap-1 text-xs text-muted-foreground">
+									<span>
+										{room.passageConfig.language === "English 200"
+											? "English"
+											: room.passageConfig.language}
+									</span>
+									<span className="opacity-50">•</span>
+									<span>{room.passageConfig.wordCount || 50}w</span>
+									{room.passageConfig.punctuation && (
+										<>
+											<span className="opacity-50">•</span>
+											<span>punct</span>
+										</>
+									)}
+									{room.passageConfig.numbers && (
+										<>
+											<span className="opacity-50">•</span>
+											<span>nums</span>
+										</>
+									)}
 								</div>
+								<div className="text-sm font-mono">{room.roomCode}</div>
 							</Button>
 						))}
 					</div>
