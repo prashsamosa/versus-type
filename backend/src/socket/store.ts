@@ -1,9 +1,8 @@
+import type { LobbyInfo, RoomSettings } from "@versus-type/shared";
 import { resetAccuracy } from "@versus-type/shared/accuracy";
-import type { LobbyInfo } from "@versus-type/shared/index";
 import { generatePassage } from "@versus-type/shared/passage-generator";
 import type { PlayerState, RoomState, RoomType } from "./types";
 
-export const MAX_ROOM_SIZE = 10;
 export const COUNTDOWN_SECONDS = 3;
 
 export const roomStates: Record<string, RoomState> = {};
@@ -14,12 +13,13 @@ const initialRoomState = {
 	isMatchStarted: false,
 	isMatchEnded: false,
 	players: {},
+	maxPlayers: 8,
+	chat: [],
 	passageConfig: {
 		punctuation: false,
 		numbers: false,
 		wordCount: 50,
 	},
-	chat: [],
 } satisfies Partial<RoomState>;
 
 export const initialPlayerState = {
@@ -60,10 +60,13 @@ export async function reinitializeRoomState(roomCode: string) {
 	roomState.players = resetedPlayers;
 }
 
-export async function initializeRoom(roomCode: string, type: RoomType) {
+export async function initializeRoom(roomCode: string, settings: RoomSettings) {
+	const { isPrivate, maxPlayers } = settings;
+	const type: RoomType = isPrivate ? "private" : "public";
 	roomStates[roomCode] = {
 		...initialRoomState,
 		type,
+		maxPlayers,
 		passage: await generatePassage(initialRoomState.passageConfig),
 	};
 }

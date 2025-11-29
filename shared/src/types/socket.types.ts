@@ -1,4 +1,6 @@
 import type { Server, Socket } from "socket.io";
+import z from "zod";
+import { MAX_PLAYERS } from "../consts";
 import type { GeneratorConfig } from "../passage-generator";
 
 export type ChatMessage = {
@@ -51,6 +53,12 @@ export type MatchResults = {
 		ordinal: number;
 	};
 };
+
+export const roomSettingsSchema = z.object({
+	isPrivate: z.boolean(),
+	maxPlayers: z.number().min(2).max(MAX_PLAYERS),
+});
+export type RoomSettings = z.infer<typeof roomSettingsSchema>;
 
 export interface ServerToClientEvents {
 	"pvp:countdown": (seconds: number) => void;

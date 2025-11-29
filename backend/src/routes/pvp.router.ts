@@ -1,6 +1,7 @@
+import { roomSettingsSchema } from "@versus-type/shared";
 import { Router } from "express";
 import { customAlphabet } from "nanoid";
-import { initializeRoom, roomStates } from "@/socket/pvp/store";
+import { initializeRoom, roomStates } from "@/socket/store";
 
 const MATCH_CODE_LENGTH = 6;
 const alphabet =
@@ -8,16 +9,17 @@ const alphabet =
 const nanoid = customAlphabet(alphabet, MATCH_CODE_LENGTH);
 
 export const pvpRouter = Router();
+
 pvpRouter.post("/host", async (req, res) => {
-	const isPrivate = req.body.private;
-	if (typeof isPrivate !== "boolean") {
-		res.status(400).json({ error: "Invalid private value" });
-		return;
+	const parseResult = roomSettingsSchema.safeParse(req.body);
+	if (!parseResult.success) {
+		return res.status(400).json({ success: false, error: "Invalid settings" });
 	}
+	const settings = parseResult.data;
 
 	let roomCode = "";
-	while (roomStates[roomCode]) roomCode = nanoid();
-	await initializeRoom(roomCode, isPrivate ? "private" : "public");
+	while (roomStates[roomCode] || roomCode === "") roomCode = nanoid();
+	await initializeRoom(roomCode, settings);
 
 	res.json({ success: true, roomCode: roomCode });
 });

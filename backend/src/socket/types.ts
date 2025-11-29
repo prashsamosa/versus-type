@@ -33,5 +33,6 @@ export type RoomState = {
 	players: { [userId: string]: PlayerState };
 	passageConfig: GeneratorConfig;
 	chat: ChatMessage[];
+	maxPlayers: number;
 	// currentMatchId: string | null;
 };

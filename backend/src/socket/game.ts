@@ -13,7 +13,6 @@ import { updatePlayersInfoInDB } from "./dbservice";
 import {
 	COUNTDOWN_SECONDS,
 	initialPlayerState,
-	MAX_ROOM_SIZE,
 	participantCount,
 	reinitializeRoomState,
 	roomStates,
@@ -50,7 +49,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 
 		socket.join(roomCode);
 		const room = io.sockets.adapter.rooms.get(roomCode);
-		if (!isHost && room && room.size > MAX_ROOM_SIZE) {
+		if (!isHost && room && room.size > roomState.maxPlayers) {
 			// why not just join AFTER check? coz it will make race conditions, if 2 join at the same time, both will pass the check
 			socket.leave(roomCode);
 			return callback({ success: false, message: "Room is full" });
@@ -425,7 +424,8 @@ async function startCountdown(io: ioServer, roomCode: string) {
 
 function sendLobbyUpdate(io: ioServer, roomCode: string) {
 	if (!roomStates[roomCode]) {
-		console.warn(`sendLobbyUpdate: roomState for ${roomCode} not found`);
+		console.warn(`sendLobbyUpdate: state/players for ${roomCode} not found`);
+		return;
 	}
 	io.to(roomCode).emit(
 		"pvp:lobby-update",
