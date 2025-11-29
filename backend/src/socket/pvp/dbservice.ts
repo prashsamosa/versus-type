@@ -1,42 +1,13 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import {
-	matches,
-	matchParticipants,
-	type RoomStatus,
-	rooms,
-	userStats,
-} from "@/db/schema";
+import { matches, matchParticipants, userStats } from "@/db/schema";
 import type { RoomState } from "./types";
-
-export async function deleteRoomFromDB(roomCode: string) {
-	await db
-		.delete(rooms)
-		.where(eq(rooms.roomCode, roomCode))
-		.catch((err) => {
-			console.error("Error deleting room from DB:", err);
-		});
-}
-
-export async function getRoomIdFromDb(
-	roomCode: string,
-): Promise<string | null> {
-	const room = await db
-		.select({ id: rooms.id })
-		.from(rooms)
-		.where(eq(rooms.roomCode, roomCode))
-		.limit(1)
-		.then((r) => r[0]);
-	if (!room) return null;
-	return room.id;
-}
 
 export async function updatePlayersInfoInDB(roomState: RoomState) {
 	const matchId = await db
 		.insert(matches)
 		.values({
 			passage: roomState.passage,
-			roomId: roomState.dbId,
 		})
 		.returning({ id: matches.id })
 		.then((r) => r[0]?.id);
@@ -83,17 +54,4 @@ export async function updatePlayersInfoInDB(roomState: RoomState) {
 				console.error("Error updating user stats in DB:", err);
 			});
 	}
-}
-
-export async function updateRoomStatusInDb(
-	roomCode: string,
-	status: RoomStatus,
-) {
-	await db
-		.update(rooms)
-		.set({ status })
-		.where(eq(rooms.roomCode, roomCode))
-		.catch((err) => {
-			console.error("Error updating room status in DB:", err);
-		});
 }

@@ -1,4 +1,5 @@
 import type { AccuracyState } from "@versus-type/shared/accuracy";
+import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 
 export type PlayerState = {
 	isHost?: boolean;
@@ -19,14 +20,16 @@ export type PlayerState = {
 	incorrectIdx: number | null;
 };
 
+export type RoomType = "public" | "private" | "single-match";
+
 export type RoomState = {
 	status: "inProgress" | "waiting" | "closed";
+	type: RoomType;
 	passage: string;
 	hostId: string | null;
 	isMatchStarted: boolean;
 	isMatchEnded: boolean;
 	players: { [userId: string]: PlayerState };
-	dbId: string;
+	passageConfig: GeneratorConfig;
 	// currentMatchId: string | null;
-	// settings: GeneratorConfig;
 };

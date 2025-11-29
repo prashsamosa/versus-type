@@ -30,12 +30,14 @@ export type LobbyInfo = {
 export type JoinResponse = {
 	success: boolean;
 	message?: string;
-	isStarted?: boolean;
-	typingIndex?: number;
-	oppTypingIndexes?: { [userId: string]: number };
-	passage?: string;
-	passageConfig?: GeneratorConfig;
-	chatHistory?: ChatMessage[];
+	gameState?: {
+		isStarted: boolean;
+		typingIndex: number;
+		oppTypingIndexes: { [userId: string]: number };
+		passage: string;
+		passageConfig: GeneratorConfig;
+		chatHistory: ChatMessage[];
+	};
 };
 
 export type WpmInfo = {
@@ -83,10 +85,7 @@ export interface ClientToServerEvents {
 
 	"chat:send-message": (data: { message: string }) => void;
 
-	"passage:config-change": (
-		config: GeneratorConfig,
-		callback: (passage: string) => void,
-	) => void;
+	"passage:config-change": (config: GeneratorConfig) => void;
 }
 
 export interface InterServerEvents {}

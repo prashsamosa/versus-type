@@ -123,48 +123,17 @@ export const userStats = sqliteTable(
 	],
 );
 
-export const rooms = sqliteTable(
-	"rooms",
-	{
-		id: text()
-			.primaryKey()
-			.$defaultFn(() => randomUUID()),
-		roomCode: text().unique().notNull(),
-		private: integer({ mode: "boolean" }).notNull().default(false),
-		status: text()
-			.$type<"waiting" | "inProgress" | "closed">()
-			.notNull()
-			.default("waiting"),
-		// settings: text({ mode: "json" }),
-		createdAt: integer("created_at", { mode: "timestamp" })
-			.notNull()
-			.$defaultFn(() => new Date()),
-	},
-	(table) => [
-		index("idx_roomCode").on(table.roomCode),
-		index("idx_room_status").on(table.status),
-	],
-);
+export const matches = sqliteTable("matches", {
+	id: text()
+		.primaryKey()
+		.$defaultFn(() => randomUUID()),
 
-export const matches = sqliteTable(
-	"matches",
-	{
-		id: text()
-			.primaryKey()
-			.$defaultFn(() => randomUUID()),
+	passage: text().notNull(),
 
-		roomId: text()
-			.notNull()
-			.references(() => rooms.id, { onDelete: "cascade" }),
-
-		passage: text().notNull(),
-
-		createdAt: integer("created_at", { mode: "timestamp" })
-			.notNull()
-			.$defaultFn(() => new Date()),
-	},
-	(table) => [index("idx_match_roomId").on(table.roomId)],
-);
+	createdAt: integer("created_at", { mode: "timestamp" })
+		.notNull()
+		.$defaultFn(() => new Date()),
+});
 
 export const matchParticipants = sqliteTable("matchParticipants", {
 	id: text()

@@ -1,20 +1,25 @@
 import { resetAccuracy } from "@versus-type/shared/accuracy";
 import type { LobbyInfo } from "@versus-type/shared/index";
-import {
-	type GeneratorConfig,
-	generatePassage,
-} from "@versus-type/shared/passage-generator";
-import type { PlayerState, RoomState } from "./types";
+import { generatePassage } from "@versus-type/shared/passage-generator";
+import type { PlayerState, RoomState, RoomType } from "./types";
 
 export const MAX_ROOM_SIZE = 10;
 export const COUNTDOWN_SECONDS = 3;
 
 export const roomStates: Record<string, RoomState> = {};
-export const passageConfig: GeneratorConfig = {
-	punctuation: false,
-	numbers: false,
-	wordCount: 50,
-};
+
+const initialRoomState = {
+	status: "waiting",
+	hostId: null,
+	isMatchStarted: false,
+	isMatchEnded: false,
+	players: {},
+	passageConfig: {
+		punctuation: false,
+		numbers: false,
+		wordCount: 50,
+	},
+} satisfies Partial<RoomState>;
 
 export const initialPlayerState = {
 	typingIndex: 0,
@@ -34,7 +39,7 @@ export async function reinitializeRoomState(roomCode: string) {
 	const roomState = roomStates[roomCode];
 	roomState.isMatchEnded = false;
 	if (!roomState.passage) {
-		roomState.passage = await generatePassage(passageConfig);
+		roomState.passage = await generatePassage(roomState.passageConfig);
 	}
 	roomState.status = "inProgress";
 
@@ -52,6 +57,14 @@ export async function reinitializeRoomState(roomCode: string) {
 		};
 	}
 	roomState.players = resetedPlayers;
+}
+
+export async function initializeRoom(roomCode: string, type: RoomType) {
+	roomStates[roomCode] = {
+		...initialRoomState,
+		type,
+		passage: await generatePassage(initialRoomState.passageConfig),
+	};
 }
 
 export function toPlayersInfo(players: { [userId: string]: PlayerState }) {
