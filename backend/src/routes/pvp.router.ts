@@ -1,7 +1,7 @@
 import { type RoomInfo, roomSettingsSchema } from "@versus-type/shared";
 import { Router } from "express";
 import { customAlphabet } from "nanoid";
-import { initializeRoom, roomStates } from "@/socket/store";
+import { activePlayersCount, initializeRoom, roomStates } from "@/socket/store";
 
 const MATCH_CODE_LENGTH = 6;
 const alphabet =
@@ -45,9 +45,7 @@ pvpRouter.get("/rooms", (_, res) => {
 			([roomCode, roomState]) =>
 				({
 					roomCode,
-					players: Object.values(roomState.players).filter(
-						(player) => !player.spectator && !player.disconnected,
-					).length,
+					players: activePlayersCount(roomCode),
 					maxPlayers: roomState.maxPlayers,
 					status: roomState.status === "inProgress" ? "inProgress" : "waiting",
 					passageConfig: roomState.passageConfig,

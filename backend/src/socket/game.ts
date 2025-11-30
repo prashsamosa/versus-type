@@ -9,7 +9,11 @@ import {
 	generatePassage,
 } from "@versus-type/shared/passage-generator";
 import { emitNewMessage } from "./chat.socket";
-import { updatePlayersInfoInDB } from "./dbservice";
+import {
+	newRollingAvgWpmFromDB,
+	rollingAvgWpmFromDB,
+	updatePlayersInfoInDB,
+} from "./dbservice";
 import {
 	COUNTDOWN_SECONDS,
 	initialPlayerState,
@@ -18,6 +22,7 @@ import {
 	roomStates,
 	toPlayersInfo,
 	typingPlayerCount,
+	updateRoomAvgWpm,
 } from "./store";
 import { calcWpm, getRandomColor } from "./utils";
 
@@ -122,7 +127,16 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				color: getRandomColor(roomCode),
 			};
 		}
+
 		sendLobbyUpdate(io, roomCode);
+
+		rollingAvgWpmFromDB(socket.data.userId).then((avgWpm) => {
+			const player = roomState.players[socket.data.userId];
+			if (player) {
+				player.rollingAvgWpm = avgWpm;
+				updateRoomAvgWpm(roomCode);
+			}
+		});
 	});
 
 	socket.on("disconnect", () => {
@@ -190,6 +204,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				}
 			}
 			sendLobbyUpdate(io, roomCode);
+			updateRoomAvgWpm(roomCode);
 		}
 		console.log(`Player ${socket.id}(${username}) disconnected`);
 	});
@@ -288,6 +303,13 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				player.accuracy = getAccuracy(player.accState);
 				sendWpmUpdate(io, roomCode);
 				player.timeTyped = Date.now() - player.startedAt;
+
+				newRollingAvgWpmFromDB(socket.data.userId, player.wpm).then(
+					(newAvg) => {
+						player.rollingAvgWpm = newAvg;
+						updateRoomAvgWpm(roomCode);
+					},
+				);
 
 				const maxOrdinal = Object.values(roomState.players).reduce(
 					(max, pl) => (pl.ordinal && pl.ordinal > max ? pl.ordinal : max),

@@ -1,7 +1,46 @@
 import type { LobbyInfo, RoomSettings } from "@versus-type/shared";
+import type { AccuracyState } from "@versus-type/shared/accuracy";
 import { resetAccuracy } from "@versus-type/shared/accuracy";
+import type { ChatMessage } from "@versus-type/shared/index";
+import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { generatePassage } from "@versus-type/shared/passage-generator";
-import type { PlayerState, RoomState, RoomType } from "./types";
+
+export type PlayerState = {
+	isHost?: boolean;
+	username?: string;
+	color: string;
+	spectator: boolean;
+	disconnected?: boolean;
+	rollingAvgWpm?: number;
+
+	// game-specific, needs RESET
+	typingIndex: number;
+	wpm?: number;
+	startedAt?: number;
+	accuracy?: number;
+	accState?: AccuracyState;
+	finished?: boolean;
+	timeTyped?: number;
+	ordinal?: number;
+	incorrectIdx: number | null;
+};
+
+export type RoomType = "public" | "private" | "single-match";
+
+export type RoomState = {
+	status: "inProgress" | "waiting" | "closed";
+	type: RoomType;
+	passage: string;
+	hostId: string | null;
+	isMatchStarted: boolean;
+	isMatchEnded: boolean;
+	players: { [userId: string]: PlayerState };
+	passageConfig: GeneratorConfig;
+	chat: ChatMessage[];
+	maxPlayers: number;
+	avgWpm: number;
+	// currentMatchId: string | null;
+};
 
 export const COUNTDOWN_SECONDS = 3;
 
@@ -21,6 +60,7 @@ function createInitialRoomState() {
 		maxPlayers: 8,
 		chat: [],
 		passageConfig: initialPassageConfig,
+		avgWpm: 0,
 	} satisfies Partial<RoomState>;
 }
 
@@ -61,6 +101,7 @@ export async function reinitializeRoomState(roomCode: string) {
 			...initialPlayerState,
 			isHost: player.isHost,
 			username: player.username,
+			rollingAvgWpm: player.rollingAvgWpm,
 			spectator: false,
 			color: player.color,
 			disconnected: player.disconnected,
@@ -138,4 +179,18 @@ export function activePlayersCount(roomCode: string): number {
 				: count + 1,
 		0,
 	);
+}
+
+export function updateRoomAvgWpm(roomCode: string) {
+	const roomState = roomStates[roomCode];
+	let totalWpm = 0;
+	let count = 0;
+	for (const userId in roomState.players) {
+		const player = roomState.players[userId];
+		if (!player.spectator && !player.disconnected && player.rollingAvgWpm) {
+			totalWpm += player.rollingAvgWpm;
+			count++;
+		}
+	}
+	roomState.avgWpm = count > 0 ? totalWpm / count : 0;
 }

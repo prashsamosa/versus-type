@@ -111,7 +111,6 @@ export interface SocketData {
 	roomCode?: string;
 	isHost?: boolean;
 	userId: string;
-	rollAvgWpm?: number;
 }
 
 export type ioServer = Server<

@@ -1,7 +1,6 @@
 import type { ioSocket } from "@versus-type/shared";
 import type { ExtendedError } from "socket.io";
 import { auth } from "../auth/auth";
-import { rollingAvgWpmFromDB } from "./dbservice";
 
 const userToSocket = new Map();
 
@@ -29,8 +28,6 @@ export async function authWithDuplicateCheck(
 	}
 
 	socket.data.userId = userId;
-	socket.data.rollAvgWpm = await rollingAvgWpmFromDB(userId);
-	console.log(`ROLLING AVG WPM: ${socket.data.rollAvgWpm}`);
 	userToSocket.set(userId, socket.id);
 
 	next();

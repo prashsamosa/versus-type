@@ -1,7 +1,7 @@
 import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { matches, matchParticipants, userStats } from "@/db/schema";
-import type { RoomState } from "./types";
+import type { RoomState } from "./store.ts";
 
 const DEFAULT_WPM = 60;
 const ROLLING_AVG_MATCH_COUNT = 10;
@@ -80,4 +80,18 @@ export async function rollingAvgWpmFromDB(userId: string) {
 		return DEFAULT_WPM;
 	}
 	return rollingAvgWpm;
+}
+
+export async function newRollingAvgWpmFromDB(userId: string, newWpm: number) {
+	const nminusone = await db
+		.select({ wpm: matchParticipants.wpm })
+		.from(matchParticipants)
+		.where(eq(matchParticipants.userId, userId))
+		.orderBy(desc(matchParticipants.id))
+		.limit(ROLLING_AVG_MATCH_COUNT - 1);
+
+	const wpms = nminusone.map((r) => r.wpm ?? 0);
+	wpms.push(newWpm);
+
+	return wpms.reduce((sum, w) => sum + w, 0) / wpms.length;
 }
