@@ -61,7 +61,14 @@ export function Lobby() {
 							) : null}
 						</div>
 						{player.spectator ? null : (
-							<div className="flex items-center flex-1 gap-0">
+							<div
+								className={
+									"flex items-center flex-1 gap-0 transition ease-in-out duration-300 " +
+									(countingDown || matchStarted || matchEnded
+										? ""
+										: "translate-x-[150%]")
+								}
+							>
 								<div className="flex items-center gap-2 justify-end min-w-0 flex-1">
 									{player.ordinal === 1 ? (
 										<Crown className="text-yellow-400 size-4 shrink-0" />

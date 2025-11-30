@@ -2,6 +2,7 @@ import type { RoomInfo } from "@versus-type/shared/index";
 import { RefreshCw, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -9,6 +10,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
 import { getPublicRooms } from "@/services/pvp.client";
 
@@ -101,11 +107,15 @@ export function BrowseModal({
 								className="w-full justify-between px-4 py-3 h-auto"
 							>
 								<div className="flex items-center gap-4">
-									<span className="text-sm font-medium">
-										{room.players}/{room.maxPlayers}
+									<span className="tracking-wider">
+										{room.players}
+										<span className="text-muted-foreground">
+											/{room.maxPlayers}
+										</span>
 									</span>
+
 									<span
-										className={`text-sm ${
+										className={`text-sm font-mono ${
 											room.status === "waiting"
 												? "text-green-300/80"
 												: "text-yellow-400/80"
@@ -114,28 +124,45 @@ export function BrowseModal({
 										{room.status === "waiting" ? "Waiting" : "In Progress"}
 									</span>
 								</div>
-								<div className="flex items-center gap-1 text-xs text-muted-foreground">
-									<span>
-										{room.passageConfig.language === "English 200"
-											? "English"
-											: room.passageConfig.language}
-									</span>
-									<span className="opacity-50">•</span>
-									<span>{room.passageConfig.wordCount || 50}w</span>
-									{room.passageConfig.punctuation && (
-										<>
-											<span className="opacity-50">•</span>
-											<span>punct</span>
-										</>
-									)}
-									{room.passageConfig.numbers && (
-										<>
-											<span className="opacity-50">•</span>
-											<span>nums</span>
-										</>
-									)}
+								<div className="flex items-center gap-3">
+									<div className="flex items-center gap-1 text-xs text-muted-foreground">
+										<span>
+											{room.passageConfig.language === "English 200"
+												? "English"
+												: room.passageConfig.language}
+										</span>
+										<span className="opacity-50">•</span>
+										<span>{room.passageConfig.wordCount || 50}w</span>
+										{room.passageConfig.punctuation && (
+											<>
+												<span className="opacity-50">•</span>
+												<span>punct</span>
+											</>
+										)}
+										{room.passageConfig.numbers && (
+											<>
+												<span className="opacity-50">•</span>
+												<span>nums</span>
+											</>
+										)}
+									</div>
+
+									{room.avgWpm ? (
+										<Tooltip>
+											<TooltipTrigger>
+												<Badge variant="secondary">
+													{Math.round(room.avgWpm)}
+													<span className="text-muted-foreground"> WPM</span>
+												</Badge>
+											</TooltipTrigger>
+											<TooltipContent>
+												Average WPM of players in this room
+											</TooltipContent>
+										</Tooltip>
+									) : null}
+									<div className="w-[3px] bg-accent h-6 -my-2 rounded-full" />
+									<span className="font-mono">{room.roomCode}</span>
 								</div>
-								<div className="text-sm font-mono">{room.roomCode}</div>
 							</Button>
 						))}
 					</div>

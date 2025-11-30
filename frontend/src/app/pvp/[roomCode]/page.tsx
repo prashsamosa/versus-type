@@ -117,7 +117,6 @@ export default function PvpPage() {
 	function handleExit() {
 		router.push("/");
 	}
-
 	return (
 		<div className="flex flex-col items-center justify-start min-h-screen">
 			<div className="p-2 flex justify-between items-center w-full mb-4">
@@ -177,7 +176,7 @@ export default function PvpPage() {
 				<div className="p-16 relative">
 					<PvpGame />
 					{myUserId && players[myUserId]?.spectator ? (
-						<div className="absolute top-10 left-1/2 -translate-x-1/2">
+						<div className="absolute top-14 left-1/2 -translate-x-1/2">
 							<Tooltip>
 								<TooltipTrigger className="cursor-default">
 									<div

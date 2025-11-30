@@ -2,7 +2,6 @@ import type { RoomInfo, RoomSettings } from "@versus-type/shared/index";
 import { API_URL } from "@/const";
 
 export async function hostMatch(settings: RoomSettings) {
-	console.log(settings);
 	try {
 		const response = await fetch(`${API_URL}/pvp/host`, {
 			method: "POST",
@@ -35,7 +34,6 @@ export async function getPublicRooms() {
 		console.log("Fetching " + `${API_URL}/pvp/rooms`);
 		const response = await fetch(`${API_URL}/pvp/rooms`);
 		if (!response.ok) {
-			console.log(response);
 			const errMsg =
 				(await response.json().catch())?.error || response.statusText;
 			throw new Error(`Error fetching public rooms: ${errMsg}`);
