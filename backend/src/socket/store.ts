@@ -183,6 +183,10 @@ export function activePlayersCount(roomCode: string): number {
 
 export function updateRoomAvgWpm(roomCode: string) {
 	const roomState = roomStates[roomCode];
+	if (!roomState) {
+		console.error(`updateRoomAvgWpm: room ${roomCode} not found`);
+		return;
+	}
 	let totalWpm = 0;
 	let count = 0;
 	for (const userId in roomState.players) {

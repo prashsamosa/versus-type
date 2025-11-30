@@ -3,7 +3,6 @@ import { db } from "@/db";
 import { matches, matchParticipants, userStats } from "@/db/schema";
 import type { RoomState } from "./store.ts";
 
-const DEFAULT_WPM = 60;
 const ROLLING_AVG_MATCH_COUNT = 10;
 
 export async function updatePlayersInfoInDB(roomState: RoomState) {
@@ -77,7 +76,7 @@ export async function rollingAvgWpmFromDB(userId: string) {
 
 	const rollingAvgWpm = result[0]?.rollingAvgWpm;
 	if (rollingAvgWpm === null || rollingAvgWpm === undefined) {
-		return DEFAULT_WPM;
+		return undefined;
 	}
 	return rollingAvgWpm;
 }

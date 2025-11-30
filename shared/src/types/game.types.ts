@@ -35,6 +35,7 @@ export type RoomInfo = {
 	status: "inProgress" | "waiting";
 	maxPlayers: number;
 	passageConfig: GeneratorConfig;
+	avgWpm?: number;
 };
 
 export type JoinResponse = {
