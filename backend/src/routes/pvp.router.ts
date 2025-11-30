@@ -85,28 +85,25 @@ pvpRouter.get("/matchmake", async (req, res) => {
 	const session = await auth.api.getSession({
 		headers: fromNodeHeaders(req.headers),
 	});
-	if (!session) {
-		res.status(401).json({ error: "Unauthorized" });
-		return;
+	let avgWpm = DEFAULT_WPM;
+	if (session) {
+		avgWpm = (await rollingAvgWpmFromDB(session.user.id)) || DEFAULT_WPM;
 	}
-	const avgWpm = await rollingAvgWpmFromDB(session.user.id);
 	const totalOnlinePlayers = io.engine.clientsCount;
-	const roomCode = findBestMatch(
-		roomStates,
-		avgWpm || DEFAULT_WPM,
-		totalOnlinePlayers,
-	);
+	const roomCode = findBestMatch(roomStates, avgWpm, totalOnlinePlayers);
 	if (roomCode) {
 		res.json({ roomCode });
 	} else {
 		let newRoomCode = "";
 		while (roomStates[newRoomCode] || newRoomCode === "")
 			newRoomCode = nanoid();
+
 		const settings: RoomSettings = {
 			type: "single-match",
 			maxPlayers: MAX_MATCHMAKING_PLAYERS,
 		};
 		await initializeRoom(newRoomCode, settings);
-		res.json({ roomCode });
+
+		res.json({ roomCode: newRoomCode });
 	}
 });
