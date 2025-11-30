@@ -60,7 +60,7 @@ export function BrowseModal({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-[500px]" showCloseButton={false}>
 				<DialogHeader className="flex flex-row -mt-2 -mr-1.5 justify-between items-center">
-					<DialogTitle>Browse Rooms</DialogTitle>
+					<DialogTitle>Public Rooms</DialogTitle>
 					<div>
 						<Button
 							variant="ghost"

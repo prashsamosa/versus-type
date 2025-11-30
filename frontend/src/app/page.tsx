@@ -1,106 +1,140 @@
 "use client";
 
+import {
+	Globe,
+	Loader2,
+	LogIn,
+	Settings,
+	User,
+	UserPlus,
+	Zap,
+} from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { getQuickPlayRoom } from "@/services/pvp.client";
 import { BrowseModal } from "./browse-modal";
 import { HostModal } from "./host-modal";
 import { JoinModal } from "./join-modal";
 import { LogoutButton } from "./logoutButton";
 
 export default function Home() {
+	const router = useRouter();
 	const [hostOpen, setHostOpen] = useState(false);
 	const [joinOpen, setJoinOpen] = useState(false);
 	const [browseOpen, setBrowseOpen] = useState(false);
+	const [quickPlayLoading, setQuickPlayLoading] = useState(false);
+	const [quickPlayError, setQuickPlayError] = useState<string | null>(null);
+
+	async function handleQuickPlay() {
+		setQuickPlayLoading(true);
+		setQuickPlayError(null);
+		try {
+			const roomCode = await getQuickPlayRoom();
+			router.push(`/pvp/${roomCode}`);
+		} catch (err) {
+			setQuickPlayError(
+				err instanceof Error ? err.message : "Failed to find a match",
+			);
+		} finally {
+			setQuickPlayLoading(false);
+		}
+	}
 
 	return (
 		<div className="min-h-screen flex items-center justify-center p-4">
-			<div className="container max-w-4xl mx-auto">
-				<div className="text-center space-y-8">
-					<div className="space-y-4">
-						<h1 className="text-4xl font-bold tracking-tight">Versus Type</h1>
-						<p className="text-xl text-muted-foreground">
-							Test your typing skills in fast-paced battles
-						</p>
-					</div>
+			<div className="text-center space-y-8">
+				<h1 className="text-4xl font-bold tracking-tight">Versus Type</h1>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-2xl mx-auto">
-						<Card>
-							<CardHeader className="pb-3">
-								<CardTitle className="text-lg">Quick Start</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<Button className="w-full" size="lg" asChild>
-									<Link href="/solo">Solo</Link>
-								</Button>
-								<Button
-									className="w-full mt-2"
-									size="lg"
-									variant="secondary"
-									onClick={() => setHostOpen(true)}
-								>
-									Host
-								</Button>
-								<Button
-									className="w-full mt-2"
-									size="lg"
-									variant="outline"
-									onClick={() => setJoinOpen(true)}
-								>
-									Join
-								</Button>
-								<Button
-									className="w-full mt-2"
-									size="lg"
-									variant="ghost"
-									onClick={() => setBrowseOpen(true)}
-								>
-									Browse Rooms
-								</Button>
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader className="pb-3">
-								<CardTitle className="text-lg">Profile</CardTitle>
-								<CardDescription>View your stats and progress</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<Button variant="outline" className="w-full" size="lg" asChild>
-									<Link href="/profile">View Profile</Link>
-								</Button>
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader className="pb-3">
-								<CardTitle className="text-lg">Settings</CardTitle>
-								<CardDescription>Customize your experience</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<Button variant="outline" className="w-full" size="lg" asChild>
-									<Link href="/settings">Settings</Link>
-								</Button>
-							</CardContent>
-						</Card>
-					</div>
-
-					<div className="flex gap-4 justify-center flex-wrap">
-						<Button variant="outline" asChild>
-							<Link href="/sign-in">Sign In</Link>
+				<div className="flex flex-col gap-3 w-64 mx-auto">
+					<Tooltip
+						open={!!quickPlayError}
+						onOpenChange={(open) => !open && setQuickPlayError(null)}
+					>
+						<TooltipTrigger asChild>
+							<Button
+								size="lg"
+								onClick={handleQuickPlay}
+								disabled={quickPlayLoading}
+							>
+								{quickPlayLoading ? (
+									<Loader2 className="size-4 animate-spin" />
+								) : (
+									<Zap className="size-4" />
+								)}
+								Quick Play
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent className="text-destructive text-sm">
+							{quickPlayError}
+						</TooltipContent>
+					</Tooltip>
+					<Button size="lg" variant="secondary" asChild>
+						<Link href="/solo">
+							<User className="size-4" />
+							Solo
+						</Link>
+					</Button>
+					<div className="flex gap-3">
+						<Button
+							className="flex-1"
+							size="lg"
+							variant="outline"
+							onClick={() => setHostOpen(true)}
+						>
+							Host
 						</Button>
-						<Button variant="outline" asChild>
-							<Link href="/sign-up">Sign Up</Link>
+						<Button
+							className="flex-1"
+							size="lg"
+							variant="outline"
+							onClick={() => setJoinOpen(true)}
+						>
+							Join
 						</Button>
-						<LogoutButton />
 					</div>
+					<Button
+						size="lg"
+						variant="outline"
+						onClick={() => setBrowseOpen(true)}
+					>
+						<Globe className="size-4" />
+						Browse Rooms
+					</Button>
+				</div>
+
+				<div className="flex gap-3 justify-center flex-wrap">
+					<Button variant="ghost" size="sm" asChild>
+						<Link href="/profile">
+							<User className="size-4" />
+							Profile
+						</Link>
+					</Button>
+					<Button variant="ghost" size="sm" asChild>
+						<Link href="/settings">
+							<Settings className="size-4" />
+							Settings
+						</Link>
+					</Button>
+					<Button variant="ghost" size="sm" asChild>
+						<Link href="/sign-in">
+							<LogIn className="size-4" />
+							Sign In
+						</Link>
+					</Button>
+					<Button variant="ghost" size="sm" asChild>
+						<Link href="/sign-up">
+							<UserPlus className="size-4" />
+							Sign Up
+						</Link>
+					</Button>
+					<LogoutButton />
 				</div>
 			</div>
 

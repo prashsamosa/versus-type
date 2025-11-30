@@ -1,7 +1,7 @@
-import type { RoomInfo, RoomSettings } from "@versus-type/shared/index";
+import type { RoomInfo, RoomSettingsClient } from "@versus-type/shared/index";
 import { API_URL } from "@/const";
 
-export async function hostMatch(settings: RoomSettings) {
+export async function hostMatch(settings: RoomSettingsClient) {
 	try {
 		const response = await fetch(`${API_URL}/pvp/host`, {
 			method: "POST",
@@ -31,7 +31,6 @@ export async function hostMatch(settings: RoomSettings) {
 
 export async function getPublicRooms() {
 	try {
-		console.log("Fetching " + `${API_URL}/pvp/rooms`);
 		const response = await fetch(`${API_URL}/pvp/rooms`);
 		if (!response.ok) {
 			const errMsg =
@@ -42,6 +41,30 @@ export async function getPublicRooms() {
 		return data as RoomInfo[];
 	} catch (error) {
 		console.error("getPublicRooms error:", error);
+		throw error;
+	}
+}
+
+export async function getQuickPlayRoom() {
+	try {
+		const response = await fetch(`${API_URL}/pvp/matchmake`, {
+			credentials: "include",
+		});
+		if (!response.ok) {
+			const errMsg =
+				(await response.json().catch())?.error || response.statusText;
+			throw new Error(`Error: ${errMsg}`);
+		}
+		const data = await response.json();
+		console.log(data);
+		const roomCode = data.roomCode;
+		if (typeof roomCode !== "string") {
+			console.error("Validation error: roomCode is not a string");
+			throw new Error("Internal server error");
+		}
+		return roomCode;
+	} catch (error) {
+		console.error("getQuickPlayRoom error:", error);
 		throw error;
 	}
 }

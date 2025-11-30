@@ -1,5 +1,5 @@
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { disconnectSocket, setupSocketAndJoin, socket } from "@/socket";
@@ -11,14 +11,10 @@ export function usePvpSession() {
 	const [socketError, setSocketError] = useState<string | null>(null);
 	const [latency, setLatency] = useState<number | null>(null);
 	const [disconnected, setDisconnected] = useState(false);
-	const [username, setUsername] = useState(() => {
-		if (typeof window !== "undefined") {
-			return localStorage.getItem("anonymousUsername") || "";
-		}
-		return "";
-	});
+	const [username, setUsername] = useState("");
 	const { data: session, isPending } = authClient.useSession();
-	const [hasSignedIn, setHasSignedIn] = useState(false);
+	const [authResolved, setAuthResolved] = useState(false);
+	const signingIn = useRef(false);
 	const endMatch = usePvpStore((s) => s.endMatch);
 
 	const setPlayers = usePvpStore((s) => s.setPlayers);
@@ -35,22 +31,31 @@ export function usePvpSession() {
 
 	useEffect(() => {
 		if (isPending) return;
+
 		if (session?.user && !session.user.isAnonymous) {
+			localStorage.removeItem("anonymousUsername");
 			const displayName =
 				session.user.name ?? session.user.email?.split("@")[0] ?? "User";
 			setUsername(displayName);
+			setAuthResolved(true);
 			return;
-		} else if (!session?.user && !hasSignedIn) {
-			console.log("Signing in anonymously");
-			setHasSignedIn(true);
-			authClient.signIn.anonymous();
-		} else {
-			console.log("Anonymous user");
 		}
-	}, [session, isPending, hasSignedIn]);
+
+		if (!session?.user && !signingIn.current) {
+			signingIn.current = true;
+			authClient.signIn.anonymous();
+			return;
+		}
+
+		if (session?.user?.isAnonymous) {
+			const storedUsername = localStorage.getItem("anonymousUsername") || "";
+			setUsername(storedUsername);
+			setAuthResolved(true);
+		}
+	}, [session, isPending]);
 
 	useEffect(() => {
-		if (!username || isPending) return;
+		if (!authResolved || !username) return;
 		setupSocketAndJoin(username, roomCode)
 			.then((response) => {
 				setLoading(false);
@@ -116,14 +121,14 @@ export function usePvpSession() {
 			disconnectSocket();
 			setLatency(null);
 		};
-	}, [username, isPending, setWpms]);
+	}, [username, authResolved, setWpms]);
 	return {
 		loading,
 		socketError,
 		username,
 		setUsername,
 		roomCode,
-		isPending,
+		authResolved,
 		latency,
 		players,
 		matchStarted,

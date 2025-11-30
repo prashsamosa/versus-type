@@ -43,7 +43,7 @@ export default function PvpPage() {
 		socketError,
 		username,
 		setUsername,
-		isPending,
+		authResolved,
 		roomCode,
 		latency,
 		disconnected,
@@ -75,7 +75,7 @@ export default function PvpPage() {
 
 	const waitingForPlayers = Object.keys(players).length < 1; // TODO: change to 2 for matchmaking rooms
 
-	if (isPending) {
+	if (!authResolved) {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-screen py-2">
 				<h1 className="text-4xl font-bold mb-4">Loading...</h1>
