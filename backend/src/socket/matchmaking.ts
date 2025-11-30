@@ -1,16 +1,9 @@
+import type { RoomState } from "./store";
 import { activePlayersCount } from "./store";
-import type { RoomState } from "./types";
-
-type TBDRoomState = RoomState & {
-	maxPlayers: number;
-	type: "public" | "private" | "single_match";
-	avgWpm: number;
-	lastMatchEndedAt: number;
-};
 
 export function findBestMatch(
-	rooms: Record<string, TBDRoomState>,
-	playerStats: any,
+	rooms: Record<string, RoomState>,
+	avgWpm: number,
 	totalOnlinePlayers: number,
 ): string | null {
 	// TUNABLES
@@ -54,7 +47,7 @@ export function findBestMatch(
 		const room = rooms[roomCode];
 		const activeCount = activePlayersCount(roomCode);
 		// filter
-		if (room.type !== "single_match" || activeCount >= room.maxPlayers) {
+		if (room.type !== "single-match" || activeCount >= room.maxPlayers) {
 			continue;
 		}
 
@@ -70,7 +63,7 @@ export function findBestMatch(
 		score += Math.max(0, MAX_SWEET_SPOT_BONUS - sweetSpotDiff * 10);
 
 		// skill matching
-		const wpmDiff = Math.abs(room.avgWpm - playerStats.avgWpm);
+		const wpmDiff = Math.abs(room.avgWpm - avgWpm);
 		score -=
 			Math.max(0, (wpmDiff - MIN_WPM_GAP) ** WPM_DIFF_POWER) * WPM_GAP_PENALTY;
 

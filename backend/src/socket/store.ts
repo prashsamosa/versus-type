@@ -1,4 +1,4 @@
-import type { LobbyInfo, RoomSettings } from "@versus-type/shared";
+import type { LobbyInfo } from "@versus-type/shared";
 import type { AccuracyState } from "@versus-type/shared/accuracy";
 import { resetAccuracy } from "@versus-type/shared/accuracy";
 import type { ChatMessage } from "@versus-type/shared/index";
@@ -26,6 +26,11 @@ export type PlayerState = {
 };
 
 export type RoomType = "public" | "private" | "single-match";
+
+export type RoomSettings = {
+	type: RoomType;
+	maxPlayers: number;
+};
 
 export type RoomState = {
 	status: "inProgress" | "waiting" | "closed";
@@ -111,8 +116,7 @@ export async function reinitializeRoomState(roomCode: string) {
 }
 
 export async function initializeRoom(roomCode: string, settings: RoomSettings) {
-	const { isPrivate, maxPlayers } = settings;
-	const type: RoomType = isPrivate ? "private" : "public";
+	const { type, maxPlayers } = settings;
 	roomStates[roomCode] = {
 		...createInitialRoomState(),
 		players: {},

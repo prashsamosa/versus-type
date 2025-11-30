@@ -63,11 +63,11 @@ export type MatchResults = {
 	};
 };
 
-export const roomSettingsSchema = z.object({
+export const roomSettingsClientSchema = z.object({
 	isPrivate: z.boolean(),
 	maxPlayers: z.number().min(2).max(MAX_PLAYERS),
 });
-export type RoomSettings = z.infer<typeof roomSettingsSchema>;
+export type RoomSettingsClient = z.infer<typeof roomSettingsClientSchema>;
 
 export interface ServerToClientEvents {
 	"pvp:countdown": (seconds: number) => void;

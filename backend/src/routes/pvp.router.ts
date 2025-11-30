@@ -1,17 +1,41 @@
-import { type RoomInfo, roomSettingsSchema } from "@versus-type/shared";
+import {
+	type RoomInfo,
+	type RoomSettingsClient,
+	roomSettingsClientSchema,
+} from "@versus-type/shared";
+import { fromNodeHeaders } from "better-auth/node";
 import { Router } from "express";
 import { customAlphabet } from "nanoid";
-import { activePlayersCount, initializeRoom, roomStates } from "@/socket/store";
+import { io } from "@/app";
+import { auth } from "@/auth/auth";
+import { rollingAvgWpmFromDB } from "@/socket/dbservice";
+import { findBestMatch } from "@/socket/matchmaking";
+import {
+	activePlayersCount,
+	initializeRoom,
+	type RoomSettings,
+	roomStates,
+} from "@/socket/store";
 
+const DEFAULT_WPM = 60;
 const MATCH_CODE_LENGTH = 6;
+const MAX_MATCHMAKING_PLAYERS = 6;
+
 const alphabet =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 const nanoid = customAlphabet(alphabet, MATCH_CODE_LENGTH);
 
 export const pvpRouter = Router();
 
+function toRoomSettings(settings: RoomSettingsClient): RoomSettings {
+	return {
+		type: settings.isPrivate ? "private" : "public",
+		maxPlayers: settings.maxPlayers,
+	};
+}
+
 pvpRouter.post("/host", async (req, res) => {
-	const parseResult = roomSettingsSchema.safeParse(req.body);
+	const parseResult = roomSettingsClientSchema.safeParse(req.body);
 	if (!parseResult.success) {
 		return res.status(400).json({ success: false, error: "Invalid settings" });
 	}
@@ -19,7 +43,8 @@ pvpRouter.post("/host", async (req, res) => {
 
 	let roomCode = "";
 	while (roomStates[roomCode] || roomCode === "") roomCode = nanoid();
-	await initializeRoom(roomCode, settings);
+	await initializeRoom(roomCode, toRoomSettings(settings));
+
 	console.log(`Room ${roomCode} created`);
 
 	res.json({ success: true, roomCode: roomCode });
@@ -54,4 +79,34 @@ pvpRouter.get("/rooms", (_, res) => {
 		);
 
 	res.json(publicRooms);
+});
+
+pvpRouter.get("/matchmake", async (req, res) => {
+	const session = await auth.api.getSession({
+		headers: fromNodeHeaders(req.headers),
+	});
+	if (!session) {
+		res.status(401).json({ error: "Unauthorized" });
+		return;
+	}
+	const avgWpm = await rollingAvgWpmFromDB(session.user.id);
+	const totalOnlinePlayers = io.engine.clientsCount;
+	const roomCode = findBestMatch(
+		roomStates,
+		avgWpm || DEFAULT_WPM,
+		totalOnlinePlayers,
+	);
+	if (roomCode) {
+		res.json({ roomCode });
+	} else {
+		let newRoomCode = "";
+		while (roomStates[newRoomCode] || newRoomCode === "")
+			newRoomCode = nanoid();
+		const settings: RoomSettings = {
+			type: "single-match",
+			maxPlayers: MAX_MATCHMAKING_PLAYERS,
+		};
+		await initializeRoom(newRoomCode, settings);
+		res.json({ roomCode });
+	}
 });
