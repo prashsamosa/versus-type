@@ -8,7 +8,9 @@ export async function getUserSettings(): Promise<Settings> {
 			headers: await headers(),
 		});
 		if (!response.ok) {
-			throw new Error(`Error fetching user settings: ${response.statusText}`);
+			const errMsg =
+				(await response.json().catch())?.error || response.statusText;
+			throw new Error(`Error fetching user settings: ${errMsg}`);
 		}
 		return await response.json();
 	} catch (error) {
@@ -23,7 +25,9 @@ export async function getUserStats(): Promise<Stats> {
 			headers: await headers(),
 		});
 		if (!response.ok) {
-			throw new Error(`Error fetching user stats: ${response.statusText}`);
+			const errMsg =
+				(await response.json().catch())?.error || response.statusText;
+			throw new Error(`Error fetching user stats: ${errMsg}`);
 		}
 		return await response.json();
 	} catch (error) {

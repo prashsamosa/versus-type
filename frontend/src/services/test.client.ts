@@ -10,7 +10,9 @@ export async function completeTest(data: TestStats): Promise<Settings> {
 			body: JSON.stringify(data),
 		});
 		if (!response.ok) {
-			throw new Error(`Error saving result ${response.statusText}`);
+			const errMsg =
+				(await response.json().catch())?.error || response.statusText;
+			throw new Error(`Error saving result: ${errMsg}`);
 		}
 		return await response.json();
 	} catch (error) {
