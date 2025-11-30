@@ -97,31 +97,24 @@ export const userSettings = sqliteTable("userSettings", {
 	typingSoundEnabled: integer({ mode: "boolean" }).notNull().default(false),
 });
 
-export const userStats = sqliteTable(
-	"userStats",
-	{
-		userId: text()
-			.notNull()
-			.primaryKey()
-			.references(() => user.id),
-		tests: integer().notNull().default(0),
-		pvpMatches: integer().notNull().default(0),
-		wins: integer().notNull().default(0),
-		avgWpmPvp: real().notNull().default(0),
-		avgAccuracyPvp: real().notNull().default(0),
-		highestWpm: real().notNull().default(0),
-		avgWpm: real().notNull().default(0),
-		avgAccuracy: real().notNull().default(0),
-		totalTimeTyped: integer().notNull().default(0),
-		updatedAt: integer("updated_at", { mode: "timestamp" })
-			.notNull()
-			.$onUpdateFn(() => new Date()),
-	},
-	(table) => [
-		index("idx_avgWpmPvp").on(table.avgWpmPvp),
-		index("idx_avgAccuracyPvp").on(table.avgAccuracyPvp),
-	],
-);
+export const userStats = sqliteTable("userStats", {
+	userId: text()
+		.notNull()
+		.primaryKey()
+		.references(() => user.id),
+	tests: integer().notNull().default(0),
+	pvpMatches: integer().notNull().default(0),
+	wins: integer().notNull().default(0),
+	avgWpmPvp: real().notNull().default(0),
+	avgAccuracyPvp: real().notNull().default(0),
+	highestWpm: real().notNull().default(0),
+	avgWpm: real().notNull().default(0),
+	avgAccuracy: real().notNull().default(0),
+	totalTimeTyped: integer().notNull().default(0),
+	updatedAt: integer("updated_at", { mode: "timestamp" })
+		.notNull()
+		.$onUpdateFn(() => new Date()),
+});
 
 export const matches = sqliteTable("matches", {
 	id: text()
@@ -135,20 +128,27 @@ export const matches = sqliteTable("matches", {
 		.$defaultFn(() => new Date()),
 });
 
-export const matchParticipants = sqliteTable("matchParticipants", {
-	id: text()
-		.primaryKey()
-		.$defaultFn(() => randomUUID()),
-	matchId: text()
-		.notNull()
-		.references(() => matches.id, { onDelete: "cascade" }),
-	userId: text()
-		.notNull()
-		.references(() => user.id),
-	wpm: real(),
-	accuracy: real(),
-	ordinal: integer(),
-});
+export const matchParticipants = sqliteTable(
+	"matchParticipants",
+	{
+		id: text()
+			.primaryKey()
+			.$defaultFn(() => randomUUID()),
+		matchId: text()
+			.notNull()
+			.references(() => matches.id, { onDelete: "cascade" }),
+		userId: text()
+			.notNull()
+			.references(() => user.id),
+		wpm: real(),
+		accuracy: real(),
+		ordinal: integer(),
+		createdAt: integer("created_at", { mode: "timestamp" })
+			.notNull()
+			.$defaultFn(() => new Date()),
+	},
+	(table) => [index("idx_matchParticipants_userId").on(table.userId)],
+);
 
 export const tests = sqliteTable(
 	"tests",

@@ -123,10 +123,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			};
 		}
 		sendLobbyUpdate(io, roomCode);
-		console.log("\nSOMEONE JOINED ", roomCode, isHost);
-		console.log(
-			Object.entries(roomStates[roomCode].players).map(([, p]) => p.username),
-		);
 	});
 
 	socket.on("disconnect", () => {
@@ -181,6 +177,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 						});
 					}
 				}
+				sendWpmUpdate(io, roomCode);
 				disconnectedPlayer.disconnected = true;
 				if (
 					roomState.isMatchStarted &&

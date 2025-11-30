@@ -21,9 +21,6 @@ pvpRouter.post("/host", async (req, res) => {
 	while (roomStates[roomCode] || roomCode === "") roomCode = nanoid();
 	await initializeRoom(roomCode, settings);
 	console.log(`Room ${roomCode} created`);
-	console.log(
-		Object.entries(roomStates[roomCode].players).map(([, p]) => p.username),
-	);
 
 	res.json({ success: true, roomCode: roomCode });
 });

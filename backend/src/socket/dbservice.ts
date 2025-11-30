@@ -1,7 +1,10 @@
-import { eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { matches, matchParticipants, userStats } from "@/db/schema";
 import type { RoomState } from "./types";
+
+const DEFAULT_WPM = 60;
+const ROLLING_AVG_MATCH_COUNT = 10;
 
 export async function updatePlayersInfoInDB(roomState: RoomState) {
 	const matchId = await db
@@ -27,31 +30,54 @@ export async function updatePlayersInfoInDB(roomState: RoomState) {
 		if (!player.finished) continue;
 		const isWinner = player.ordinal === 1 ? 1 : 0;
 		const accuracy = player.accuracy ?? 0;
-		await db
-			.insert(matchParticipants)
-			.values({
-				matchId: matchId,
-				userId: userId,
-				ordinal: player.ordinal,
-				accuracy: accuracy,
-				wpm: player.wpm || 0,
-			})
-			.catch((err) => {
-				console.error("Error inserting match participant:", err);
-			});
 
-		await db
-			.update(userStats)
-			.set({
-				pvpMatches: sql`${userStats.pvpMatches} + 1`,
-				wins: sql`${userStats.wins} + ${isWinner ? 1 : 0}`,
-				avgWpmPvp: sql`(((${userStats.avgWpmPvp} * ${userStats.pvpMatches}) + ${player.wpm || 0}) / (${userStats.pvpMatches} + 1))`,
-				avgAccuracyPvp: sql`(((${userStats.avgAccuracyPvp} * ${userStats.pvpMatches}) + ${accuracy}) / (${userStats.pvpMatches} + 1))`,
-				highestWpm: sql`CASE WHEN ${player.wpm || 0} > ${userStats.highestWpm} THEN ${player.wpm || 0} ELSE ${userStats.highestWpm} END`,
-			})
-			.where(eq(userStats.userId, userId))
-			.catch((err) => {
-				console.error("Error updating user stats in DB:", err);
-			});
+		await Promise.allSettled([
+			db
+				.insert(matchParticipants)
+				.values({
+					matchId: matchId,
+					userId: userId,
+					ordinal: player.ordinal,
+					accuracy: accuracy,
+					wpm: player.wpm || 0,
+				})
+				.catch((err) => {
+					console.error("Error inserting match participant:", err);
+				}),
+
+			db
+				.update(userStats)
+				.set({
+					pvpMatches: sql`${userStats.pvpMatches} + 1`,
+					wins: sql`${userStats.wins} + ${isWinner ? 1 : 0}`,
+					avgWpmPvp: sql`(((${userStats.avgWpmPvp} * ${userStats.pvpMatches}) + ${player.wpm || 0}) / (${userStats.pvpMatches} + 1))`,
+					avgAccuracyPvp: sql`(((${userStats.avgAccuracyPvp} * ${userStats.pvpMatches}) + ${accuracy}) / (${userStats.pvpMatches} + 1))`,
+					highestWpm: sql`CASE WHEN ${player.wpm || 0} > ${userStats.highestWpm} THEN ${player.wpm || 0} ELSE ${userStats.highestWpm} END`,
+				})
+				.where(eq(userStats.userId, userId))
+				.catch((err) => {
+					console.error("Error updating user stats in DB:", err);
+				}),
+		]);
 	}
+}
+
+export async function rollingAvgWpmFromDB(userId: string) {
+	const result = await db
+		.select({ rollingAvgWpm: sql<number>`AVG(wpm)` })
+		.from(
+			db
+				.select({ wpm: matchParticipants.wpm })
+				.from(matchParticipants)
+				.where(eq(matchParticipants.userId, userId))
+				.orderBy(desc(matchParticipants.id))
+				.limit(ROLLING_AVG_MATCH_COUNT)
+				.as("last_matches"),
+		);
+
+	const rollingAvgWpm = result[0]?.rollingAvgWpm;
+	if (rollingAvgWpm === null || rollingAvgWpm === undefined) {
+		return DEFAULT_WPM;
+	}
+	return rollingAvgWpm;
 }
