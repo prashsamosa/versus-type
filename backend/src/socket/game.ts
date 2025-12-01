@@ -109,6 +109,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					? `Reconnected to room ${roomCode}`
 					: `Joined room ${roomCode}`,
 			gameState: {
+				type: roomState.type,
 				isStarted: roomState.isMatchStarted,
 				typingIndex: player?.typingIndex || 0,
 				oppTypingIndexes,

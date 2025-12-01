@@ -1,4 +1,4 @@
-import type { LobbyInfo } from "@versus-type/shared";
+import type { LobbyInfo, RoomType } from "@versus-type/shared";
 import type { AccuracyState } from "@versus-type/shared/accuracy";
 import { resetAccuracy } from "@versus-type/shared/accuracy";
 import type { ChatMessage } from "@versus-type/shared/index";
@@ -24,8 +24,6 @@ export type PlayerState = {
 	ordinal?: number;
 	incorrectIdx: number | null;
 };
-
-export type RoomType = "public" | "private" | "single-match";
 
 export type RoomSettings = {
 	type: RoomType;

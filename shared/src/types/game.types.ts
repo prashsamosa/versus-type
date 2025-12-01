@@ -38,11 +38,14 @@ export type RoomInfo = {
 	avgWpm?: number;
 };
 
+export type RoomType = "public" | "private" | "single-match";
+
 export type JoinResponse = {
 	success: boolean;
 	message?: string;
 	gameState?: {
 		isStarted: boolean;
+		type: RoomType;
 		typingIndex: number;
 		oppTypingIndexes: { [userId: string]: number };
 		passage: string;
