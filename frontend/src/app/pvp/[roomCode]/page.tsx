@@ -23,12 +23,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
+import { Banner } from "./banner";
 import Chat from "./Chat";
 import { usePvpSession } from "./hooks/usePvpSession";
 import { Lobby } from "./Lobby";
 import { PvpGame } from "./PvpGame";
 import SocketErrorPage from "./SocketErrorPage";
-import { StatusSign } from "./status-sign";
 import { usePvpStore } from "./store";
 import { UsernameInput } from "./UsernameInput";
 
@@ -117,6 +117,13 @@ export default function PvpPage() {
 	}
 	return (
 		<div className="flex flex-col items-center justify-start min-h-screen">
+			<div className="w-full -z-10 absolute p-4 text-center font-bold text-5xl tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-foreground/20 to-background from-30% to-90% ">
+				{roomType === "single-match"
+					? "Quick Play"
+					: roomType === "public"
+						? "Public Room"
+						: "Private Room"}
+			</div>
 			<div className="p-2 flex justify-between items-center w-full mb-4">
 				<CodeCopy
 					roomCode={roomCode}
@@ -171,7 +178,7 @@ export default function PvpPage() {
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
 				<div className="p-16 relative">
-					<StatusSign
+					<Banner
 						isSpectating={isSpectating}
 						waitingForPlayers={waitingForPlayers}
 					/>

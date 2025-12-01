@@ -5,7 +5,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export function StatusSign({
+export function Banner({
 	isSpectating,
 	waitingForPlayers,
 }: {
@@ -20,7 +20,7 @@ export function StatusSign({
 		<div
 			className={
 				"absolute left-1/2 -translate-x-1/2 " +
-				(waitingForPlayers ? "top-6" : "top-14")
+				(waitingForPlayers ? "top-8" : "top-14")
 			}
 		>
 			<Tooltip>
@@ -43,9 +43,11 @@ export function StatusSign({
 						) : null}
 					</div>
 				</TooltipTrigger>
-				<TooltipContent>
-					<span className="text-sm">Wait for the next match to play</span>
-				</TooltipContent>
+				{isSpectating ? (
+					<TooltipContent>
+						<span className="text-sm">Wait for the next match to play</span>
+					</TooltipContent>
+				) : null}
 			</Tooltip>
 		</div>
 	);
