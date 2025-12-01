@@ -20,6 +20,7 @@ import {
 const DEFAULT_WPM = 60;
 const MATCH_CODE_LENGTH = 6;
 const MAX_MATCHMAKING_PLAYERS = 6;
+const NUKE_TIME_MS = 1 * 60 * 1000; // 1m
 
 const alphabet =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -103,7 +104,19 @@ pvpRouter.get("/matchmake", async (req, res) => {
 			maxPlayers: MAX_MATCHMAKING_PLAYERS,
 		};
 		await initializeRoom(newRoomCode, settings);
+		startNukeTimer(newRoomCode);
 
 		res.json({ roomCode: newRoomCode });
 	}
 });
+
+function startNukeTimer(roomCode: string) {
+	setTimeout(() => {
+		const roomState = roomStates[roomCode];
+		if (roomState && Object.keys(roomState.players).length === 0) {
+			roomState.status = "closed";
+			delete roomStates[roomCode];
+			console.log(`Matchmaking room ${roomCode} nuked due to inactivity`);
+		}
+	}, NUKE_TIME_MS);
+}
