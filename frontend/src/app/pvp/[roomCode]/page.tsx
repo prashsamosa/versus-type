@@ -117,7 +117,7 @@ export default function PvpPage() {
 	}
 	return (
 		<div className="flex flex-col items-center justify-start min-h-screen">
-			<div className="w-full -z-10 absolute p-4 text-center font-bold text-5xl tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-foreground/20 to-background from-30% to-90% ">
+			<div className="w-full -z-10 absolute p-5 text-center font-bold text-5xl tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-foreground/20 to-background from-30% to-90% ">
 				{roomType === "single-match"
 					? "Quick Play"
 					: roomType === "public"
@@ -177,11 +177,15 @@ export default function PvpPage() {
 				</div>
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
-				<div className="p-16 relative">
-					<Banner
-						isSpectating={isSpectating}
-						waitingForPlayers={waitingForPlayers}
-					/>
+				<div className="pt-16 relative">
+					<div
+						className={`text-center -mb-2 transition-all duration-400 ${isSpectating || waitingForPlayers ? "opacity-100" : "opacity-0"}`}
+					>
+						<Banner
+							isSpectating={isSpectating}
+							waitingForPlayers={waitingForPlayers}
+						/>
+					</div>
 					<PvpGame />
 				</div>
 				<div

@@ -12,43 +12,41 @@ export function Banner({
 	isSpectating: boolean;
 	waitingForPlayers: boolean;
 }) {
-	if (!isSpectating && !waitingForPlayers) {
-		return null;
-	}
-
 	return (
-		<div
-			className={
-				"absolute left-1/2 -translate-x-1/2 " +
-				(waitingForPlayers ? "top-8" : "top-14")
-			}
-		>
-			<Tooltip>
-				<TooltipTrigger className="cursor-default">
+		<Tooltip>
+			<TooltipTrigger className="cursor-default">
+				<div
+					className={`text-xl duration-500 text-foreground opacity-70 flex items-center gap-2 bg-input/60 border px-10 pb-2 pt-1.5 justify-center relative overflow-hidden transition-all ${isSpectating || waitingForPlayers ? "h-12" : "h-0"}`}
+					style={{
+						WebkitMaskImage:
+							"linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)",
+						maskImage:
+							"linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)",
+					}}
+				>
 					<div
-						className="text-xl text-foreground opacity-70 flex items-center gap-2 bg-input/60 border px-10 pb-2 pt-1.5 justify-center relative overflow-hidden"
-						style={{
-							WebkitMaskImage:
-								"linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)",
-							maskImage:
-								"linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)",
-						}}
+						className={
+							"overflow-hidden transition-all " +
+							(isSpectating ? "max-w-xl" : "max-w-0 delay-1000")
+						}
 					>
-						{isSpectating ? (
-							<>
-								<Eye className="mt-0.5" size={20} /> <span>Spectating</span>
-							</>
-						) : waitingForPlayers ? (
-							<span>Waiting for players</span>
-						) : null}
+						<Eye className="mt-0.5" size={20} /> <span>Spectating</span>
 					</div>
-				</TooltipTrigger>
-				{isSpectating ? (
-					<TooltipContent>
-						<span className="text-sm">Wait for the next match to play</span>
-					</TooltipContent>
-				) : null}
-			</Tooltip>
-		</div>
+					<span
+						className={
+							"overflow-hidden transition-all " +
+							(waitingForPlayers ? "max-w-xl" : "max-w-0 delay-1000")
+						}
+					>
+						Waiting for players
+					</span>
+				</div>
+			</TooltipTrigger>
+			{isSpectating ? (
+				<TooltipContent>
+					<span className="text-sm">Wait for the next match to play</span>
+				</TooltipContent>
+			) : null}
+		</Tooltip>
 	);
 }
