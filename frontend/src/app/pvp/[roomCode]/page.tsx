@@ -5,7 +5,6 @@ import {
 	ChevronDown,
 	ChevronUp,
 	Copy,
-	Eye,
 	Settings,
 	WifiOff,
 } from "lucide-react";
@@ -22,11 +21,6 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
 import Chat from "./Chat";
@@ -34,6 +28,7 @@ import { usePvpSession } from "./hooks/usePvpSession";
 import { Lobby } from "./Lobby";
 import { PvpGame } from "./PvpGame";
 import SocketErrorPage from "./SocketErrorPage";
+import { StatusSign } from "./status-sign";
 import { usePvpStore } from "./store";
 import { UsernameInput } from "./UsernameInput";
 
@@ -66,6 +61,8 @@ export default function PvpPage() {
 	const config = usePvpStore((s) => s.config);
 	const setConfig = usePvpStore((s) => s.setConfig);
 	const [expanded, setExpanded] = useState(false);
+	const roomType = usePvpStore((s) => s.roomType);
+	const isSpectating = myUserId ? players[myUserId]?.spectator : false;
 
 	useEffect(() => {
 		return () => {
@@ -73,7 +70,8 @@ export default function PvpPage() {
 		};
 	}, [resetStore]);
 
-	const waitingForPlayers = Object.keys(players).length < 1; // TODO: change to 2 for matchmaking rooms
+	const waitingForPlayers =
+		roomType === "single-match" ? Object.keys(players).length < 2 : false;
 
 	if (!authResolved) {
 		return (
@@ -161,44 +159,23 @@ export default function PvpPage() {
 					<Button variant="secondary" onClick={handleExit}>
 						Exit
 					</Button>
-					{isHost && !countingDown && !matchStarted ? (
-						<Button onClick={handleStartCountdown} disabled={waitingForPlayers}>
-							{waitingForPlayers
-								? "Waiting for players..."
-								: matchEnded
-									? "Start Next Match"
-									: "Start Match"}
+					{roomType !== "single-match" &&
+					isHost &&
+					!countingDown &&
+					!matchStarted ? (
+						<Button onClick={handleStartCountdown}>
+							{matchEnded ? "Start Next Match" : "Start Match"}
 						</Button>
 					) : null}
 				</div>
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
 				<div className="p-16 relative">
+					<StatusSign
+						isSpectating={isSpectating}
+						waitingForPlayers={waitingForPlayers}
+					/>
 					<PvpGame />
-					{myUserId && players[myUserId]?.spectator ? (
-						<div className="absolute top-14 left-1/2 -translate-x-1/2">
-							<Tooltip>
-								<TooltipTrigger className="cursor-default">
-									<div
-										className="text-xl text-foreground opacity-70 flex items-center gap-2 bg-input/60 border px-10 pb-2 pt-1.5 justify-center relative overflow-hidden"
-										style={{
-											WebkitMaskImage:
-												"linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)",
-											maskImage:
-												"linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)",
-										}}
-									>
-										<Eye className="mt-0.5" size={20} /> <span>Spectating</span>
-									</div>
-								</TooltipTrigger>
-								<TooltipContent>
-									<span className="text-sm">
-										Wait for the next match to play
-									</span>
-								</TooltipContent>
-							</Tooltip>
-						</div>
-					) : null}
 				</div>
 				<div
 					className={

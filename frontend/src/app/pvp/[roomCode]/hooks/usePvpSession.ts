@@ -28,6 +28,7 @@ export function usePvpSession() {
 	const setChatMessages = usePvpStore((s) => s.setChatMessages);
 	const setPassage = usePvpStore((s) => s.setPassage);
 	const setPassageConfig = usePvpStore((s) => s.setPassageConfig);
+	const setRoomType = usePvpStore((s) => s.setRoomType);
 
 	useEffect(() => {
 		if (isPending) return;
@@ -75,6 +76,7 @@ export function usePvpSession() {
 					if (gameState.passage) setPassage(gameState.passage);
 					if (gameState.passageConfig)
 						setPassageConfig(gameState.passageConfig);
+					if (gameState.type) setRoomType(gameState.type);
 				}
 			})
 			.catch((err) => {

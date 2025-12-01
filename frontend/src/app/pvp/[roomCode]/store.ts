@@ -1,4 +1,9 @@
-import type { ChatMessage, LobbyInfo, WpmInfo } from "@versus-type/shared";
+import type {
+	ChatMessage,
+	LobbyInfo,
+	RoomType,
+	WpmInfo,
+} from "@versus-type/shared";
 import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { create } from "zustand";
 
@@ -58,6 +63,8 @@ type PvpStore = {
 	setPassageConfig: (config: GeneratorConfig | null) => void;
 	config: GameConfig;
 	setConfig: (config: GameConfig) => void;
+	roomType?: RoomType;
+	setRoomType: (roomType: RoomType) => void;
 };
 
 const initialState = {
@@ -135,4 +142,5 @@ export const usePvpStore = create<PvpStore>((set) => ({
 		saveGameConfig(config);
 		set({ config });
 	},
+	setRoomType: (roomType) => set({ roomType }),
 }));
