@@ -74,6 +74,7 @@ export type RoomSettingsClient = z.infer<typeof roomSettingsClientSchema>;
 
 export interface ServerToClientEvents {
 	"pvp:countdown": (seconds: number) => void;
+	"pvp:waiting-countdown": (seconds: number | null) => void;
 	"pvp:progress-update": (data: {
 		userId: string;
 		typingIndex: number;

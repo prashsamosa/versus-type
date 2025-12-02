@@ -42,10 +42,8 @@ export type RoomState = {
 	chat: ChatMessage[];
 	maxPlayers: number;
 	avgWpm: number;
-	// currentMatchId: string | null;
+	stopWaitingCountdown?: () => void;
 };
-
-export const COUNTDOWN_SECONDS = 3;
 
 export const roomStates: Record<string, RoomState> = {};
 

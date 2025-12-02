@@ -1,4 +1,9 @@
-import type { ioServer, ioSocket, MatchResults } from "@versus-type/shared";
+import type {
+	ClientToServerEvents,
+	ioServer,
+	ioSocket,
+	MatchResults,
+} from "@versus-type/shared";
 import {
 	getAccuracy,
 	recordKey,
@@ -15,7 +20,7 @@ import {
 	updatePlayersInfoInDB,
 } from "./dbservice";
 import {
-	COUNTDOWN_SECONDS,
+	activePlayersCount,
 	initialPlayerState,
 	participantCount,
 	reinitializeRoomState,
@@ -25,6 +30,9 @@ import {
 	updateRoomAvgWpm,
 } from "./store";
 import { calcWpm, getRandomColor } from "./utils";
+
+const COUNTDOWN_SECONDS = 3;
+const WAITING_COUNTDOWN_SECONDS = 15;
 
 export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("pvp:join", async (data, callback) => {
@@ -44,8 +52,8 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			});
 		}
 
-		let isHost = true;
-		if (io.sockets.adapter.rooms.has(roomCode)) isHost = false;
+		let isHost = roomState.type !== "single-match";
+		if (isHost && io.sockets.adapter.rooms.has(roomCode)) isHost = false;
 
 		socket.data.username = username;
 		socket.data.roomCode = roomCode;
@@ -66,10 +74,11 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				: `Player ${socket.id}(${username}) joined match with code ${roomCode}`,
 		);
 
-		const player = roomStates[roomCode].players[socket.data.userId];
+		const player = roomState.players[socket.data.userId];
 		let oppTypingIndexes: Record<string, number> = {};
+		const playerCnt = activePlayersCount(roomCode);
 		let reconnected = false;
-		if (isHost) {
+		if (isHost || (roomState.type === "single-match" && playerCnt === 0)) {
 			roomState.passage = await generatePassage(roomState.passageConfig);
 		} else {
 			oppTypingIndexes = roomState.isMatchStarted
@@ -138,6 +147,18 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				updateRoomAvgWpm(roomCode);
 			}
 		});
+
+		if (playerCnt === 1 && roomState.type === "single-match") {
+			// second player joined, start waiting countdown
+			roomState.stopWaitingCountdown = startWaitingCountdown(
+				io,
+				roomCode,
+				() => {
+					roomState.stopWaitingCountdown = undefined;
+					startMatch(io, roomCode);
+				},
+			);
+		}
 	});
 
 	socket.on("disconnect", () => {
@@ -193,7 +214,27 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					}
 				}
 				sendWpmUpdate(io, roomCode);
-				disconnectedPlayer.disconnected = true;
+				if (
+					roomState.type === "single-match" &&
+					roomState.status === "waiting"
+				) {
+					delete roomState.players[socket.data.userId];
+				} else {
+					disconnectedPlayer.disconnected = true;
+				}
+
+				if (
+					roomState.type === "single-match" &&
+					roomState.status === "waiting" &&
+					roomState.stopWaitingCountdown &&
+					activePlayersCount(roomCode) < 2
+				) {
+					// stop waiting countdown if 2nd player disconnected
+					roomState.stopWaitingCountdown();
+					roomState.stopWaitingCountdown = undefined;
+					io.to(roomCode).emit("pvp:waiting-countdown", null);
+				}
+
 				if (
 					roomState.isMatchStarted &&
 					!disconnectedPlayer.finished &&
@@ -233,40 +274,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
-
-		const roomState = roomStates[roomCode];
-		if (roomState.isMatchStarted) {
-			callback({
-				success: false,
-				message: "Match already started",
-			});
-			return;
-		}
-
-		roomState.status = "inProgress";
-		callback({
-			success: true,
-			message: "Starting countdown",
-		});
-
-		await reinitializeRoomState(roomCode);
-		io.to(roomCode).emit(
-			"passage:put",
-			roomState.passage,
-			roomState.passageConfig,
-		);
-
-		sendLobbyUpdate(io, roomCode);
-		startCountdown(io, roomCode);
-		startWpmUpdates(io, roomCode);
-
-		for (const [userId] of Object.entries(roomState.players)) {
-			console.log("sending reset progress of", userId);
-			io.to(roomCode).emit("pvp:progress-update", {
-				userId,
-				typingIndex: 0,
-			});
-		}
+		await startMatch(io, roomCode, callback);
 	});
 
 	socket.on("pvp:key-press", (key: string) => {
@@ -495,4 +503,71 @@ async function closeRoom(roomCode: string, io: ioServer) {
 		}
 	}, 3000); // give clients time to receive the message
 	console.log(`Room ${roomCode} closed`);
+}
+
+async function startMatch(
+	io: ioServer,
+	roomCode: string,
+	callback?: Parameters<ClientToServerEvents["pvp:start-match"]>[0],
+) {
+	const roomState = roomStates[roomCode];
+	if (roomState.isMatchStarted) {
+		callback?.({
+			success: false,
+			message: "Match already started",
+		});
+		return;
+	}
+
+	roomState.status = "inProgress";
+
+	await reinitializeRoomState(roomCode);
+	io.to(roomCode).emit(
+		"passage:put",
+		roomState.passage,
+		roomState.passageConfig,
+	);
+
+	sendLobbyUpdate(io, roomCode);
+
+	startCountdown(io, roomCode);
+	callback?.({
+		success: true,
+		message: "Starting countdown",
+	});
+
+	startWpmUpdates(io, roomCode);
+
+	for (const [userId] of Object.entries(roomState.players)) {
+		console.log("sending reset progress of", userId);
+		io.to(roomCode).emit("pvp:progress-update", {
+			userId,
+			typingIndex: 0,
+		});
+	}
+}
+
+function startWaitingCountdown(
+	io: ioServer,
+	roomCode: string,
+	onComplete: () => void,
+) {
+	let countdown = WAITING_COUNTDOWN_SECONDS;
+	let stop = false;
+	io.to(roomCode).emit("pvp:waiting-countdown", countdown);
+	const countdownInterval = setInterval(() => {
+		if (stop) {
+			clearInterval(countdownInterval);
+			return;
+		}
+		countdown--;
+		io.to(roomCode).emit("pvp:waiting-countdown", countdown);
+		if (countdown === COUNTDOWN_SECONDS + 1) {
+			clearInterval(countdownInterval);
+			onComplete();
+		}
+	}, 1000);
+	return () => {
+		stop = true;
+	};
 }
