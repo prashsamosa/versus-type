@@ -1,3 +1,4 @@
+import type { UserStats } from "@versus-type/shared";
 import { fromNodeHeaders } from "better-auth/node";
 import { eq } from "drizzle-orm";
 import { Router } from "express";
@@ -24,6 +25,7 @@ userRouter.get("/stats", async (req, res) => {
 		res.status(401).json({ error: "Unauthorized" });
 		return;
 	}
+
 	const stats = await db
 		.select()
 		.from(userStats)
@@ -32,8 +34,8 @@ userRouter.get("/stats", async (req, res) => {
 		res.status(404).json({ error: "stats not found" });
 		return;
 	}
-	const { userId: _, ...returnObj } = stats[0];
-	res.json(returnObj);
+	const { userId: _, updatedAt: __, ...returnObj } = stats[0];
+	res.json(returnObj as UserStats);
 });
 
 export default userRouter;

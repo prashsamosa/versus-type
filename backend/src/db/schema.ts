@@ -102,11 +102,9 @@ export const userStats = sqliteTable("userStats", {
 		.notNull()
 		.primaryKey()
 		.references(() => user.id),
-	tests: integer().notNull().default(0),
+	soloMatches: integer().notNull().default(0),
 	pvpMatches: integer().notNull().default(0),
 	wins: integer().notNull().default(0),
-	avgWpmPvp: real().notNull().default(0),
-	avgAccuracyPvp: real().notNull().default(0),
 	highestWpm: real().notNull().default(0),
 	avgWpm: real().notNull().default(0),
 	avgAccuracy: real().notNull().default(0),
