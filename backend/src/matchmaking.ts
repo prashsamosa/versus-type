@@ -7,13 +7,13 @@ export function findBestMatch(
 	totalOnlinePlayers: number,
 ): string | null {
 	// TUNABLES
-	const BASE_SCORE = 100;
+	const BASE_SCORE = 120;
 
 	let ONE_PLAYER_BONUS: number;
 	const SWEET_SPOT_PLAYER_COUNT = 4;
 	let MAX_SWEET_SPOT_BONUS: number;
 
-	const WAITING_BONUS = 40;
+	// const WAITING_BONUS = 40;
 
 	let WPM_GAP_PENALTY: number; // multiplier for each WPM point difference
 	const MIN_WPM_GAP = 20;
@@ -26,13 +26,13 @@ export function findBestMatch(
 		ONE_PLAYER_BONUS = 60;
 		MAX_SWEET_SPOT_BONUS = 20;
 		WPM_GAP_PENALTY = 1.8;
-		MIN_SCORE_THRESHOLD = 10;
+		MIN_SCORE_THRESHOLD = 0;
 	} else if (totalOnlinePlayers < 100) {
 		// medium traffic, balance between speed and quality matches
 		ONE_PLAYER_BONUS = 30;
 		MAX_SWEET_SPOT_BONUS = 40;
 		WPM_GAP_PENALTY = 2;
-		MIN_SCORE_THRESHOLD = 30;
+		MIN_SCORE_THRESHOLD = 20;
 	} else {
 		// high traffic, prioritize quality matches, more stacking
 		ONE_PLAYER_BONUS = 10;
@@ -54,8 +54,8 @@ export function findBestMatch(
 		// base score on type
 		let score = BASE_SCORE;
 
-		// waiting rooms
-		if (room.status === "waiting") score += WAITING_BONUS;
+		// waiting rooms(removed coz singlematch are always waiting)
+		// if (room.status === "waiting") score += WAITING_BONUS;
 
 		// fullness
 		const sweetSpotDiff = Math.abs(activeCount - SWEET_SPOT_PLAYER_COUNT);
