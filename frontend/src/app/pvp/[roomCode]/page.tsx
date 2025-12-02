@@ -11,7 +11,6 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { QuickPlayButton } from "@/app/quick-play";
-import { UsernameForm } from "@/app/settings/UsernameForm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -33,6 +32,7 @@ import { Lobby } from "./Lobby";
 import { PvpGame } from "./PvpGame";
 import SocketErrorPage from "./SocketErrorPage";
 import { usePvpStore } from "./store";
+import { UsernameForm } from "./UsernameForm";
 
 export default function PvpPage() {
 	const {

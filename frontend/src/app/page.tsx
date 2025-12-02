@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, LogIn, Settings, User, UserPlus } from "lucide-react";
+import { Globe, LogIn, User, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -61,12 +61,6 @@ export default function Home() {
 						<Link href="/profile">
 							<User className="size-4" />
 							Profile
-						</Link>
-					</Button>
-					<Button variant="ghost" size="sm" asChild>
-						<Link href="/settings">
-							<Settings className="size-4" />
-							Settings
 						</Link>
 					</Button>
 					<Button variant="ghost" size="sm" asChild>

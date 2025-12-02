@@ -48,7 +48,7 @@ export function Banner({
 						Waiting for players
 						<div
 							className={
-								"mt-1 transition-all duration-400 " +
+								"mt-1 transition-all duration-700 " +
 								(waitingCountdown ? "max-w-xl" : "max-w-0")
 							}
 						>
