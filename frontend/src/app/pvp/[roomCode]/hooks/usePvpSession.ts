@@ -45,7 +45,14 @@ export function usePvpSession() {
 
 		if (!session?.user && !signingIn.current) {
 			signingIn.current = true;
-			authClient.signIn.anonymous();
+			authClient.signIn.anonymous().then((result) => {
+				if (result.data?.user) {
+					const storedUsername =
+						localStorage.getItem("anonymousUsername") || "";
+					setUsername(storedUsername);
+					setAuthResolved(true);
+				}
+			});
 			return;
 		}
 

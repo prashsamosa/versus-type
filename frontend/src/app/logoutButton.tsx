@@ -12,13 +12,14 @@ export function LogoutButton() {
 			console.error("Logout error:", error);
 		}
 	};
+	const user = authClient.useSession().data?.user;
 
-	if (!authClient.useSession().data?.user) {
+	if (!user || user.isAnonymous) {
 		return null;
 	}
 
 	return (
-		<Button variant="destructive" onClick={handleLogout}>
+		<Button variant="secondary" onClick={handleLogout}>
 			Logout
 		</Button>
 	);

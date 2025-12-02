@@ -1,4 +1,5 @@
 import { Eye } from "lucide-react";
+import { useRef } from "react";
 import {
 	Tooltip,
 	TooltipContent,
@@ -15,6 +16,9 @@ export function Banner({
 	waitingForPlayers: boolean;
 }) {
 	const waitingCountdown = usePvpStore((s) => s.waitingCountdown);
+	const prevWaitingCountdown = useRef<number>(15);
+	prevWaitingCountdown.current =
+		waitingCountdown ?? prevWaitingCountdown.current;
 	return (
 		<Tooltip>
 			<TooltipTrigger className="cursor-default">
@@ -42,12 +46,17 @@ export function Banner({
 						}
 					>
 						Waiting for players
-						{waitingCountdown !== null && (
-							<div className="mt-1">
-								{" "}
-								<Odometer value={waitingCountdown} />
-							</div>
-						)}
+						<div
+							className={
+								"mt-1 transition-all duration-400 " +
+								(waitingCountdown ? "max-w-xl" : "max-w-0")
+							}
+						>
+							{" "}
+							<Odometer
+								value={waitingCountdown ?? prevWaitingCountdown.current}
+							/>
+						</div>
 					</span>
 				</div>
 			</TooltipTrigger>
