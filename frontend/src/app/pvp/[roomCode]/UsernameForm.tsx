@@ -5,11 +5,7 @@ import { ErrorTooltipBtn } from "@/components/ui/error-tooltip-btn";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 
-export function UsernameForm({
-	setUsername,
-}: {
-	setUsername?: (username: string) => void;
-}) {
+export function UsernameForm() {
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	let username = authClient.useSession().data?.user.name || "";
@@ -37,9 +33,9 @@ export function UsernameForm({
 		}
 		authClient
 			.updateUser({ name: username })
-			.then(() => {
-				setUsername?.(username);
-			})
+			// .then(() => {
+			// 	setUsername?.(username);
+			// })
 			.catch((err) => {
 				setError(err.message);
 			})

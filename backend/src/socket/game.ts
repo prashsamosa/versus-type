@@ -36,11 +36,18 @@ const WAITING_COUNTDOWN_SECONDS = 15;
 
 export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("pvp:join", async (data, callback) => {
-		const { roomCode, username } = data;
+		const { roomCode } = data;
 		if (!roomCode) {
 			return callback({
 				success: false,
 				message: "Room code is required",
+			});
+		}
+		if (!socket.data.username?.trim()) {
+			console.warn(`FE error: username not set for socket ${socket.id}`);
+			return callback({
+				success: false,
+				message: "Username is not set",
 			});
 		}
 		const roomState = roomStates[roomCode];
@@ -55,7 +62,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		let isHost = roomState.type !== "single-match";
 		if (isHost && io.sockets.adapter.rooms.has(roomCode)) isHost = false;
 
-		socket.data.username = username;
 		socket.data.roomCode = roomCode;
 
 		if (isHost) socket.data.isHost = true;
@@ -71,7 +77,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		console.log(
 			isHost
 				? `Match hosted with code ${roomCode} by player ${socket.id}`
-				: `Player ${socket.id}(${username}) joined match with code ${roomCode}`,
+				: `Player ${socket.id}(${socket.data.username}) joined match with code ${roomCode}`,
 		);
 
 		const player = roomState.players[socket.data.userId];
@@ -98,13 +104,13 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				}
 				emitNewMessage(io, roomCode, {
 					username: "",
-					message: `${username ?? "<Unknown>"} is back`,
+					message: `${socket.data.username ?? "<Unknown>"} is back`,
 					system: true,
 				});
 			} else {
 				emitNewMessage(io, roomCode, {
 					username: "",
-					message: `${username ?? "<Unknown>"} in da house`,
+					message: `${socket.data.username ?? "<Unknown>"} in da house`,
 					system: true,
 				});
 			}
@@ -132,7 +138,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			roomState.players[socket.data.userId] = {
 				...initialPlayerState,
 				isHost: isHost,
-				username: username || "<Unknown>",
+				username: socket.data.username || "<Unknown>",
 				spectator: roomState.isMatchStarted,
 				color: getRandomColor(roomCode),
 			};

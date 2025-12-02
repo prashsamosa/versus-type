@@ -99,7 +99,6 @@ export interface ClientToServerEvents {
 	"pvp:join": (
 		data: {
 			roomCode: string;
-			username: string;
 		},
 		callback: (response: JoinResponse) => void,
 	) => void;

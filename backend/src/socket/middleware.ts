@@ -19,7 +19,8 @@ export async function authWithDuplicateCheck(
 		return next(new Error("Unauthorized"));
 	}
 	const userId = session.user.id;
-	console.log(`#### ${session.user.name} connected (${userId})`);
+	const username = session.user.name;
+	console.log(`#### ${username} connected (${userId})`);
 
 	const existingSocketId = userToSocket.get(userId);
 	if (existingSocketId && existingSocketId !== socket.id) {
@@ -28,6 +29,7 @@ export async function authWithDuplicateCheck(
 	}
 
 	socket.data.userId = userId;
+	socket.data.username = username;
 	userToSocket.set(userId, socket.id);
 
 	next();

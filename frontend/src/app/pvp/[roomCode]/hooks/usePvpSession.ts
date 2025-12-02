@@ -1,20 +1,15 @@
 import { useParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { useEffect, useState } from "react";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { disconnectSocket, setupSocketAndJoin, socket } from "@/socket";
 import { usePvpStore } from "../store";
 
-export function usePvpSession() {
+export function usePvpSession(ready: boolean) {
 	const { roomCode } = useParams<{ roomCode: string }>();
 	const [loading, setLoading] = useState(true);
 	const [socketError, setSocketError] = useState<string | null>(null);
 	const [latency, setLatency] = useState<number | null>(null);
 	const [disconnected, setDisconnected] = useState(false);
-	const [username, setUsername] = useState("");
-	const { data: session, isPending } = authClient.useSession();
-	const [authResolved, setAuthResolved] = useState(false);
-	const signingIn = useRef(false);
 	const endMatch = usePvpStore((s) => s.endMatch);
 
 	const setPlayers = usePvpStore((s) => s.setPlayers);
@@ -32,39 +27,8 @@ export function usePvpSession() {
 	const setWaitingCountdown = usePvpStore((s) => s.setWaitingCountdown);
 
 	useEffect(() => {
-		if (isPending) return;
-
-		if (session?.user && !session.user.isAnonymous) {
-			const displayName =
-				session.user.name ?? session.user.email?.split("@")[0] ?? "User";
-			setUsername(displayName);
-			setAuthResolved(true);
-			return;
-		}
-
-		if (!session?.user && !signingIn.current) {
-			signingIn.current = true;
-			authClient.signIn.anonymous().then((result) => {
-				if (result.data?.user) {
-					const name =
-						result.data.user.name === "Anonymous" ? "" : result.data.user.name;
-					setUsername(name);
-					setAuthResolved(true);
-				}
-			});
-			return;
-		}
-
-		if (session?.user?.isAnonymous) {
-			const name = session.user.name === "Anonymous" ? "" : session.user.name;
-			setUsername(name);
-			setAuthResolved(true);
-		}
-	}, [session, isPending]);
-
-	useEffect(() => {
-		if (!authResolved || !username) return;
-		setupSocketAndJoin(username, roomCode)
+		if (!ready) return;
+		setupSocketAndJoin(roomCode)
 			.then((response) => {
 				setLoading(false);
 				if (!response.success) {
@@ -133,14 +97,11 @@ export function usePvpSession() {
 			disconnectSocket();
 			setLatency(null);
 		};
-	}, [username, authResolved, setWpms]);
+	}, [ready, setWpms]);
 	return {
 		loading,
 		socketError,
-		username,
-		setUsername,
 		roomCode,
-		authResolved,
 		latency,
 		players,
 		matchStarted,
