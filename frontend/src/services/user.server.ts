@@ -4,12 +4,18 @@ import { API_URL } from "@/const";
 
 export async function getUserSettings(): Promise<Settings> {
 	try {
-		const response = await fetch(`${API_URL}/settings`, {
+		console.log(
+			"trying to fetch user settings from",
+			`${API_URL}/user/settings`,
+		);
+		const response = await fetch(`${API_URL}/user/settings`, {
 			headers: await headers(),
+			credentials: "include",
 		});
 		if (!response.ok) {
 			const errMsg =
-				(await response.json().catch(() => ({})))?.error || response.statusText;
+				(await response.json().catch(() => ({})))?.error ||
+				response.status + response.statusText;
 			throw new Error(`Error fetching user settings: ${errMsg}`);
 		}
 		return await response.json();
@@ -21,8 +27,9 @@ export async function getUserSettings(): Promise<Settings> {
 
 export async function getUserStats(): Promise<Stats> {
 	try {
-		const response = await fetch(`${API_URL}/stats`, {
+		const response = await fetch(`${API_URL}/user/stats`, {
 			headers: await headers(),
+			credentials: "include",
 		});
 		if (!response.ok) {
 			const errMsg =

@@ -35,7 +35,6 @@ export function usePvpSession() {
 		if (isPending) return;
 
 		if (session?.user && !session.user.isAnonymous) {
-			localStorage.removeItem("anonymousUsername");
 			const displayName =
 				session.user.name ?? session.user.email?.split("@")[0] ?? "User";
 			setUsername(displayName);
@@ -47,9 +46,9 @@ export function usePvpSession() {
 			signingIn.current = true;
 			authClient.signIn.anonymous().then((result) => {
 				if (result.data?.user) {
-					const storedUsername =
-						localStorage.getItem("anonymousUsername") || "";
-					setUsername(storedUsername);
+					const name =
+						result.data.user.name === "Anonymous" ? "" : result.data.user.name;
+					setUsername(name);
 					setAuthResolved(true);
 				}
 			});
@@ -57,8 +56,8 @@ export function usePvpSession() {
 		}
 
 		if (session?.user?.isAnonymous) {
-			const storedUsername = localStorage.getItem("anonymousUsername") || "";
-			setUsername(storedUsername);
+			const name = session.user.name === "Anonymous" ? "" : session.user.name;
+			setUsername(name);
 			setAuthResolved(true);
 		}
 	}, [session, isPending]);

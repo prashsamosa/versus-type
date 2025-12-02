@@ -1,11 +1,11 @@
 import { Eye } from "lucide-react";
 import { useRef } from "react";
+import { Odometer } from "@/components/ui/odometer";
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Odometer } from "./Odometer";
 import { usePvpStore } from "./store";
 
 export function Banner({

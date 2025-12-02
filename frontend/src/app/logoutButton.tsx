@@ -6,7 +6,6 @@ import { authClient } from "@/lib/auth-client";
 export function LogoutButton() {
 	const handleLogout = async () => {
 		try {
-			localStorage.removeItem("anonymousUsername");
 			await authClient.signOut();
 		} catch (error) {
 			console.error("Logout error:", error);

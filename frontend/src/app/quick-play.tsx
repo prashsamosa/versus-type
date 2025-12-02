@@ -1,12 +1,7 @@
 import { Loader2, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { ErrorTooltipBtn } from "@/components/ui/error-tooltip-btn";
 import { getQuickPlayRoom } from "@/services/pvp.client";
 export function QuickPlayButton({ label = "Quick Play" }: { label?: string }) {
 	const router = useRouter();
@@ -28,23 +23,19 @@ export function QuickPlayButton({ label = "Quick Play" }: { label?: string }) {
 		}
 	}
 	return (
-		<Tooltip
-			open={!!quickPlayError}
-			onOpenChange={(open) => !open && setQuickPlayError(null)}
+		<ErrorTooltipBtn
+			size="lg"
+			onClick={handleQuickPlay}
+			error={quickPlayError}
+			setError={setQuickPlayError}
+			disabled={quickPlayLoading}
 		>
-			<TooltipTrigger asChild>
-				<Button size="lg" onClick={handleQuickPlay} disabled={quickPlayLoading}>
-					{quickPlayLoading ? (
-						<Loader2 className="size-4 animate-spin" />
-					) : (
-						<Zap className="size-4" />
-					)}
-					{label}
-				</Button>
-			</TooltipTrigger>
-			<TooltipContent className="text-destructive text-sm">
-				{quickPlayError}
-			</TooltipContent>
-		</Tooltip>
+			{quickPlayLoading ? (
+				<Loader2 className="size-4 animate-spin" />
+			) : (
+				<Zap className="size-4" />
+			)}
+			{label}
+		</ErrorTooltipBtn>
 	);
 }

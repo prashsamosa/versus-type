@@ -11,8 +11,10 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { QuickPlayButton } from "@/app/quick-play";
+import { UsernameForm } from "@/app/settings/UsernameForm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
 	Dialog,
 	DialogContent,
@@ -31,7 +33,6 @@ import { Lobby } from "./Lobby";
 import { PvpGame } from "./PvpGame";
 import SocketErrorPage from "./SocketErrorPage";
 import { usePvpStore } from "./store";
-import { UsernameInput } from "./UsernameInput";
 
 export default function PvpPage() {
 	const {
@@ -85,7 +86,13 @@ export default function PvpPage() {
 	}
 
 	if (!username) {
-		return <UsernameInput setUsername={setUsername} />;
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-background">
+				<Card>
+					<UsernameForm setUsername={setUsername} />
+				</Card>
+			</div>
+		);
 	}
 	if (loading) {
 		return (

@@ -10,7 +10,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { updateUserSettings } from "@/services/user.client";
 
@@ -39,93 +38,78 @@ export function SettingsForm({ settingsData }: { settingsData: Settings }) {
 	}
 
 	return (
-		<div className="container max-w-2xl mx-auto py-8">
-			<div className="space-y-6">
-				<div>
-					<h1 className="text-3xl font-bold">Settings</h1>
-					<p className="text-muted-foreground">
-						Manage your typing preferences
-					</p>
-				</div>
+		<form onSubmit={handleSubmit} className="space-y-6">
+			<Card>
+				<CardHeader>
+					<CardTitle>Audio</CardTitle>
+					<CardDescription>
+						Configure sound settings for your typing experience
+					</CardDescription>
+				</CardHeader>
+				<CardContent className="space-y-6">
+					<div className="flex items-center justify-between">
+						<div className="space-y-0.5">
+							<Label htmlFor="sound-enabled">Master Audio</Label>
+							<p className="text-sm text-muted-foreground">
+								Enable all game sounds and effects
+							</p>
+						</div>
+						<Switch
+							id="sound-enabled"
+							checked={settings.soundEnabled}
+							onCheckedChange={(checked) =>
+								setSettings({ ...settings, soundEnabled: checked })
+							}
+						/>
+					</div>
 
-				<Separator />
+					<div className="flex items-center justify-between">
+						<div className="space-y-0.5">
+							<Label htmlFor="typing-sound">Typing Sounds</Label>
+							<p className="text-sm text-muted-foreground">
+								Keyboard click sounds while typing
+							</p>
+						</div>
+						<Switch
+							id="typing-sound"
+							checked={settings.typingSoundEnabled}
+							onCheckedChange={(checked) =>
+								setSettings({ ...settings, typingSoundEnabled: checked })
+							}
+						/>
+					</div>
+				</CardContent>
+			</Card>
 
-				<form onSubmit={handleSubmit} className="space-y-6">
-					<Card>
-						<CardHeader>
-							<CardTitle>Audio</CardTitle>
-							<CardDescription>
-								Configure sound settings for your typing experience
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-6">
-							<div className="flex items-center justify-between">
-								<div className="space-y-0.5">
-									<Label htmlFor="sound-enabled">Master Audio</Label>
-									<p className="text-sm text-muted-foreground">
-										Enable all game sounds and effects
-									</p>
-								</div>
-								<Switch
-									id="sound-enabled"
-									checked={settings.soundEnabled}
-									onCheckedChange={(checked) =>
-										setSettings({ ...settings, soundEnabled: checked })
-									}
-								/>
+			{error && (
+				<Card className="border-destructive">
+					<CardContent className="pt-6">
+						<div className="flex items-center space-x-2">
+							<div className="text-destructive">
+								<p className="font-medium">Error</p>
+								<p className="text-sm">{error.message}</p>
 							</div>
+						</div>
+					</CardContent>
+				</Card>
+			)}
 
-							<div className="flex items-center justify-between">
-								<div className="space-y-0.5">
-									<Label htmlFor="typing-sound">Typing Sounds</Label>
-									<p className="text-sm text-muted-foreground">
-										Keyboard click sounds while typing
-									</p>
-								</div>
-								<Switch
-									id="typing-sound"
-									checked={settings.typingSoundEnabled}
-									onCheckedChange={(checked) =>
-										setSettings({ ...settings, typingSoundEnabled: checked })
-									}
-								/>
+			{success && (
+				<Card className="border-green-500">
+					<CardContent className="pt-6">
+						<div className="flex items-center space-x-2">
+							<div className="text-green-600">
+								<p className="font-medium">Settings saved</p>
+								<p className="text-sm">Your preferences have been updated</p>
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</CardContent>
+				</Card>
+			)}
 
-					{error && (
-						<Card className="border-destructive">
-							<CardContent className="pt-6">
-								<div className="flex items-center space-x-2">
-									<div className="text-destructive">
-										<p className="font-medium">Error</p>
-										<p className="text-sm">{error.message}</p>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-					)}
-
-					{success && (
-						<Card className="border-green-500">
-							<CardContent className="pt-6">
-								<div className="flex items-center space-x-2">
-									<div className="text-green-600">
-										<p className="font-medium">Settings saved</p>
-										<p className="text-sm">
-											Your preferences have been updated
-										</p>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-					)}
-
-					<Button type="submit" disabled={loading} className="w-full">
-						{loading ? "Saving..." : "Save Settings"}
-					</Button>
-				</form>
-			</div>
-		</div>
+			<Button type="submit" disabled={loading} className="w-full">
+				{loading ? "Saving..." : "Save Settings"}
+			</Button>
+		</form>
 	);
 }
