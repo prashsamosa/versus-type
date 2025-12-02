@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getWordIndex, getWordStartIndex, isWordCorrect } from "@/lib/utils";
-import { sendBackspace, sendKeystroke } from "../socket/pvp.socket.service";
+import { sendBackspace, sendKeystrokes } from "../socket/pvp.socket.service";
 
 export function usePvpTypingState(words: string[], initialIndex: number) {
 	const passageChars = words.join(" ");
@@ -20,6 +20,8 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 	const startRef = useRef<number | null>(null);
 	const endRef = useRef<number | null>(null);
 	const prevInputRef = useRef("");
+	const keysBufferRef = useRef<string>("");
+	const bufferSize = 4;
 
 	function resetTypingState() {
 		setTypedText("");
@@ -62,13 +64,27 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 				setIncorrect(true);
 				incorrectCurr = true;
 			}
-			sendKeystroke(typed);
+			keysBufferRef.current += typed;
+			if (keysBufferRef.current.length >= bufferSize) {
+				sendKeystrokes(keysBufferRef.current);
+				keysBufferRef.current = "";
+			}
 		} else if (val.length < prev.length && prev.startsWith(val)) {
+			// backspace(s) detected
 			if (incorrect && val === passageChars.slice(0, val.length)) {
 				setIncorrect(false);
 				incorrectCurr = false;
 			}
-			sendBackspace(prev.length - val.length);
+
+			const amountToSend =
+				prev.length - val.length - keysBufferRef.current.length;
+
+			if (amountToSend > 0) {
+				sendBackspace(amountToSend);
+				keysBufferRef.current = "";
+			} else {
+				keysBufferRef.current = keysBufferRef.current.slice(0, -amountToSend);
+			}
 		} else {
 			// paste or other edits
 			return;
@@ -81,6 +97,10 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 		if (startRef.current === null) startRef.current = performance.now();
 
 		if (val.length >= passageChars.length && !finished && !incorrectCurr) {
+			if (keysBufferRef.current.length > 0) {
+				sendKeystrokes(keysBufferRef.current);
+				keysBufferRef.current = "";
+			}
 			endRef.current = performance.now();
 			setFinished(true);
 		}
