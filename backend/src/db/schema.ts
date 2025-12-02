@@ -88,14 +88,14 @@ export const verification = sqliteTable("verification", {
 
 // auth-schema END
 
-export const userSettings = sqliteTable("userSettings", {
-	userId: text()
-		.notNull()
-		.primaryKey()
-		.references(() => user.id),
-	soundEnabled: integer({ mode: "boolean" }).notNull().default(true),
-	typingSoundEnabled: integer({ mode: "boolean" }).notNull().default(false),
-});
+// export const userSettings = sqliteTable("userSettings", {
+// 	userId: text()
+// 		.notNull()
+// 		.primaryKey()
+// 		.references(() => user.id),
+// 	soundEnabled: integer({ mode: "boolean" }).notNull().default(true),
+// 	typingSoundEnabled: integer({ mode: "boolean" }).notNull().default(false),
+// });
 
 export const userStats = sqliteTable("userStats", {
 	userId: text()

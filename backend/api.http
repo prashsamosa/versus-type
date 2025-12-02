@@ -25,19 +25,8 @@ POST {{server}}/auth/sign-out
 ### get user info
 GET {{server}}/user
 
-### get settings
-GET {{server}}/user/settings
-
 ### get stats
 GET {{server}}/user/stats
-
-### update settings
-PATCH {{server}}/user/settings
-
-{
-  "soundEnabled": true,
-  "typingSoundEnabled": true
-}
 
 ##### Tests
 ### Complete test
@@ -68,9 +57,15 @@ POST {{server}}/pvp/host/
 {
   "private": true
 }
-### Get Match status
+### Get Room status
 POST {{server}}/pvp/room-status/
 
 {
   "roomCode": "yo123"
 }
+
+### Get public rooms
+GET {{server}}/pvp/rooms/
+
+### Find Match
+GET {{server}}/pvp/matchmake/
