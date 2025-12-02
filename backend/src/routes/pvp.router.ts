@@ -8,8 +8,8 @@ import { Router } from "express";
 import { customAlphabet } from "nanoid";
 import { io } from "@/app";
 import { auth } from "@/auth/auth";
+import { findBestMatch } from "@/matchmaking";
 import { rollingAvgWpmFromDB } from "@/socket/dbservice";
-import { findBestMatch } from "@/socket/matchmaking";
 import {
 	activePlayersCount,
 	initializeRoom,

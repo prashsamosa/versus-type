@@ -1,5 +1,5 @@
-import type { RoomState } from "./store";
-import { activePlayersCount } from "./store";
+import type { RoomState } from "./socket/store";
+import { activePlayersCount } from "./socket/store";
 
 export function findBestMatch(
 	rooms: Record<string, RoomState>,

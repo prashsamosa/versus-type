@@ -232,7 +232,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					// stop waiting countdown if 2nd player disconnected
 					roomState.stopWaitingCountdown();
 					roomState.stopWaitingCountdown = undefined;
-					io.to(roomCode).emit("pvp:waiting-countdown", null);
 				}
 
 				if (
@@ -557,12 +556,14 @@ function startWaitingCountdown(
 	io.to(roomCode).emit("pvp:waiting-countdown", countdown);
 	const countdownInterval = setInterval(() => {
 		if (stop) {
+			io.to(roomCode).emit("pvp:waiting-countdown", null);
 			clearInterval(countdownInterval);
 			return;
 		}
 		countdown--;
 		io.to(roomCode).emit("pvp:waiting-countdown", countdown);
-		if (countdown === COUNTDOWN_SECONDS + 1) {
+		if (countdown === COUNTDOWN_SECONDS) {
+			io.to(roomCode).emit("pvp:waiting-countdown", null);
 			clearInterval(countdownInterval);
 			onComplete();
 		}
