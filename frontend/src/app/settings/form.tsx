@@ -1,6 +1,6 @@
 "use client";
 import type { Settings } from "@versus-type/shared";
-import { use, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -14,13 +14,8 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { updateUserSettings } from "@/services/user.client";
 
-export function SettingsForm({
-	settingsData,
-}: {
-	settingsData: Promise<Settings>;
-}) {
-	const data = use(settingsData);
-	const [settings, setSettings] = useState<Settings>(data);
+export function SettingsForm({ settingsData }: { settingsData: Settings }) {
+	const [settings, setSettings] = useState<Settings>(settingsData);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<Error | null>(null);
 	const [success, setSuccess] = useState(false);

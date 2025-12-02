@@ -13,7 +13,7 @@ export async function updateUserSettings(settings: Settings) {
 		});
 		if (!response.ok) {
 			const errMsg =
-				(await response.json().catch())?.error || response.statusText;
+				(await response.json().catch(() => ({})))?.error || response.statusText;
 			throw new Error(`Error updating user settings: ${errMsg}`);
 		}
 		return await response.json();

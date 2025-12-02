@@ -13,7 +13,7 @@ export async function hostMatch(settings: RoomSettingsClient) {
 		});
 		if (!response.ok) {
 			const errMsg =
-				(await response.json().catch())?.error || response.statusText;
+				(await response.json().catch(() => ({})))?.error || response.statusText;
 			throw new Error(`Error creating room: ${errMsg}`);
 		}
 		const data = await response.json();
@@ -34,7 +34,7 @@ export async function getPublicRooms() {
 		const response = await fetch(`${API_URL}/pvp/rooms`);
 		if (!response.ok) {
 			const errMsg =
-				(await response.json().catch())?.error || response.statusText;
+				(await response.json().catch(() => ({})))?.error || response.statusText;
 			throw new Error(`Error fetching public rooms: ${errMsg}`);
 		}
 		const data = await response.json();
@@ -52,7 +52,7 @@ export async function getQuickPlayRoom() {
 		});
 		if (!response.ok) {
 			const errMsg =
-				(await response.json().catch())?.error || response.statusText;
+				(await response.json().catch(() => ({})))?.error || response.statusText;
 			throw new Error(`Error: ${errMsg}`);
 		}
 		const data = await response.json();

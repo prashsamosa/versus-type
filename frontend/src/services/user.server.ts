@@ -9,7 +9,7 @@ export async function getUserSettings(): Promise<Settings> {
 		});
 		if (!response.ok) {
 			const errMsg =
-				(await response.json().catch())?.error || response.statusText;
+				(await response.json().catch(() => ({})))?.error || response.statusText;
 			throw new Error(`Error fetching user settings: ${errMsg}`);
 		}
 		return await response.json();
@@ -26,7 +26,7 @@ export async function getUserStats(): Promise<Stats> {
 		});
 		if (!response.ok) {
 			const errMsg =
-				(await response.json().catch())?.error || response.statusText;
+				(await response.json().catch(() => ({})))?.error || response.statusText;
 			throw new Error(`Error fetching user stats: ${errMsg}`);
 		}
 		return await response.json();
