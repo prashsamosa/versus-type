@@ -9,6 +9,7 @@ import {
 	recordKey,
 	resetAccuracy,
 } from "@versus-type/shared/accuracy";
+import { MAX_KEYSTROKES_PER_EVENT } from "@versus-type/shared/consts";
 import {
 	GeneratorConfigSchema,
 	generatePassage,
@@ -282,7 +283,18 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		await startMatch(io, roomCode, callback);
 	});
 
-	socket.on("pvp:key-press", (key: string) => {
+	socket.on("pvp:keystrokes", (input: string) => {
+		if (input.length > MAX_KEYSTROKES_PER_EVENT) {
+			console.warn(
+				`Player ${socket.data.userId} sent too many keystrokes at once`,
+			);
+			return;
+		}
+		if (input.length === 0) {
+			console.warn(`Player ${socket.data.userId} sent empty keystroke`);
+			return;
+		}
+
 		const roomCode = socket.data.roomCode;
 		const roomState = roomStates[roomCode!];
 		if (!roomCode || !roomState?.isMatchStarted) {
@@ -291,6 +303,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
+
 		const player = roomState.players[socket.data.userId];
 		if (player.finished) return;
 
@@ -304,47 +317,62 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 
 		if (!player.startedAt) player.startedAt = Date.now();
 
-		player.accState = recordKey(
-			player.accState ?? resetAccuracy(),
-			key,
-			passage[player.typingIndex],
-		);
-		if (player.incorrectIdx === null && passage[player.typingIndex] === key) {
-			if (player.typingIndex >= passage.length - 1) {
-				// PLAYER FINISHED
-				player.finished = true;
-				player.wpm = calcWpm(player.typingIndex, player.startedAt);
-				player.accuracy = getAccuracy(player.accState);
-				sendWpmUpdate(io, roomCode);
-				player.timeTyped = Date.now() - player.startedAt;
+		let lastCorrectIndex =
+			player.incorrectIdx === null ? player.typingIndex : null;
 
-				newRollingAvgWpmFromDB(socket.data.userId, player.wpm).then(
-					(newAvg) => {
-						player.rollingAvgWpm = newAvg;
-						updateRoomAvgWpm(roomCode);
-					},
-				);
+		for (const key of input) {
+			if (player.finished) break;
 
-				const maxOrdinal = Object.values(roomState.players).reduce(
-					(max, pl) => (pl.ordinal && pl.ordinal > max ? pl.ordinal : max),
-					0,
-				);
-				player.ordinal = maxOrdinal + 1;
-				if (player.ordinal === participantCount(roomCode)) {
-					// LAST PLAYER FINISHED
-					endMatch(roomCode, io);
+			player.accState = recordKey(
+				player.accState ?? resetAccuracy(),
+				key,
+				passage[player.typingIndex],
+			);
+
+			if (player.incorrectIdx === null && passage[player.typingIndex] === key) {
+				if (player.typingIndex >= passage.length - 1) {
+					// PLAYER FINISHED
+					lastCorrectIndex = player.typingIndex + 1;
+					player.finished = true;
+					player.wpm = calcWpm(player.typingIndex, player.startedAt);
+					player.accuracy = getAccuracy(player.accState);
+					sendWpmUpdate(io, roomCode);
+					player.timeTyped = Date.now() - player.startedAt;
+
+					newRollingAvgWpmFromDB(socket.data.userId, player.wpm).then(
+						(newAvg) => {
+							player.rollingAvgWpm = newAvg;
+							updateRoomAvgWpm(roomCode);
+						},
+					);
+
+					const maxOrdinal = Object.values(roomState.players).reduce(
+						(max, pl) => (pl.ordinal && pl.ordinal > max ? pl.ordinal : max),
+						0,
+					);
+					player.ordinal = maxOrdinal + 1;
+					if (player.ordinal === participantCount(roomCode)) {
+						// LAST PLAYER FINISHED
+						endMatch(roomCode, io);
+					}
+
+					sendLobbyUpdate(io, roomCode);
+					player.typingIndex++;
+					break;
 				}
-
-				sendLobbyUpdate(io, roomCode);
+				lastCorrectIndex = player.typingIndex + 1;
+			} else if (player.incorrectIdx === null) {
+				player.incorrectIdx = player.typingIndex;
 			}
+			player.typingIndex++;
+		}
+
+		if (lastCorrectIndex !== null) {
 			io.to(roomCode).emit("pvp:progress-update", {
 				userId: socket.data.userId ?? socket.id,
-				typingIndex: player.typingIndex + 1,
+				typingIndex: lastCorrectIndex,
 			});
-		} else if (player.incorrectIdx === null) {
-			player.incorrectIdx = player.typingIndex;
 		}
-		player.typingIndex++;
 	});
 
 	socket.on("pvp:backspace", (amount: number) => {
