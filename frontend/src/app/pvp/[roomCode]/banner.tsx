@@ -4,6 +4,8 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Odometer } from "./Odometer";
+import { usePvpStore } from "./store";
 
 export function Banner({
 	isSpectating,
@@ -12,6 +14,7 @@ export function Banner({
 	isSpectating: boolean;
 	waitingForPlayers: boolean;
 }) {
+	const waitingCountdown = usePvpStore((s) => s.waitingCountdown);
 	return (
 		<Tooltip>
 			<TooltipTrigger className="cursor-default">
@@ -34,11 +37,17 @@ export function Banner({
 					</div>
 					<span
 						className={
-							"overflow-hidden transition-all " +
+							"overflow-hidden flex gap-3 items-center transition-all " +
 							(waitingForPlayers ? "max-w-xl" : "max-w-0 delay-1000")
 						}
 					>
 						Waiting for players
+						{waitingCountdown !== null && (
+							<div className="mt-1">
+								{" "}
+								<Odometer value={waitingCountdown} />
+							</div>
+						)}
 					</span>
 				</div>
 			</TooltipTrigger>

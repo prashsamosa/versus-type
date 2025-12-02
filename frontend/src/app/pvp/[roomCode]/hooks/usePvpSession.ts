@@ -29,6 +29,7 @@ export function usePvpSession() {
 	const setPassage = usePvpStore((s) => s.setPassage);
 	const setPassageConfig = usePvpStore((s) => s.setPassageConfig);
 	const setRoomType = usePvpStore((s) => s.setRoomType);
+	const setWaitingCountdown = usePvpStore((s) => s.setWaitingCountdown);
 
 	useEffect(() => {
 		if (isPending) return;
@@ -101,6 +102,9 @@ export function usePvpSession() {
 			},
 			"pvp:match-ended": () => {
 				endMatch();
+			},
+			"pvp:waiting-countdown": (countdown) => {
+				setWaitingCountdown(countdown);
 			},
 		});
 		async function fetchLatency() {

@@ -64,7 +64,7 @@ export default function PvpPage() {
 	const [expanded, setExpanded] = useState(false);
 	const roomType = usePvpStore((s) => s.roomType);
 	const isSpectating = myUserId ? players[myUserId]?.spectator : false;
-
+	const waitingCountdown = usePvpStore((s) => s.waitingCountdown);
 	useEffect(() => {
 		return () => {
 			resetStore();
@@ -72,7 +72,9 @@ export default function PvpPage() {
 	}, [resetStore]);
 
 	const waitingForPlayers =
-		roomType === "single-match" ? Object.keys(players).length < 2 : false;
+		roomType === "single-match"
+			? Object.keys(players).length < 2 || !!waitingCountdown
+			: false;
 
 	if (!authResolved) {
 		return (

@@ -39,6 +39,8 @@ type PvpStore = {
 	handleStartMatch: (started: boolean) => void;
 	countdown: number | null;
 	handleCountdownTick: (num: number | null) => void;
+	waitingCountdown: number | null;
+	setWaitingCountdown: (countdown: number | null) => void;
 	wpms: WpmInfo;
 	setWpms: (wpms: WpmInfo) => void;
 	oppTypingIndexes: Record<string, number>;
@@ -72,6 +74,7 @@ const initialState = {
 	matchEnded: false,
 	matchStarted: false,
 	countdown: null,
+	waitingCountdown: null,
 	wpms: {},
 	oppTypingIndexes: {},
 	initialIndex: 0,
@@ -97,6 +100,7 @@ export const usePvpStore = create<PvpStore>((set) => ({
 			oppTypingIndexes: {},
 			wpms: {},
 		})),
+	setWaitingCountdown: (countdown) => set({ waitingCountdown: countdown }),
 	setWpms: (wpms) => set({ wpms }),
 	setOppTypingIndexes: (indexes) => set({ oppTypingIndexes: indexes }),
 	updateOppTypingIndex: (userId, index) =>
