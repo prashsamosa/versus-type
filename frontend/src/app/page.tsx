@@ -1,51 +1,19 @@
 "use client";
 
-import {
-	Globe,
-	Loader2,
-	LogIn,
-	Settings,
-	User,
-	UserPlus,
-	Zap,
-} from "lucide-react";
+import { Globe, LogIn, Settings, User, UserPlus } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { getQuickPlayRoom } from "@/services/pvp.client";
 import { BrowseModal } from "./browse-modal";
 import { HostModal } from "./host-modal";
 import { JoinModal } from "./join-modal";
 import { LogoutButton } from "./logoutButton";
+import { QuickPlayButton } from "./quick-play";
 
 export default function Home() {
-	const router = useRouter();
 	const [hostOpen, setHostOpen] = useState(false);
 	const [joinOpen, setJoinOpen] = useState(false);
 	const [browseOpen, setBrowseOpen] = useState(false);
-	const [quickPlayLoading, setQuickPlayLoading] = useState(false);
-	const [quickPlayError, setQuickPlayError] = useState<string | null>(null);
-
-	async function handleQuickPlay() {
-		setQuickPlayLoading(true);
-		setQuickPlayError(null);
-		try {
-			const roomCode = await getQuickPlayRoom();
-			router.push(`/pvp/${roomCode}`);
-		} catch (err) {
-			setQuickPlayError(
-				err instanceof Error ? err.message : "Failed to find a match",
-			);
-		} finally {
-			setQuickPlayLoading(false);
-		}
-	}
 
 	return (
 		<div className="min-h-screen flex items-center justify-center p-4">
@@ -53,28 +21,7 @@ export default function Home() {
 				<h1 className="text-4xl font-bold tracking-tight">Versus Type</h1>
 
 				<div className="flex flex-col gap-3 w-64 mx-auto">
-					<Tooltip
-						open={!!quickPlayError}
-						onOpenChange={(open) => !open && setQuickPlayError(null)}
-					>
-						<TooltipTrigger asChild>
-							<Button
-								size="lg"
-								onClick={handleQuickPlay}
-								disabled={quickPlayLoading}
-							>
-								{quickPlayLoading ? (
-									<Loader2 className="size-4 animate-spin" />
-								) : (
-									<Zap className="size-4" />
-								)}
-								Quick Play
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent className="text-destructive text-sm">
-							{quickPlayError}
-						</TooltipContent>
-					</Tooltip>
+					<QuickPlayButton />
 					<Button size="lg" variant="secondary" asChild>
 						<Link href="/solo">
 							<User className="size-4" />

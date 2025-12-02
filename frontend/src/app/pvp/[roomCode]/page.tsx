@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { QuickPlayButton } from "@/app/quick-play";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -115,6 +116,7 @@ export default function PvpPage() {
 	function handleExit() {
 		router.push("/");
 	}
+
 	return (
 		<div className="flex flex-col items-center justify-start min-h-screen">
 			<div className="w-full -z-10 absolute p-5 text-center font-bold text-5xl tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-foreground/20 to-background from-30% to-90% ">
@@ -181,10 +183,14 @@ export default function PvpPage() {
 					<div
 						className={`text-center -mb-2 transition-all duration-400 ${isSpectating || waitingForPlayers ? "opacity-100" : "opacity-0"}`}
 					>
-						<Banner
-							isSpectating={isSpectating}
-							waitingForPlayers={waitingForPlayers}
-						/>
+						{matchEnded && roomType === "single-match" ? (
+							<QuickPlayButton label="Find New Match" />
+						) : (
+							<Banner
+								isSpectating={isSpectating}
+								waitingForPlayers={waitingForPlayers}
+							/>
+						)}
 					</div>
 					<PvpGame />
 				</div>
