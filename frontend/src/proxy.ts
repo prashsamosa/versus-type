@@ -26,12 +26,14 @@ export default async function proxy(req: NextRequest) {
 		return NextResponse.redirect(new URL("/", req.nextUrl));
 	}
 
-	// send non-authenticated user to /sign-in for protected routes
+	// anon sign non-authenticated users
 	if (!isAuthenticated && protectedPaths.includes(pathname)) {
 		console.log(
-			`Unauthenticated user accessing protected path ${pathname}. Redirecting to /sign-in.`,
+			`Unauthenticated user accessing protected path ${pathname}. Redirecting to /anonymous-sign.`,
 		);
-		return NextResponse.redirect(new URL("/sign-in", req.url));
+		return NextResponse.redirect(
+			new URL("/anonymous-sign?from=" + pathname, req.url),
+		);
 	}
 
 	return NextResponse.next();
