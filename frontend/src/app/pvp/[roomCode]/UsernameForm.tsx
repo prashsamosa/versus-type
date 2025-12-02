@@ -33,9 +33,6 @@ export function UsernameForm() {
 		}
 		authClient
 			.updateUser({ name: username })
-			// .then(() => {
-			// 	setUsername?.(username);
-			// })
 			.catch((err) => {
 				setError(err.message);
 			})

@@ -1,17 +1,20 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { useEnsureSignedIn } from "@/app/hooks/useEnsureSignedIn";
 
 export default function AnonymousSignPage() {
 	const searchParams = useSearchParams();
 	const { authResolved } = useEnsureSignedIn();
-	const router = useRouter();
 	const from = searchParams.get("from") || "/";
 
-	if (typeof window !== "undefined") {
-		if (authResolved) router.replace(from);
-	}
+	useEffect(() => {
+		if (authResolved) {
+			// router.replace(from) doesn't work on soft navigation idk why
+			window.location.replace(from);
+		}
+	}, [authResolved, from]);
 
 	return (
 		<div className="h-screen flex items-center justify-center p-4">

@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useEnsureSignedIn } from "@/app/hooks/useEnsureSignedIn";
 import { QuickPlayButton } from "@/app/quick-play";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,9 +37,8 @@ import { UsernameForm } from "./UsernameForm";
 export default function PvpPage() {
 	let username = authClient.useSession().data?.user.name.trim() || "";
 	if (username === "Anonymous") username = "";
-	const { authResolved } = useEnsureSignedIn();
 	const { loading, socketError, roomCode, latency, disconnected } =
-		usePvpSession(authResolved && !!username.trim());
+		usePvpSession(!!username);
 
 	const [copied, setCopied] = useState(false);
 
@@ -72,14 +70,6 @@ export default function PvpPage() {
 		roomType === "single-match"
 			? Object.keys(players).length < 2 || !!waitingCountdown
 			: false;
-
-	if (!authResolved) {
-		return (
-			<div className="flex flex-col items-center justify-center min-h-screen py-2">
-				<h1 className="text-4xl font-bold mb-4">Loading...</h1>
-			</div>
-		);
-	}
 
 	if (!username) {
 		return (

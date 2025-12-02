@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ErrorTooltipBtn } from "@/components/ui/error-tooltip-btn";
 import { getQuickPlayRoom } from "@/services/pvp.client";
+
 export function QuickPlayButton({ label = "Quick Play" }: { label?: string }) {
 	const router = useRouter();
 	const [quickPlayLoading, setQuickPlayLoading] = useState(false);

@@ -27,7 +27,10 @@ export default async function proxy(req: NextRequest) {
 	}
 
 	// anon sign non-authenticated users
-	if (!isAuthenticated && protectedPaths.includes(pathname)) {
+	if (
+		!isAuthenticated &&
+		(protectedPaths.includes(pathname) || pathname.startsWith("/pvp"))
+	) {
 		console.log(
 			`Unauthenticated user accessing protected path ${pathname}. Redirecting to /anonymous-sign.`,
 		);

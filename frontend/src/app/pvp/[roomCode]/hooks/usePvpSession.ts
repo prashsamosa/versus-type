@@ -4,7 +4,7 @@ import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { disconnectSocket, setupSocketAndJoin, socket } from "@/socket";
 import { usePvpStore } from "../store";
 
-export function usePvpSession(ready: boolean) {
+export function usePvpSession(ready = true) {
 	const { roomCode } = useParams<{ roomCode: string }>();
 	const [loading, setLoading] = useState(true);
 	const [socketError, setSocketError] = useState<string | null>(null);
