@@ -47,7 +47,11 @@ export function findBestMatch(
 		const room = rooms[roomCode];
 		const activeCount = activePlayersCount(roomCode);
 		// filter
-		if (room.type !== "single-match" || activeCount >= room.maxPlayers) {
+		if (
+			room.type !== "single-match" ||
+			activeCount >= room.maxPlayers ||
+			(room.type === "single-match" && room.status !== "waiting")
+		) {
 			continue;
 		}
 
