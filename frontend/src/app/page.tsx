@@ -25,7 +25,7 @@ export default function Home() {
 					<Button size="lg" variant="secondary" asChild>
 						<Link href="/solo">
 							<User className="size-4" />
-							Solo
+							Solo Practice
 						</Link>
 					</Button>
 					<div className="flex gap-3">

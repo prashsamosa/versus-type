@@ -21,6 +21,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { Header } from "@/components/ui/header";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { authClient } from "@/lib/auth-client";
@@ -115,13 +116,13 @@ export default function PvpPage() {
 
 	return (
 		<div className="flex flex-col items-center justify-start min-h-screen">
-			<div className="w-full -z-10 absolute p-5 text-center font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-foreground/20 to-background from-30% to-90% hidden md:block md:text-4xl lg:text-5xl">
+			<Header>
 				{roomType === "single-match"
 					? "Quick Play"
 					: roomType === "public"
 						? "Public Room"
 						: "Private Room"}
-			</div>
+			</Header>
 			<div className="p-2 px-4 flex justify-between items-center w-full mb-4">
 				<CodeCopy
 					roomCode={roomCode}

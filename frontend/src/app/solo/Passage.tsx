@@ -7,19 +7,21 @@ import { useCursorPosition } from "@/app/_passage/hooks/useCursorPosition";
 import PassageText from "@/app/_passage/PassageText";
 import FinishedStats from "./FinishedStats";
 import { useTypingTest } from "./hooks/useTypingTest";
+import { PassageConfigPanel } from "./PassageConfigPanel";
 
 export default function Passage({
-	initialWords,
+	words,
 	config,
+	onConfigChange,
 }: {
-	initialWords: string[];
+	words: string[];
 	config: GeneratorConfig;
+	onConfigChange: (config: GeneratorConfig) => void;
 }) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const charRefs = useRef<HTMLSpanElement[]>([]);
 
 	const {
-		words,
 		passageChars,
 		typedText,
 		finished,
@@ -27,9 +29,9 @@ export default function Passage({
 		endRef,
 		accuracyRef,
 		handleInputChange,
-		restartTest,
 		handleKeyDown,
-	} = useTypingTest(config, initialWords);
+		incorrect,
+	} = useTypingTest(words);
 
 	const [manualScrollOffset, setManualScrollOffset] = useState<number | null>(
 		null,
@@ -69,14 +71,14 @@ export default function Passage({
 		return () => container.removeEventListener("wheel", handleWheel);
 	}, [scrollOffset]);
 
-	function handleRestart() {
-		restartTest();
+	function handleRestart(fromFinishScreen: boolean = false) {
+		onConfigChange(config);
 		if (charRefs.current) charRefs.current.length = 0;
-		setFocused(false);
+		if (fromFinishScreen) setFocused(false);
 		setManualScrollOffset(null);
 		setTimeout(() => {
 			hiddenInputRef.current?.focus();
-		}, 0);
+		}, 5);
 	}
 
 	if (finished && startRef.current && endRef.current) {
@@ -86,24 +88,33 @@ export default function Passage({
 				endTs={endRef.current}
 				input={typedText}
 				target={passageChars}
-				onRestartAction={handleRestart}
+				onRestartAction={() => handleRestart(true)}
 				accuracyState={accuracyRef.current}
 			/>
 		);
 	}
 
 	return (
-		<div
-			ref={containerRef}
-			className="max-w-3xl min-h-[13rem] overflow-hidden mx-auto transition mt-20 px-4 py-10 bg-card/50 rounded-md relative cursor-text"
-			onClick={() => {
-				hiddenInputRef.current?.focus();
-			}}
-		>
+		<div className="relative -mt-10">
+			<PassageConfigPanel
+				config={config}
+				onConfigChange={(config) => {
+					onConfigChange(config);
+					setTimeout(() => hiddenInputRef.current?.focus(), 50);
+				}}
+				disabled={startRef.current !== null}
+			/>
 			<div
-				className="absolute top-0 left-0 w-full h-14 z-10 select-none"
-				style={{
-					background: `
+				ref={containerRef}
+				className="max-w-3xl min-h-[13rem] overflow-hidden mx-auto transition px-4 py-10 bg-card/50 rounded-md relative cursor-text"
+				onClick={() => {
+					hiddenInputRef.current?.focus();
+				}}
+			>
+				<div
+					className="absolute top-0 left-0 w-full h-14 z-10 select-none"
+					style={{
+						background: `
       linear-gradient(
         to bottom,
         var(--background) 20%,
@@ -114,12 +125,12 @@ export default function Passage({
         transparent 100%
       )
     `,
-				}}
-			/>
-			<div
-				className="absolute bottom-0 left-0 w-full h-14 z-10 select-none"
-				style={{
-					background: `
+					}}
+				/>
+				<div
+					className="absolute bottom-0 left-0 w-full h-14 z-10 select-none"
+					style={{
+						background: `
       linear-gradient(
         to top,
         var(--background) 20%,
@@ -130,30 +141,36 @@ export default function Passage({
         transparent 100%
       )
     `,
-				}}
-			/>
-			<input
-				ref={hiddenInputRef}
-				type="text"
-				className="absolute opacity-0 -z-10"
-				value={typedText}
-				onChange={(e) => {
-					setManualScrollOffset(null);
-					handleInputChange(e);
-				}}
-				onKeyDown={handleKeyDown}
-				onFocus={() => setFocused(true)}
-				onBlur={() => setFocused(false)}
-			/>
-			<PassageText
-				words={words}
-				typedText={typedText}
-				charRefs={charRefs}
-				scrollOffset={
-					manualScrollOffset === null ? scrollOffset : manualScrollOffset
-				}
-			/>
-			<Cursor x={cursorPos.x} y={cursorPos.y} disabled={!focused} />
+					}}
+				/>
+				<input
+					ref={hiddenInputRef}
+					type="text"
+					className="absolute opacity-0 -z-10"
+					value={typedText}
+					onChange={(e) => {
+						setManualScrollOffset(null);
+						handleInputChange(e);
+					}}
+					onKeyDown={(e) => handleKeyDown(e, handleRestart)}
+					onFocus={() => setFocused(true)}
+					onBlur={() => setFocused(false)}
+				/>
+				<PassageText
+					words={words}
+					typedText={typedText}
+					charRefs={charRefs}
+					scrollOffset={
+						manualScrollOffset === null ? scrollOffset : manualScrollOffset
+					}
+				/>
+				<Cursor
+					x={cursorPos.x}
+					y={cursorPos.y}
+					disabled={!focused}
+					redGlow={incorrect}
+				/>
+			</div>
 		</div>
 	);
 }
