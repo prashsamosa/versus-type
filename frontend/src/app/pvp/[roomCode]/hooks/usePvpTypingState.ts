@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { getWordIndex, getWordStartIndex, isWordCorrect } from "@/lib/utils";
 import { sendBackspace, sendKeystrokes } from "../socket/pvp.socket.service";
 
+const FLUSH_TIMEOUT = 700;
+
 export function usePvpTypingState(words: string[], initialIndex: number) {
 	const passageChars = words.join(" ");
 	useEffect(() => {
@@ -24,7 +26,19 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 	const endRef = useRef<number | null>(null);
 	const prevInputRef = useRef("");
 	const keysBufferRef = useRef<string>("");
+	const flushTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const bufferSize = 4;
+
+	function flushBuffer() {
+		if (keysBufferRef.current) {
+			sendKeystrokes(keysBufferRef.current);
+			keysBufferRef.current = "";
+		}
+		if (flushTimeoutRef.current) {
+			clearTimeout(flushTimeoutRef.current);
+			flushTimeoutRef.current = null;
+		}
+	}
 
 	function resetTypingState() {
 		setTypedText("");
@@ -34,7 +48,20 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 		startRef.current = null;
 		endRef.current = null;
 		prevInputRef.current = "";
+		keysBufferRef.current = "";
+		if (flushTimeoutRef.current) {
+			clearTimeout(flushTimeoutRef.current);
+			flushTimeoutRef.current = null;
+		}
 	}
+
+	useEffect(() => {
+		return () => {
+			if (flushTimeoutRef.current) {
+				clearTimeout(flushTimeoutRef.current);
+			}
+		};
+	}, []);
 
 	function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
 		if (finished) return;
@@ -68,9 +95,10 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 				incorrectCurr = true;
 			}
 			keysBufferRef.current += typed;
-			if (keysBufferRef.current.length >= bufferSize) {
-				sendKeystrokes(keysBufferRef.current);
-				keysBufferRef.current = "";
+			if (val.length === 1 || keysBufferRef.current.length >= bufferSize) {
+				flushBuffer();
+			} else if (!flushTimeoutRef.current) {
+				flushTimeoutRef.current = setTimeout(flushBuffer, FLUSH_TIMEOUT);
 			}
 		} else if (val.length < prev.length && prev.startsWith(val)) {
 			// backspace(s) detected
@@ -100,10 +128,7 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 		if (startRef.current === null) startRef.current = performance.now();
 
 		if (val.length >= passageChars.length && !finished && !incorrectCurr) {
-			if (keysBufferRef.current.length > 0) {
-				sendKeystrokes(keysBufferRef.current);
-				keysBufferRef.current = "";
-			}
+			flushBuffer();
 			endRef.current = performance.now();
 			setFinished(true);
 		}
