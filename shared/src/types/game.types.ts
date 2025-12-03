@@ -91,7 +91,11 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
 	"pvp:start-match": (
-		callback: (response: { success: boolean; message?: string }) => void,
+		callback: (response: {
+			success: boolean;
+			message?: string;
+			keyBufferSize?: number;
+		}) => void,
 	) => void;
 	"pvp:keystrokes": (input: string) => void;
 	"pvp:backspace": (amount: number) => void;

@@ -61,6 +61,7 @@ export default function PvpPage() {
 	const roomType = usePvpStore((s) => s.roomType);
 	const isSpectating = myUserId ? players[myUserId]?.spectator : false;
 	const waitingCountdown = usePvpStore((s) => s.waitingCountdown);
+	const setKeyBufferLength = usePvpStore((s) => s.setKeyBufferLength);
 	useEffect(() => {
 		return () => {
 			resetStore();
@@ -106,6 +107,7 @@ export default function PvpPage() {
 		console.log("Start match response:", response);
 		if (response?.success) {
 			setCountingDown(true);
+			if (response.keyBufferSize) setKeyBufferLength(response.keyBufferSize);
 		}
 	}
 

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getWordIndex, getWordStartIndex, isWordCorrect } from "@/lib/utils";
 import { sendBackspace, sendKeystrokes } from "../socket/pvp.socket.service";
+import { usePvpStore } from "../store";
 
 const FLUSH_TIMEOUT = 700;
 
@@ -27,7 +28,7 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 	const prevInputRef = useRef("");
 	const keysBufferRef = useRef<string>("");
 	const flushTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const bufferSize = 4;
+	const bufferSize = usePvpStore((s) => s.keyBufferSize);
 
 	function flushBuffer() {
 		if (keysBufferRef.current) {
