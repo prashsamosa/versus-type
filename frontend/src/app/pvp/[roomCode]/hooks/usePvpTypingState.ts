@@ -10,8 +10,11 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 		if (initialIndex > 0) {
 			setTypedText(passageChars.slice(0, initialIndex));
 			prevInputRef.current = passageChars.slice(0, initialIndex);
+			if (initialIndex >= passageChars.length) {
+				setFinished(true);
+			}
 		}
-	}, [initialIndex]);
+	}, [initialIndex, passageChars.length]);
 
 	const [typedText, setTypedText] = useState("");
 	const [finished, setFinished] = useState(false);

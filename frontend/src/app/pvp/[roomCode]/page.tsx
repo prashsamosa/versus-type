@@ -67,7 +67,7 @@ export default function PvpPage() {
 	}, [resetStore]);
 
 	const waitingForPlayers =
-		roomType === "single-match"
+		roomType === "single-match" && !matchStarted && !matchEnded
 			? Object.keys(players).length < 2 || !!waitingCountdown
 			: false;
 
@@ -114,14 +114,14 @@ export default function PvpPage() {
 
 	return (
 		<div className="flex flex-col items-center justify-start min-h-screen">
-			<div className="w-full -z-10 absolute p-5 text-center font-bold text-5xl tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-foreground/20 to-background from-30% to-90% ">
+			<div className="w-full -z-10 absolute p-5 text-center font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-b from-foreground/20 to-background from-30% to-90% hidden md:block md:text-4xl lg:text-5xl">
 				{roomType === "single-match"
 					? "Quick Play"
 					: roomType === "public"
 						? "Public Room"
 						: "Private Room"}
 			</div>
-			<div className="p-2 flex justify-between items-center w-full mb-4">
+			<div className="p-2 px-4 flex justify-between items-center w-full mb-4">
 				<CodeCopy
 					roomCode={roomCode}
 					copied={copied}
@@ -175,17 +175,18 @@ export default function PvpPage() {
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
 				<div className="pt-16 relative">
+					{players[myUserId ?? ""]?.finished && roomType === "single-match" ? (
+						<div className="relative z-10 text-center -mb-10">
+							<QuickPlayButton label="Find New Match" />
+						</div>
+					) : null}
 					<div
 						className={`text-center -mb-2 transition-all duration-400 ${isSpectating || waitingForPlayers ? "opacity-100" : "opacity-0"}`}
 					>
-						{matchEnded && roomType === "single-match" ? (
-							<QuickPlayButton label="Find New Match" />
-						) : (
-							<Banner
-								isSpectating={isSpectating}
-								waitingForPlayers={waitingForPlayers}
-							/>
-						)}
+						<Banner
+							isSpectating={isSpectating}
+							waitingForPlayers={waitingForPlayers}
+						/>
 					</div>
 					<PvpGame />
 				</div>

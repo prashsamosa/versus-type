@@ -34,13 +34,16 @@ export function usePvpSession(ready = true) {
 				if (!response.success) {
 					setSocketError(response.message ?? "Failed to join match");
 				} else {
-					if (!response.gameState) return;
+					if (!response.gameState) {
+						console.error("No game state in Join Response");
+						return;
+					}
 					const gameState = response.gameState;
 
 					handleStartMatch(!!gameState.isStarted);
 
-					setInitialIndex(gameState.typingIndex ?? 0);
-
+					setInitialIndex(gameState.typingIndex);
+					// if (gameState.typingIndex >= gameState.passage.length) setFinished(true);
 					if (gameState.isStarted && gameState.oppTypingIndexes)
 						setOppTypingIndexes(gameState.oppTypingIndexes);
 					if (gameState.chatHistory) setChatMessages(gameState.chatHistory);
