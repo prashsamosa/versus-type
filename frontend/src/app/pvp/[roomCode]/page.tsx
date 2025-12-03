@@ -35,7 +35,8 @@ import { usePvpStore } from "./store";
 import { UsernameForm } from "./UsernameForm";
 
 export default function PvpPage() {
-	let username = authClient.useSession().data?.user.name.trim() || "";
+	const { data, isPending } = authClient.useSession();
+	let username = data?.user.name.trim() || "";
 	if (username === "Anonymous") username = "";
 	const { loading, socketError, roomCode, latency, disconnected } =
 		usePvpSession(!!username);
@@ -71,7 +72,7 @@ export default function PvpPage() {
 			? Object.keys(players).length < 2 || !!waitingCountdown
 			: false;
 
-	if (!username) {
+	if (!username && !isPending) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-background">
 				<Card>
