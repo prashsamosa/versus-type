@@ -8,6 +8,7 @@ import type {
 import { toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
+import rateLimit from "express-rate-limit";
 import { Server } from "socket.io";
 import { auth } from "./auth/auth";
 import env from "./env";
@@ -24,6 +25,16 @@ app.use(
 		credentials: true,
 	}),
 );
+
+export const apiLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 50,
+	standardHeaders: true,
+	legacyHeaders: false,
+	message: { error: "Too many requests, chill out" },
+});
+
+app.use("/api/", apiLimiter);
 
 app.get("/ping", (_, res) => {
 	res.send("pong");
