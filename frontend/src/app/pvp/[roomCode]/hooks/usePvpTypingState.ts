@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { getWordIndex, getWordStartIndex, isWordCorrect } from "@/lib/utils";
+import { socket } from "@/socket";
 import { sendBackspace, sendKeystrokes } from "../socket/pvp.socket.service";
-import { usePvpStore } from "../store";
 
 const FLUSH_TIMEOUT = 700;
 
@@ -28,7 +29,7 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 	const prevInputRef = useRef("");
 	const keysBufferRef = useRef<string>("");
 	const flushTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const bufferSize = usePvpStore((s) => s.keyBufferSize);
+	const bufferSize = useRef<number>(20);
 
 	function flushBuffer() {
 		if (keysBufferRef.current) {
@@ -57,7 +58,14 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 	}
 
 	useEffect(() => {
+		if (!socket) return;
+		const unregister = registerSocketHandlers(socket, {
+			"pvp:key-buffer-size": (keyBufferSize: number) => {
+				bufferSize.current = keyBufferSize;
+			},
+		});
 		return () => {
+			unregister();
 			if (flushTimeoutRef.current) {
 				clearTimeout(flushTimeoutRef.current);
 			}
@@ -96,7 +104,10 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 				incorrectCurr = true;
 			}
 			keysBufferRef.current += typed;
-			if (val.length === 1 || keysBufferRef.current.length >= bufferSize) {
+			if (
+				val.length === 1 ||
+				keysBufferRef.current.length >= bufferSize.current
+			) {
 				flushBuffer();
 			} else if (!flushTimeoutRef.current) {
 				flushTimeoutRef.current = setTimeout(flushBuffer, FLUSH_TIMEOUT);
