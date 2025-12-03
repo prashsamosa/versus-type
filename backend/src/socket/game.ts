@@ -1,9 +1,4 @@
-import type {
-	ClientToServerEvents,
-	ioServer,
-	ioSocket,
-	MatchResults,
-} from "@versus-type/shared";
+import type { ioServer, ioSocket, MatchResults } from "@versus-type/shared";
 import {
 	getAccuracy,
 	recordKey,
@@ -20,6 +15,7 @@ import {
 	rollingAvgWpmFromDB,
 	updatePlayersInfoInDB,
 } from "./dbservice";
+import { KEY_BUFFER_SIZE } from "./keyBufSizeController";
 import {
 	activePlayersCount,
 	initialPlayerState,
@@ -284,7 +280,21 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 			return;
 		}
-		await startMatch(io, roomCode, callback);
+		if (roomStates[roomCode]?.isMatchStarted) {
+			callback({
+				success: false,
+				message: "Match already started",
+			});
+			return;
+		}
+
+		await startMatch(io, roomCode, () => {
+			callback({
+				success: true,
+				message: "Match started",
+				keyBufferSize: KEY_BUFFER_SIZE,
+			});
+		});
 	});
 
 	socket.on("pvp:keystrokes", (input: string) => {
@@ -545,16 +555,10 @@ async function closeRoom(roomCode: string, io: ioServer) {
 async function startMatch(
 	io: ioServer,
 	roomCode: string,
-	callback?: Parameters<ClientToServerEvents["pvp:start-match"]>[0],
+	callback?: () => void,
 ) {
 	const roomState = roomStates[roomCode];
-	if (roomState.isMatchStarted) {
-		callback?.({
-			success: false,
-			message: "Match already started",
-		});
-		return;
-	}
+	if (roomState.isMatchStarted) return;
 
 	roomState.status = "inProgress";
 
@@ -568,10 +572,7 @@ async function startMatch(
 	sendLobbyUpdate(io, roomCode);
 
 	startCountdown(io, roomCode);
-	callback?.({
-		success: true,
-		message: "Starting countdown",
-	});
+	callback?.();
 
 	startWpmUpdates(io, roomCode);
 

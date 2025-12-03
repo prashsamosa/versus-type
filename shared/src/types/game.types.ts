@@ -83,6 +83,7 @@ export interface ServerToClientEvents {
 	"pvp:disconnect": (data: { reason: string }) => void;
 	"pvp:lobby-update": (lobby: LobbyInfo) => void;
 	"pvp:wpm-update": (data: WpmInfo) => void;
+	"pvp:key-buffer-size": (keyBufferSize: number) => void;
 
 	"chat:new-message": (data: ChatMessage) => void;
 	"passage:put": (passage: string, passageConfig: GeneratorConfig) => void;
@@ -91,15 +92,12 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
 	"pvp:start-match": (
-		callback: (response: {
-			success: boolean;
-			message?: string;
-			keyBufferSize?: number;
-		}) => void,
+		callback: (response: { success: boolean; message?: string }) => void,
 	) => void;
 	"pvp:keystrokes": (input: string) => void;
 	"pvp:backspace": (amount: number) => void;
 	ping: (callback: () => void) => void;
+
 	"pvp:join": (
 		data: {
 			roomCode: string;
