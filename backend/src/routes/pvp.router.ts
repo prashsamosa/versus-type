@@ -3,6 +3,7 @@ import {
 	type RoomSettingsClient,
 	roomSettingsClientSchema,
 } from "@versus-type/shared";
+import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { fromNodeHeaders } from "better-auth/node";
 import { Router } from "express";
 import { customAlphabet } from "nanoid";
@@ -21,6 +22,13 @@ const DEFAULT_WPM = 60;
 const MATCH_CODE_LENGTH = 6;
 const MAX_MATCHMAKING_PLAYERS = 6;
 const NUKE_TIME_MS = 1 * 60 * 1000; // 1m
+
+const MATCHMAKING_PASSAGE_CONFIG: GeneratorConfig = {
+	language: "English 200",
+	numbers: false,
+	punctuation: false,
+	wordCount: 10,
+};
 
 const alphabet =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -103,7 +111,7 @@ pvpRouter.get("/matchmake", async (req, res) => {
 			type: "single-match",
 			maxPlayers: MAX_MATCHMAKING_PLAYERS,
 		};
-		await initializeRoom(newRoomCode, settings);
+		await initializeRoom(newRoomCode, settings, MATCHMAKING_PASSAGE_CONFIG);
 		startNukeTimer(newRoomCode);
 
 		res.json({ roomCode: newRoomCode });

@@ -111,7 +111,11 @@ export async function reinitializeRoomState(roomCode: string) {
 	roomState.players = resetedPlayers;
 }
 
-export async function initializeRoom(roomCode: string, settings: RoomSettings) {
+export async function initializeRoom(
+	roomCode: string,
+	settings: RoomSettings,
+	passageConfig: GeneratorConfig = initialPassageConfig,
+) {
 	const { type, maxPlayers } = settings;
 	roomStates[roomCode] = {
 		...createInitialRoomState(),
@@ -119,7 +123,8 @@ export async function initializeRoom(roomCode: string, settings: RoomSettings) {
 		chat: [],
 		type,
 		maxPlayers,
-		passage: await generatePassage(initialPassageConfig),
+		passageConfig: passageConfig,
+		passage: await generatePassage(passageConfig),
 	};
 }
 

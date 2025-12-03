@@ -155,7 +155,11 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			}
 		});
 
-		if (playerCnt === 1 && roomState.type === "single-match") {
+		if (
+			playerCnt === 1 &&
+			roomState.type === "single-match" &&
+			roomState.status === "waiting"
+		) {
 			// second player joined, start waiting countdown
 			roomState.stopWaitingCountdown = startWaitingCountdown(
 				io,

@@ -49,8 +49,8 @@ export async function updatePlayersInfoInDB(roomState: RoomState) {
 				.set({
 					pvpMatches: sql`${userStats.pvpMatches} + 1`,
 					wins: sql`${userStats.wins} + ${isWinner ? 1 : 0}`,
-					avgWpmPvp: sql`(((${userStats.avgWpmPvp} * ${userStats.pvpMatches}) + ${player.wpm || 0}) / (${userStats.pvpMatches} + 1))`,
-					avgAccuracyPvp: sql`(((${userStats.avgAccuracyPvp} * ${userStats.pvpMatches}) + ${accuracy}) / (${userStats.pvpMatches} + 1))`,
+					avgWpm: sql`(((${userStats.avgWpm} * ${userStats.pvpMatches}) + ${player.wpm || 0}) / (${userStats.pvpMatches} + 1))`,
+					avgAccuracy: sql`(((${userStats.avgAccuracy} * ${userStats.pvpMatches}) + ${accuracy}) / (${userStats.pvpMatches} + 1))`,
 					highestWpm: sql`CASE WHEN ${player.wpm || 0} > ${userStats.highestWpm} THEN ${player.wpm || 0} ELSE ${userStats.highestWpm} END`,
 				})
 				.where(eq(userStats.userId, userId))

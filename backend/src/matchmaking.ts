@@ -64,8 +64,8 @@ export function findBestMatch(
 
 		// skill matching
 		const wpmDiff = Math.abs(room.avgWpm - avgWpm);
-		score -=
-			Math.max(0, (wpmDiff - MIN_WPM_GAP) ** WPM_DIFF_POWER) * WPM_GAP_PENALTY;
+		const wpmGap = Math.max(0, wpmDiff - MIN_WPM_GAP);
+		score -= wpmGap ** WPM_DIFF_POWER * WPM_GAP_PENALTY;
 
 		if (score > maxScore) {
 			maxScore = score;
