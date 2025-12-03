@@ -1,10 +1,14 @@
 import type { ioServer } from "@versus-type/shared";
 import { registerChatHandlers } from "./chat.socket";
 import { registerPvpSessionHandlers } from "./game";
+import { startKeyBufController } from "./keyBufSizeController";
 import { authWithDuplicateCheck, cleanupUserSocket } from "./middleware";
 
 export function initializeSocket(io: ioServer) {
 	io.use(authWithDuplicateCheck);
+
+	startKeyBufController(io);
+
 	io.on("connection", (socket) => {
 		console.log("user connected: ", socket.id);
 		// registerMatchmakingHandlers(socket, io);

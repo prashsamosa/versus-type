@@ -1,6 +1,5 @@
 import { monitorEventLoopDelay } from "node:perf_hooks";
 import type { ioServer } from "@versus-type/shared";
-import { io } from "@/app";
 
 export let KEY_BUFFER_SIZE = 1;
 
@@ -17,9 +16,11 @@ const COOLDOWN_MS = 22000; // wait COOLDOWN_MS of stability before lowering buff
 const histogram = monitorEventLoopDelay({ resolution: 5 });
 histogram.enable();
 
-setInterval(() => {
-	updateKeyBufferSize(io);
-}, CHECK_INTERVAL_MS);
+export function startKeyBufController(io: ioServer) {
+	setInterval(() => {
+		updateKeyBufferSize(io);
+	}, CHECK_INTERVAL_MS);
+}
 
 function updateKeyBufferSize(io: ioServer) {
 	let changed = false;

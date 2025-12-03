@@ -62,6 +62,7 @@ export async function updatePlayersInfoInDB(roomState: RoomState) {
 }
 
 export async function rollingAvgWpmFromDB(userId: string) {
+	if (!userId) return 60;
 	const result = await db
 		.select({ rollingAvgWpm: sql<number>`AVG(wpm)` })
 		.from(

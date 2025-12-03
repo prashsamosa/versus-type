@@ -15,7 +15,6 @@ import {
 	rollingAvgWpmFromDB,
 	updatePlayersInfoInDB,
 } from "./dbservice";
-import { KEY_BUFFER_SIZE } from "./keyBufSizeController";
 import {
 	activePlayersCount,
 	initialPlayerState,
@@ -33,6 +32,7 @@ const WAITING_COUNTDOWN_SECONDS = 15;
 
 export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("pvp:join", async (data, callback) => {
+		if (!callback) return;
 		const { roomCode } = data;
 		if (!roomCode) {
 			return callback({
@@ -184,6 +184,14 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			const roomState = roomStates[roomCode];
 			const room = io.sockets.adapter.rooms.get(roomCode);
 			const disconnectedPlayer = roomState.players[socket.data.userId];
+
+			if (!disconnectedPlayer) {
+				console.warn(
+					`disconnect: player ${socket.data.userId} not found in roomState.players`,
+				);
+				return;
+			}
+
 			if (!room || room.size === 0) {
 				console.log(`Room ${roomCode} has closed`);
 				if (roomState?.status !== "closed") {
@@ -292,7 +300,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			callback({
 				success: true,
 				message: "Match started",
-				keyBufferSize: KEY_BUFFER_SIZE,
 			});
 		});
 	});
