@@ -48,7 +48,7 @@ export function HostModal({
 					<DialogTitle className="text-center">Host a Match</DialogTitle>
 				</DialogHeader>
 				<div className="flex flex-col space-y-4">
-					<div className="flex items-center space-x-2">
+					<div className="flex items-center justify-between space-x-2">
 						<Label htmlFor="private-switch">Private</Label>
 						<Switch
 							id="private-switch"
@@ -60,16 +60,16 @@ export function HostModal({
 						<Label>Max Players</Label>
 						<div className="flex items-center gap-2">
 							<Button
-								variant="outline"
+								variant="ghost"
 								size="icon"
 								onClick={() => setMaxPlayers(Math.max(2, maxPlayers - 1))}
 								disabled={maxPlayers <= 2}
 							>
-								-
+								<span className="mb-0.5">-</span>
 							</Button>
 							<span className="text-center font-mono">{maxPlayers}</span>
 							<Button
-								variant="outline"
+								variant="ghost"
 								size="icon"
 								onClick={() =>
 									setMaxPlayers(Math.min(MAX_PLAYERS, maxPlayers + 1))
