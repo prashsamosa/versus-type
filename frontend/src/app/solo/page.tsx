@@ -66,7 +66,7 @@ export default function SoloPage() {
 	return (
 		<>
 			<Header>Solo Practice</Header>
-			<Button asChild>
+			<Button variant="ghost" asChild>
 				<Link className="absolute top-5 left-5" href="/">
 					<ChevronLeft className="mt-0.5 -mr-1 -ml-1" /> Home
 				</Link>
