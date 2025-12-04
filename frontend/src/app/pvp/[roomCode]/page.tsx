@@ -24,6 +24,7 @@ import {
 import { Header } from "@/components/ui/header";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { DEFAULT_KEY_BUFFER_SIZE } from "@/const";
 import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
 import { Banner } from "./banner";
@@ -62,6 +63,8 @@ export default function PvpPage() {
 	const roomType = usePvpStore((s) => s.roomType);
 	const isSpectating = myUserId ? players[myUserId]?.spectator : false;
 	const waitingCountdown = usePvpStore((s) => s.waitingCountdown);
+	const setKeyBufferSize = usePvpStore((s) => s.setKeyBufferSize);
+
 	useEffect(() => {
 		return () => {
 			resetStore();
@@ -124,6 +127,7 @@ export default function PvpPage() {
 		console.log("Start match response:", response);
 		if (response?.success) {
 			setCountingDown(true);
+			setKeyBufferSize(response.keyBufferSize || DEFAULT_KEY_BUFFER_SIZE);
 		}
 	}
 

@@ -4,7 +4,6 @@ import {
 	recordKey,
 	resetAccuracy,
 } from "@versus-type/shared/accuracy";
-import { MAX_KEYSTROKES_PER_EVENT } from "@versus-type/shared/consts";
 import {
 	GeneratorConfigSchema,
 	generatePassage,
@@ -15,6 +14,7 @@ import {
 	rollingAvgWpmFromDB,
 	updatePlayersInfoInDB,
 } from "./dbservice";
+import { KEY_BUFFER_SIZE, MAX_BUFFER } from "./keyBufSizeController";
 import {
 	activePlayersCount,
 	initialPlayerState,
@@ -300,12 +300,13 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			callback({
 				success: true,
 				message: "Match started",
+				keyBufferSize: KEY_BUFFER_SIZE,
 			});
 		});
 	});
 
 	socket.on("pvp:keystrokes", (input: string) => {
-		if (input.length > MAX_KEYSTROKES_PER_EVENT) {
+		if (input.length > MAX_BUFFER) {
 			console.warn(
 				`Player ${socket.data.userId} sent too many keystrokes at once`,
 			);
@@ -353,6 +354,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			if (player.incorrectIdx === null && passage[player.typingIndex] === key) {
 				if (player.typingIndex >= passage.length - 1) {
 					// PLAYER FINISHED
+					console.log("PLAYER FINISHED");
 					lastCorrectIndex = player.typingIndex + 1;
 					player.finished = true;
 					player.wpm = calcWpm(player.typingIndex, player.startedAt);

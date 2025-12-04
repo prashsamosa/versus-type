@@ -4,7 +4,7 @@ import type { ioServer } from "@versus-type/shared";
 export let KEY_BUFFER_SIZE = 1;
 
 const CHECK_INTERVAL_MS = 5000;
-const MAX_BUFFER = 6;
+export const MAX_BUFFER = 6;
 const MIN_BUFFER = 1;
 
 const LAG_UP = 50;
