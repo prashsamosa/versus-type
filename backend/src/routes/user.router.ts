@@ -17,7 +17,6 @@ userRouter.get("/", async (req, res) => {
 
 userRouter.get("/stats", async (req, res) => {
 	console.log("Fetching user stats");
-	await new Promise((resolve) => setTimeout(resolve, 1000));
 	const session = await auth.api.getSession({
 		headers: fromNodeHeaders(req.headers),
 	});
@@ -41,7 +40,6 @@ userRouter.get("/stats", async (req, res) => {
 export default userRouter;
 
 // userRouter.patch("/settings", async (req, res) => {
-// 	await new Promise((resolve) => setTimeout(resolve, 1000));
 // 	const session = await auth.api.getSession({
 // 		headers: fromNodeHeaders(req.headers),
 // 	});
@@ -71,7 +69,6 @@ export default userRouter;
 //
 // userRouter.get("/settings", async (req, res) => {
 // 	console.log("YOOOOO");
-// 	await new Promise((resolve) => setTimeout(resolve, 1000));
 // 	const session = await auth.api.getSession({
 // 		headers: fromNodeHeaders(req.headers),
 // 	});

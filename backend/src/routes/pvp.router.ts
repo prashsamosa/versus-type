@@ -27,7 +27,7 @@ const MATCHMAKING_PASSAGE_CONFIG: GeneratorConfig = {
 	language: "English 200",
 	numbers: false,
 	punctuation: false,
-	wordCount: 10,
+	wordCount: 50,
 };
 
 const alphabet =
