@@ -1,16 +1,11 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
@@ -47,11 +42,19 @@ export default function SignUp() {
 	}
 
 	return (
-		<div className="min-h-screen flex items-center justify-center p-4">
+		<div className="min-h-screen flex flex-col items-center justify-center p-4 gap-4">
 			<Card className="w-full max-w-md">
-				<CardHeader className="text-center">
-					<CardTitle className="text-2xl">Sign Up</CardTitle>
-					<CardDescription>Create an account to get started</CardDescription>
+				<CardHeader>
+					<div className="flex items-center">
+						<Button variant="ghost" size="icon" asChild className="-ml-2">
+							<Link href="/">
+								<ChevronLeft className="size-4" />
+							</Link>
+						</Button>
+						<CardTitle className="text-2xl flex-1 text-center pr-8">
+							Sign Up
+						</CardTitle>
+					</div>
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleSubmit} className="space-y-4">

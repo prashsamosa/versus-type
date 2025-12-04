@@ -15,16 +15,9 @@ export default async function proxy(req: NextRequest) {
 	const sessionCookie = req.cookies.get(SESSION_COOKIE_NAME);
 	const isAuthenticated = !!sessionCookie;
 
-	const guestOnlyPaths = ["/sign-in", "/sign-up"];
+	// removing ts coz guests are also authenticated(anon)
+	// const guestOnlyPaths = ["/sign-in", "/sign-up"];
 	const protectedPaths = ["/dashboard", "/profile", "/settings"];
-
-	// send already authenticated users to the home page (for guest-only paths)
-	if (isAuthenticated && guestOnlyPaths.includes(pathname)) {
-		console.log(
-			`Authenticated user accessing public path ${pathname}. Redirecting to /.`,
-		);
-		return NextResponse.redirect(new URL("/", req.nextUrl));
-	}
 
 	// anon sign non-authenticated users
 	if (
