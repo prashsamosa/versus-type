@@ -10,10 +10,14 @@ import { DEFAULT_KEY_BUFFER_SIZE } from "@/const";
 
 export type GameConfig = {
 	showOppCursors: boolean;
+	enableConfetti: boolean;
 };
 
 const GAME_CONFIG_KEY = "pvp-game-config";
-const defaultGameConfig: GameConfig = { showOppCursors: true };
+const defaultGameConfig: GameConfig = {
+	showOppCursors: true,
+	enableConfetti: true,
+};
 
 function loadGameConfig(): GameConfig {
 	if (typeof window === "undefined") return defaultGameConfig;
@@ -64,8 +68,8 @@ type PvpStore = {
 	setPassage: (passage: string) => void;
 	passageConfig: GeneratorConfig | null;
 	setPassageConfig: (config: GeneratorConfig | null) => void;
-	config: GameConfig;
-	setConfig: (config: GameConfig) => void;
+	gameConfig: GameConfig;
+	setGameConfig: (config: GameConfig) => void;
 	roomType?: RoomType;
 	setRoomType: (roomType: RoomType) => void;
 	keyBufferSize: number;
@@ -86,7 +90,7 @@ const initialState = {
 	chatMessages: [],
 	passage: "",
 	passageConfig: null,
-	config: loadGameConfig(),
+	gameConfig: loadGameConfig(),
 	keyBufferSize: DEFAULT_KEY_BUFFER_SIZE,
 } satisfies Partial<PvpStore>;
 // why 'satisfies' instead of type annotation? Coz TS magic: type annotation infers this type to initialState, which makes TS cry later when we spread initialState in create. Using satisfies doesn't infer the type, and we get sexy autocomplete.
@@ -127,6 +131,7 @@ export const usePvpStore = create<PvpStore>((set) => ({
 			passageConfig: state.passageConfig,
 			matchStarted: false,
 			matchEnded: false,
+			gameConfig: state.gameConfig,
 			players: Object.entries(state.players).reduce((acc, [userId, player]) => {
 				acc[userId] = {
 					...player,
@@ -146,9 +151,9 @@ export const usePvpStore = create<PvpStore>((set) => ({
 		set((state) => ({ chatMessages: [...state.chatMessages, message] })),
 	setPassage: (passage) => set({ passage, passageLength: passage.length }),
 	setPassageConfig: (config) => set({ passageConfig: config }),
-	setConfig: (config) => {
+	setGameConfig: (config) => {
 		saveGameConfig(config);
-		set({ config });
+		set({ gameConfig: config });
 	},
 	setRoomType: (roomType) => set({ roomType }),
 	setKeyBufferSize: (size) => set({ keyBufferSize: size }),

@@ -5,7 +5,6 @@ import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
 import { useChat } from "./hooks/useChat";
 import { usePvpStore } from "./store";
@@ -15,7 +14,6 @@ export default function Chat() {
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const shouldAutoScroll = useRef(true);
-	const userId = authClient.useSession().data?.user.id;
 	const players = usePvpStore((s) => s.players);
 
 	function handleScroll() {
@@ -53,7 +51,6 @@ export default function Chat() {
 					</div>
 				) : (
 					messages.map((msg, index) => {
-						const isOwnMessage = msg.userId === userId;
 						return (
 							<div key={index} className="mb-2 wrap-anywhere">
 								{msg.system ? (
@@ -61,13 +58,13 @@ export default function Chat() {
 								) : (
 									<>
 										<strong
-											className={isOwnMessage ? "underline" : ""}
 											style={
 												msg.userId ? { color: players[msg.userId]?.color } : {}
 											}
 										>
-											{msg.username}:
-										</strong>{" "}
+											{msg.username}
+										</strong>
+										{": "}
 										{msg.message}
 									</>
 								)}

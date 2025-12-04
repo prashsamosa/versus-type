@@ -57,8 +57,6 @@ export default function PvpPage() {
 		(s) => s.initializeNextMatchState,
 	);
 	const resetStore = usePvpStore((s) => s.resetStore);
-	const config = usePvpStore((s) => s.config);
-	const setConfig = usePvpStore((s) => s.setConfig);
 	const [expanded, setExpanded] = useState(false);
 	const roomType = usePvpStore((s) => s.roomType);
 	const isSpectating = myUserId ? players[myUserId]?.spectator : false;
@@ -161,28 +159,7 @@ export default function PvpPage() {
 					) : (
 						<LatencyStatus latency={latency} />
 					)}
-					<Dialog>
-						<DialogTrigger asChild>
-							<Button variant="outline" size="icon">
-								<Settings className="size-4" />
-							</Button>
-						</DialogTrigger>
-						<DialogContent>
-							<DialogHeader>
-								<DialogTitle>Game Settings</DialogTitle>
-							</DialogHeader>
-							<div className="flex items-center justify-between py-2">
-								<Label htmlFor="show-opp-cursors">Show opponent cursors</Label>
-								<Switch
-									id="show-opp-cursors"
-									checked={config.showOppCursors}
-									onCheckedChange={(checked) =>
-										setConfig({ ...config, showOppCursors: checked })
-									}
-								/>
-							</div>
-						</DialogContent>
-					</Dialog>
+					<GameSettings />
 					<Button variant="secondary" onClick={handleExit}>
 						Exit
 					</Button>
@@ -239,6 +216,48 @@ export default function PvpPage() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+function GameSettings() {
+	const config = usePvpStore((s) => s.gameConfig);
+	const setConfig = usePvpStore((s) => s.setGameConfig);
+	return (
+		<Dialog>
+			<DialogTrigger asChild>
+				<Button variant="outline" size="icon">
+					<Settings className="size-4" />
+				</Button>
+			</DialogTrigger>
+			<DialogContent className="w-sm">
+				<DialogHeader>
+					<DialogTitle>Game Settings</DialogTitle>
+				</DialogHeader>
+				<div className="flex flex-col">
+					<div className="flex items-center justify-between py-2">
+						<Label htmlFor="show-opp-cursors">Show opponent cursors</Label>
+						<Switch
+							id="show-opp-cursors"
+							checked={config.showOppCursors}
+							onCheckedChange={(checked) =>
+								setConfig({ ...config, showOppCursors: checked })
+							}
+						/>
+					</div>
+
+					<div className="flex items-center justify-between py-2">
+						<Label htmlFor="show-opp-cursors">Enable confetti on win</Label>
+						<Switch
+							id="show-opp-cursors"
+							checked={config.enableConfetti}
+							onCheckedChange={(checked) =>
+								setConfig({ ...config, enableConfetti: checked })
+							}
+						/>
+					</div>
+				</div>
+			</DialogContent>
+		</Dialog>
 	);
 }
 

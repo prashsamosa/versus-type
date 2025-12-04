@@ -27,7 +27,7 @@ export default function Passage({
 	const oppTypingIndexes = usePvpStore((s) => s.oppTypingIndexes);
 	const updateOppTypingIndex = usePvpStore((s) => s.updateOppTypingIndex);
 	const initialIndex = usePvpStore((s) => s.initialIndex);
-	const showOppCursors = usePvpStore((s) => s.config.showOppCursors);
+	const showOppCursors = usePvpStore((s) => s.gameConfig.showOppCursors);
 
 	const {
 		typedText,

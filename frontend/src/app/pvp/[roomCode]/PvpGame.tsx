@@ -29,17 +29,18 @@ export function PvpGame() {
 	const players = usePvpStore((s) => s.players);
 	const isSpectating = players[userId || ""]?.spectator;
 	const handleCountdownTick = usePvpStore((s) => s.handleCountdownTick);
+	const enableConfetti = usePvpStore((s) => s.gameConfig.enableConfetti);
 	const hasConfettiFired = useRef(false);
 
 	const myPlayer = players[userId || ""];
 	const isWinner = myPlayer?.finished && myPlayer?.ordinal === 1;
 
 	useEffect(() => {
-		if (isWinner && !hasConfettiFired.current) {
+		if (isWinner && !hasConfettiFired.current && enableConfetti) {
 			hasConfettiFired.current = true;
 			fireConfetti();
 		}
-	}, [isWinner]);
+	}, [isWinner, enableConfetti]);
 
 	useEffect(() => {
 		if (!matchStarted) {

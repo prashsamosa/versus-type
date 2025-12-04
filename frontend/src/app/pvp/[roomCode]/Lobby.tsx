@@ -47,7 +47,7 @@ export function Lobby() {
 							</span>
 							{player.isHost ? (
 								<Badge variant="secondary" className="shrink-0">
-									<User />
+									<User className="-ml-0.5" />
 									Host
 								</Badge>
 							) : null}

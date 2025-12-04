@@ -36,12 +36,12 @@
 		font-size: 3.5rem;
 		transform: translate(-50%, -50%) translateX(-60px);
 	}
-	20% {
+	15% {
 		opacity: 1;
 		font-size: 4rem;
 		transform: translate(-50%, -50%) translateX(-10px);
 	}
-	80% {
+	85% {
 		opacity: 1;
 		font-size: 4rem;
 		transform: translate(-50%, -50%) translateX(10px);
