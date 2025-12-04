@@ -41,13 +41,14 @@ export function PvpGame() {
 				disabled={!matchStarted}
 				inputDisabled={isSpectating}
 			/>
-			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-				{countingDown ? (
-					<div className="text-white flex items-center justify-center text-5xl font-bold">
-						{countdown}
-					</div>
-				) : null}
-			</div>
+			{countingDown && (
+				<div
+					key={countdown}
+					className="absolute top-[55%] left-1/2 font-bold animate-countdown text-foreground/95 text-shadow-[-0.5px_-0.5px_7px_var(--passage),0.5px_-0.5px_7px_var(--passage),-0.5px_0.5px_7px_var(--passage),0.5px_0.5px_7px_var(--passage)]"
+				>
+					{countdown}
+				</div>
+			)}
 		</div>
 	);
 }
