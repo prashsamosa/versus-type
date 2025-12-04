@@ -80,7 +80,12 @@ export default function Chat() {
 
 			{socket ? (
 				<form onSubmit={handleSubmit} className="flex gap-2 -mx-1">
-					<Input type="text" name="inputMessage" className="grow p-2" />
+					<Input
+						id="chat-input"
+						type="text"
+						name="inputMessage"
+						className="grow p-2"
+					/>
 					<Button type="submit">Send</Button>
 				</form>
 			) : (

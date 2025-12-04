@@ -68,6 +68,23 @@ export default function PvpPage() {
 		};
 	}, [resetStore]);
 
+	useEffect(() => {
+		function handleKeyDown(e: KeyboardEvent) {
+			// toggle focus passage <-> chat on tab
+			if (e.key === "Tab") {
+				e.preventDefault();
+				const passageInput = document.getElementById("passage-input");
+				if (document.activeElement === passageInput) {
+					document.getElementById("chat-input")?.focus();
+				} else {
+					passageInput?.focus();
+				}
+			}
+		}
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, []);
+
 	const waitingForPlayers =
 		roomType === "single-match" && !matchStarted && !matchEnded
 			? Object.keys(players).length < 2 || !!waitingCountdown

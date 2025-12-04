@@ -155,6 +155,7 @@ export default function Passage({
 				}}
 			/>
 			<input
+				id="passage-input"
 				ref={hiddenInputRef}
 				type="text"
 				className="absolute opacity-0 -z-10"
