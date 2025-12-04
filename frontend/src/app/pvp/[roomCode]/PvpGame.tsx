@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import confetti from "canvas-confetti";
+import { useEffect, useRef } from "react";
 import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
@@ -6,14 +7,45 @@ import Passage from "./Passage";
 import { PassageConfigPanel } from "./PassageConfigPanel";
 import { usePvpStore } from "./store";
 
+function fireConfetti() {
+	confetti({
+		angle: 60,
+		spread: 55,
+		origin: { x: 0, y: 0.6 },
+	});
+	confetti({
+		angle: 120,
+		spread: 55,
+		origin: { x: 1, y: 0.6 },
+	});
+}
+
 export function PvpGame() {
 	const passage = usePvpStore((s) => s.passage);
 	const matchStarted = usePvpStore((s) => s.matchStarted);
 	const countdown = usePvpStore((s) => s.countdown);
 	const countingDown = usePvpStore((s) => s.countingDown);
 	const userId = authClient.useSession()?.data?.user?.id;
-	const isSpectating = usePvpStore((s) => s.players[userId || ""]?.spectator);
+	const players = usePvpStore((s) => s.players);
+	const isSpectating = players[userId || ""]?.spectator;
 	const handleCountdownTick = usePvpStore((s) => s.handleCountdownTick);
+	const hasConfettiFired = useRef(false);
+
+	const myPlayer = players[userId || ""];
+	const isWinner = myPlayer?.finished && myPlayer?.ordinal === 1;
+
+	useEffect(() => {
+		if (isWinner && !hasConfettiFired.current) {
+			hasConfettiFired.current = true;
+			fireConfetti();
+		}
+	}, [isWinner]);
+
+	useEffect(() => {
+		if (!matchStarted) {
+			hasConfettiFired.current = false;
+		}
+	}, [matchStarted]);
 
 	useEffect(() => {
 		if (!socket) return;
