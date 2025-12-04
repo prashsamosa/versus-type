@@ -102,8 +102,9 @@ export default function PvpPage() {
 	}
 	if (loading) {
 		return (
-			<div className="flex flex-col items-center justify-center min-h-screen py-2">
-				<h1 className="text-4xl font-bold mb-4">Connecting to match...</h1>
+			<div className="flex flex-col items-center justify-center min-h-screen gap-4">
+				<div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+				<p className="text-xl text-muted-foreground">Connecting to match...</p>
 			</div>
 		);
 	}

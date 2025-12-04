@@ -1,16 +1,36 @@
+import { AlertTriangle, ChevronLeft, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function SocketErrorPage({ message }: { message: string }) {
 	return (
-		<div className="flex flex-col justify-center bg-background min-h-screen m-auto">
-			<Card className="w-[350px] mx-auto mb-4 p-4">
-				<div className="text-center text-2xl font-bold">{message}</div>
-			</Card>
-			<Button asChild className="w-auto mx-auto">
-				<Link href="/">Go to Home</Link>
-			</Button>
+		<div className="container max-w-6xl mx-auto py-12 px-4">
+			<div className="space-y-10">
+				<Button variant="ghost" asChild className="-ml-2">
+					<Link href="/">
+						<ChevronLeft className="size-4" />
+						Home
+					</Link>
+				</Button>
+
+				<Card className="max-w-md mx-auto">
+					<CardContent className="p-8 flex flex-col items-center gap-4 text-center">
+						<div className="p-4 rounded-full bg-destructive/10">
+							<AlertTriangle className="size-10 text-destructive" />
+						</div>
+						<h1 className="text-2xl font-bold">Connection Error</h1>
+						<p className="text-muted-foreground">{message}</p>
+						<Button
+							onClick={() => window.location.reload()}
+							variant="secondary"
+						>
+							<RotateCcw className="size-4" />
+							Try Again
+						</Button>
+					</CardContent>
+				</Card>
+			</div>
 		</div>
 	);
 }
