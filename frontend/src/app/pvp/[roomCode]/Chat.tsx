@@ -84,7 +84,8 @@ export default function Chat() {
 						id="chat-input"
 						type="text"
 						name="inputMessage"
-						className="grow p-2"
+						className="grow"
+						placeholder="Type your message..."
 					/>
 					<Button type="submit">Send</Button>
 				</form>

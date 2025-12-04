@@ -255,7 +255,7 @@ function CodeCopy({
 		<div className="p-2 rounded-md border flex justify-center items-center gap-2">
 			<h1 className="font-bold">Code: {roomCode}</h1>
 			<Button
-				variant="outline"
+				variant="secondary"
 				size="sm"
 				onClick={copyMatchLink}
 				className="gap-2"
@@ -278,7 +278,7 @@ function CodeCopy({
 
 function LatencyStatus({ latency }: { latency: number | null }) {
 	if (latency === null) return null;
-	if (latency < 300) {
+	if (latency < 400) {
 		return (
 			<Badge variant="outline">
 				<Activity className="size-4" />
@@ -286,7 +286,7 @@ function LatencyStatus({ latency }: { latency: number | null }) {
 			</Badge>
 		);
 	}
-	if (latency < 700) {
+	if (latency < 800) {
 		return (
 			<Badge variant="outline">
 				<Activity className="size-4" />

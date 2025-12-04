@@ -1,4 +1,4 @@
-import { Crown, Eye, WifiOff } from "lucide-react";
+import { Crown, Eye, User, WifiOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
 	SexyCard,
@@ -24,9 +24,9 @@ export function Lobby() {
 		<SexyCard>
 			<SexyCardHeader>
 				Lobby
-				<Badge>
+				<div className="text-foreground/40">
 					{playerCnt} {playerCnt === 1 ? "player" : "players"}
-				</Badge>
+				</div>
 			</SexyCardHeader>
 			<SexyCardContent className="pt-3">
 				{Object.entries(players).map(([userId, player]) => (
@@ -47,6 +47,7 @@ export function Lobby() {
 							</span>
 							{player.isHost ? (
 								<Badge variant="secondary" className="shrink-0">
+									<User />
 									Host
 								</Badge>
 							) : null}
@@ -111,12 +112,12 @@ export function Lobby() {
 								</div>
 								<div
 									className={
-										"bg-muted rounded h-2 overflow-hidden transition-all ease-out shrink-0 " +
+										"bg-muted ring ring-muted p-1 rounded h-4 overflow-hidden rounded-full transition-all ease-out shrink-0 shadow-[inset_0_2px_5px_rgba(0,0,0,0.8),inset_0_-1px_3px_rgba(0,0,0,0.6)] " +
 										(player.finished ? "w-0 ml-0" : "flex-3 min-w-[3rem] ml-2")
 									}
 								>
 									<div
-										className="h-full bg-accent transition-all duration-100 rounded"
+										className="h-2 bg-accent transition-all duration-100 rounded shadow-[inset_0_2px_2px_rgba(255,255,255,0.6),0_2px_4px_rgba(0,0,0,0.3),0_4px_8px_rgba(0,0,0,0.1)] "
 										style={{
 											width: `${((oppTypingIndexes[userId] ?? player.typingIndex) / Math.max(1, passageLength)) * 100}%`,
 											backgroundColor: player.color || "#666",

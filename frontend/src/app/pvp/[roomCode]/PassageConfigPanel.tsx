@@ -34,7 +34,7 @@ export function PassageConfigPanel() {
 	if (!passageConfig || countingDown || matchStarted) return null;
 
 	return (
-		<div className="absolute top-9 left-12 z-20 flex justify-start items-center gap-2">
+		<div className="absolute top-8 left-12 z-20 flex justify-start items-center gap-2">
 			{isHost ? (
 				<>
 					<Select
