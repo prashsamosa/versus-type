@@ -36,21 +36,28 @@
 		font-size: 3.5rem;
 		transform: translate(-50%, -50%) translateX(-60px);
 	}
-	15% {
+
+	20% {
 		opacity: 1;
 		font-size: 4rem;
 		transform: translate(-50%, -50%) translateX(-10px);
 	}
-	85% {
+
+	80% {
 		opacity: 1;
 		font-size: 4rem;
 		transform: translate(-50%, -50%) translateX(10px);
 	}
+
 	100% {
 		opacity: 0;
 		font-size: 3.5rem;
 		transform: translate(-50%, -50%) translateX(60px);
 	}
+}
+
+@utility animate-countdown {
+	animation: countdown 0.8s linear forwards;
 }
 
 @keyframes streak {
