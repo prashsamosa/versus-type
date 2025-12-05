@@ -1,25 +1,18 @@
 import type { UserStats } from "@versus-type/shared";
-import { fromNodeHeaders } from "better-auth/node";
 import { eq } from "drizzle-orm";
 import { Router } from "express";
 import { rollingAvgWpmFromDB } from "@/socket/dbservice";
-import { auth } from "../auth/auth";
 import { db } from "../db";
 import { userStats } from "../db/schema";
 
 const userRouter = Router();
 
-userRouter.get("/", async (req, res) => {
-	const session = await auth.api.getSession({
-		headers: fromNodeHeaders(req.headers),
-	});
-	res.json(session);
+userRouter.get("/", async (_, res) => {
+	res.json(res.locals.session);
 });
 
-userRouter.get("/stats", async (req, res) => {
-	const session = await auth.api.getSession({
-		headers: fromNodeHeaders(req.headers),
-	});
+userRouter.get("/stats", async (_, res) => {
+	const session = res.locals.session;
 	if (!session) {
 		res.status(401).json({ error: "Unauthorized" });
 		return;
@@ -43,7 +36,7 @@ userRouter.get("/stats", async (req, res) => {
 		return;
 	}
 
-	const { userId: _, updatedAt: __, ...returnObj } = stats[0];
+	const { userId: __, updatedAt: ___, ...returnObj } = stats[0];
 
 	res.json({
 		...returnObj,
@@ -57,9 +50,7 @@ userRouter.get("/stats", async (req, res) => {
 export default userRouter;
 
 // userRouter.patch("/settings", async (req, res) => {
-// 	const session = await auth.api.getSession({
-// 		headers: fromNodeHeaders(req.headers),
-// 	});
+// 	const session = res.locals.session;
 // 	if (!session) {
 // 		res.status(401).json({ error: "Unauthorized" });
 // 		return;
@@ -85,9 +76,7 @@ export default userRouter;
 // });
 //
 // userRouter.get("/settings", async (req, res) => {
-// 	const session = await auth.api.getSession({
-// 		headers: fromNodeHeaders(req.headers),
-// 	});
+// 	const session = res.locals.session;
 // 	if (!session) {
 // 		res.status(401).json({ error: "Unauthorized" });
 // 		return;

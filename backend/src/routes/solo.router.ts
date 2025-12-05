@@ -1,18 +1,14 @@
 import { SoloStatsSchema } from "@versus-type/shared";
-import { fromNodeHeaders } from "better-auth/node";
 import { sql } from "drizzle-orm";
 import { eq } from "drizzle-orm/sqlite-core/expressions";
 import { Router } from "express";
-import { auth } from "../auth/auth";
 import { db } from "../db";
 import { soloMatch, userStats } from "../db/schema";
 
 const soloRouter = Router();
 
 soloRouter.post("/", async (req, res) => {
-	const session = await auth.api.getSession({
-		headers: fromNodeHeaders(req.headers),
-	});
+	const session = res.locals.session;
 	if (!session) {
 		res.status(401).json({ error: "Unauthorized" });
 		return;
