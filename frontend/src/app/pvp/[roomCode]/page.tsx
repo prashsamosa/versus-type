@@ -104,7 +104,7 @@ export default function PvpPage() {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-screen gap-4">
 				<div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-				<p className="text-xl text-muted-foreground">Connecting to match...</p>
+				<p className="text-xl text-muted-foreground">Connecting to match</p>
 			</div>
 		);
 	}

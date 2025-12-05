@@ -33,6 +33,7 @@ export default function Passage({
 		handleKeyDown,
 		incorrect,
 		streak,
+		maxStreak,
 	} = useTypingState(words);
 
 	const [manualScrollOffset, setManualScrollOffset] = useState<number | null>(
@@ -90,8 +91,10 @@ export default function Passage({
 				endTs={endRef.current}
 				input={typedText}
 				target={passageChars}
+				maxStreak={maxStreak}
 				onRestartAction={() => handleRestart(true)}
 				accuracyState={accuracyRef.current}
+				passageConfig={config}
 			/>
 		);
 	}

@@ -19,6 +19,7 @@ export function useTypingState(words: string[]) {
 	const prevInputRef = useRef("");
 	const accuracyRef = useRef<AccuracyState>(resetAccuracy());
 	const [streak, setStreak] = useState(0);
+	const maxStreakRef = useRef(0);
 	const wordHadErrorRef = useRef(false);
 	const lastCompletedWordRef = useRef(-1);
 
@@ -64,6 +65,7 @@ export function useTypingState(words: string[]) {
 					wordIdx > lastCompletedWordRef.current
 				) {
 					setStreak((s) => s + 1);
+					maxStreakRef.current = Math.max(maxStreakRef.current, streak + 1);
 					lastCompletedWordRef.current = wordIdx;
 				}
 				wordHadErrorRef.current = false;
@@ -110,5 +112,6 @@ export function useTypingState(words: string[]) {
 		handleKeyDown,
 		incorrect,
 		streak,
+		maxStreak: maxStreakRef.current,
 	};
 }

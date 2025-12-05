@@ -5,23 +5,26 @@ import {
 	getAccuracy,
 	getErrorCount,
 } from "@versus-type/shared/accuracy";
+import type { SoloStats } from "@versus-type/shared/index";
+import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { computeStats } from "@versus-type/shared/stats";
+import {
+	CheckCircle,
+	Clock,
+	Flame,
+	Gauge,
+	RotateCcw,
+	Settings2,
+	Target,
+	XCircle,
+	Zap,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { ProgressStatCard, StatCard } from "@/components/ui/stat-card";
 import { authClient } from "@/lib/auth-client";
-import { completeTest } from "@/services/test.client";
-
-type TestStats = {
-	wpm: number;
-	rawWpm: number;
-	accuracy: number;
-	correctChars: number;
-	errorChars: number;
-	time: number;
-	wordsTyped: number;
-	mode: "time" | "words";
-};
+import { completeSoloMatch } from "@/services/solo.client";
 
 export default function FinishedStats({
 	startTs,
@@ -30,6 +33,8 @@ export default function FinishedStats({
 	target,
 	onRestartAction,
 	accuracyState,
+	maxStreak,
+	passageConfig,
 }: {
 	startTs: number;
 	endTs: number;
@@ -37,6 +42,8 @@ export default function FinishedStats({
 	target: string;
 	onRestartAction: () => void;
 	accuracyState: AccuracyState;
+	maxStreak: number;
+	passageConfig: GeneratorConfig;
 }) {
 	const stats = computeStats(startTs, endTs, input, target);
 	const acc = getAccuracy(accuracyState);
@@ -54,7 +61,7 @@ export default function FinishedStats({
 			setSaving(false);
 			return;
 		}
-		const testStats: TestStats = {
+		const finalStats: SoloStats = {
 			wpm: stats.wpm,
 			rawWpm: stats.rawWpm,
 			accuracy: acc,
@@ -64,75 +71,110 @@ export default function FinishedStats({
 			wordsTyped: input.trim().split(/\s+/).length,
 			mode: "words",
 		};
-		const callComplete = async () => {
+		async function callComplete() {
 			try {
-				await completeTest(testStats);
+				await completeSoloMatch(finalStats);
 			} catch (err) {
 				console.error("Failed to save result", err);
-				setError("Failed to save result");
+				setError(
+					"Failed to save result: " +
+						(err instanceof Error ? err.message : "Unknown error"),
+				);
 			} finally {
 				setSaving(false);
 			}
-		};
+		}
 		callComplete();
 	}, [session]);
 
 	if (!stats) {
 		return (
-			<Card className="max-w-3xl mx-auto mt-10">
-				<CardContent>
-					<div className="text-center text-destructive">
-						Failed to compute stats
-					</div>
-				</CardContent>
-				<CardFooter className="justify-center gap-3">
-					<Button onClick={onRestartAction}>Restart</Button>
-				</CardFooter>
-			</Card>
+			<div className="max-w-4xl mx-auto mt-10">
+				<Card>
+					<CardContent className="p-6">
+						<div className="text-center text-destructive">
+							Failed to compute stats
+						</div>
+						<div className="flex justify-center mt-4">
+							<Button onClick={onRestartAction}>
+								<RotateCcw className="size-4 mr-2" />
+								Restart
+							</Button>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
 		);
 	}
 
 	return (
-		<Card className="max-w-3xl mx-auto mt-10">
-			<CardContent>
-				<div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
-					<div>
-						<div className="text-sm text-muted-foreground">WPM</div>
-						<div className="text-3xl font-bold">{Math.round(stats.wpm)}</div>
+		<div className="max-w-5xl mx-auto mt-10 space-y-4">
+			<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+				<StatCard
+					value={Math.round(stats.wpm)}
+					suffix="WPM"
+					size="large"
+					icon={Zap}
+					className="col-span-2 row-span-2"
+				/>
+				<ProgressStatCard
+					title="Accuracy"
+					value={Math.round(acc)}
+					icon={Target}
+				/>
+
+				<StatCard
+					title="Raw WPM"
+					value={Math.round(stats.rawWpm)}
+					suffix="WPM"
+					icon={Gauge}
+				/>
+
+				<StatCard title="Time" value={stats.time} suffix="s" icon={Clock} />
+				<StatCard title="Max Streak" value={maxStreak} icon={Flame} />
+
+				<StatCard
+					title="Correct chars"
+					value={stats.correctChars}
+					icon={CheckCircle}
+				/>
+				<StatCard title="Errors" value={errors} icon={XCircle} />
+
+				<StatCard title="Config" icon={Settings2} className="col-span-2">
+					<div className="text-sm flex gap-2">
+						<div>{passageConfig.language}</div>
+						<span className="text-foreground/40">•</span>
+						<div>{passageConfig.wordCount} words</div>
+						{passageConfig.punctuation ? (
+							<>
+								<span className="text-foreground/40">•</span>
+								<div>Punctuation</div>{" "}
+							</>
+						) : null}
+
+						{passageConfig.numbers ? (
+							<>
+								<span className="text-foreground/40">•</span>
+								<div>Numbers</div>{" "}
+							</>
+						) : null}
 					</div>
-					<div>
-						<div className="text-sm text-muted-foreground">Raw</div>
-						<div className="text-3xl font-bold">{Math.round(stats.rawWpm)}</div>
-					</div>
-					<div>
-						<div className="text-sm text-muted-foreground">Time</div>
-						<div className="text-3xl font-bold">{stats.time}s</div>
-					</div>
-					<div>
-						<div className="text-sm text-muted-foreground">Acc</div>
-						<div className="text-3xl font-bold">{Math.round(acc)}%</div>
-					</div>
-					<div>
-						<div className="text-sm text-muted-foreground">Correct</div>
-						<div className="text-3xl font-bold">{stats.correctChars}</div>
-					</div>
-					<div>
-						<div className="text-sm text-muted-foreground">Errors</div>
-						<div className="text-3xl font-bold">{errors}</div>
-					</div>
+				</StatCard>
+			</div>
+
+			{saving && (
+				<div className="text-center text-muted-foreground">
+					Saving result...
 				</div>
-				{saving && (
-					<div className="text-center text-muted-foreground mt-4">
-						Saving result...
-					</div>
-				)}
-				{error && (
-					<div className="text-center text-destructive mt-4">{error}</div>
-				)}
-			</CardContent>
-			<CardFooter className="justify-center gap-3">
-				<Button onClick={onRestartAction}>Restart</Button>
-			</CardFooter>
-		</Card>
+			)}
+			{error && <div className="text-center text-destructive">{error}</div>}
+
+			<div className="flex justify-center pt-2">
+				<Button size="lg" onClick={onRestartAction}>
+					<RotateCcw className="size-4 mr-2" />
+					Restart
+				</Button>
+			</div>
+		</div>
 	);
 }
