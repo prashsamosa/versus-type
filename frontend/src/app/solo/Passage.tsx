@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import Cursor from "@/app/_passage/Cursor";
 import { useCursorPosition } from "@/app/_passage/hooks/useCursorPosition";
 import PassageText from "@/app/_passage/PassageText";
+import { StreakDisplay } from "@/components/ui/streak-display";
 import FinishedStats from "./FinishedStats";
-import { useTypingTest } from "./hooks/useTypingTest";
+import { useTypingState } from "./hooks/useTypingState";
 import { PassageConfigPanel } from "./PassageConfigPanel";
 
 export default function Passage({
@@ -31,7 +32,8 @@ export default function Passage({
 		handleInputChange,
 		handleKeyDown,
 		incorrect,
-	} = useTypingTest(words);
+		streak,
+	} = useTypingState(words);
 
 	const [manualScrollOffset, setManualScrollOffset] = useState<number | null>(
 		null,
@@ -96,14 +98,17 @@ export default function Passage({
 
 	return (
 		<div className="relative -mt-10">
-			<PassageConfigPanel
-				config={config}
-				onConfigChange={(config) => {
-					onConfigChange(config);
-					setTimeout(() => hiddenInputRef.current?.focus(), 50);
-				}}
-				disabled={startRef.current !== null}
-			/>
+			<div className="absolute -top-4 left-0 z-20 flex justify-between items-center w-full pl-2 pr-4">
+				<PassageConfigPanel
+					config={config}
+					onConfigChange={(config) => {
+						onConfigChange(config);
+						setTimeout(() => hiddenInputRef.current?.focus(), 50);
+					}}
+					disabled={startRef.current !== null}
+				/>
+				<StreakDisplay streak={streak} />
+			</div>
 			<div
 				ref={containerRef}
 				className="max-w-3xl min-h-[13rem] overflow-hidden mx-auto transition px-4 py-10 bg-card/50 rounded-md relative cursor-text"

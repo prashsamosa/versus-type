@@ -27,7 +27,7 @@ export function PassageConfigPanel({
 	return (
 		<div
 			className={
-				"absolute -top-4 left-2 z-20 flex justify-start items-center gap-2 transition " +
+				"flex justify-start items-center gap-2 transition " +
 				(disabled ? "opacity-0 pointer-events-none" : "opacity-100")
 			}
 		>

@@ -25,6 +25,9 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 	const [finished, setFinished] = useState(false);
 	const [shakeWordIndex, setShakeWordIndex] = useState<number | null>(null);
 	const [incorrect, setIncorrect] = useState(false);
+	const [streak, setStreak] = useState(0);
+	const wordHadErrorRef = useRef(false);
+	const lastCompletedWordRef = useRef(-1);
 	const startRef = useRef<number | null>(null);
 	const endRef = useRef<number | null>(null);
 	const prevInputRef = useRef("");
@@ -49,6 +52,9 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 		setFinished(false);
 		setShakeWordIndex(null);
 		setIncorrect(false);
+		setStreak(0);
+		wordHadErrorRef.current = false;
+		lastCompletedWordRef.current = -1;
 		startRef.current = null;
 		endRef.current = null;
 		prevInputRef.current = "";
@@ -104,6 +110,18 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 			if (typed !== expected) {
 				setIncorrect(true);
 				incorrectCurr = true;
+				wordHadErrorRef.current = true;
+				setStreak(0);
+			} else if (expected === " ") {
+				const wordIdx = getWordIndex(idx, words);
+				if (
+					!wordHadErrorRef.current &&
+					wordIdx > lastCompletedWordRef.current
+				) {
+					setStreak((s) => s + 1);
+					lastCompletedWordRef.current = wordIdx;
+				}
+				wordHadErrorRef.current = false;
 			}
 			keysBufferRef.current += typed;
 			if (val.length === 1 || keysBufferRef.current.length >= bufferSize) {
@@ -155,5 +173,6 @@ export function usePvpTypingState(words: string[], initialIndex: number) {
 		shakeWordIndex,
 		incorrect,
 		resetTypingState,
+		streak,
 	};
 }

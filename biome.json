@@ -16,6 +16,9 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
+			"performance": {
+				"noImgElement": "off"
+			},
 			"correctness": {
 				"useExhaustiveDependencies": "off",
 				"useUniqueElementIds": "off"

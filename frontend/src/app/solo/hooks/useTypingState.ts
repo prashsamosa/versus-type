@@ -6,8 +6,9 @@ import {
 	resetAccuracy,
 } from "@versus-type/shared/accuracy";
 import { useEffect, useRef, useState } from "react";
+import { getWordIndex } from "@/lib/utils";
 
-export function useTypingTest(words: string[]) {
+export function useTypingState(words: string[]) {
 	const passageChars = words.join(" ");
 
 	const [typedText, setTypedText] = useState("");
@@ -17,6 +18,9 @@ export function useTypingTest(words: string[]) {
 	const endRef = useRef<number | null>(null);
 	const prevInputRef = useRef("");
 	const accuracyRef = useRef<AccuracyState>(resetAccuracy());
+	const [streak, setStreak] = useState(0);
+	const wordHadErrorRef = useRef(false);
+	const lastCompletedWordRef = useRef(-1);
 
 	function resetState() {
 		setTypedText("");
@@ -26,6 +30,9 @@ export function useTypingTest(words: string[]) {
 		endRef.current = null;
 		prevInputRef.current = "";
 		accuracyRef.current = resetAccuracy();
+		setStreak(0);
+		wordHadErrorRef.current = false;
+		lastCompletedWordRef.current = -1;
 	}
 
 	useEffect(() => {
@@ -48,6 +55,18 @@ export function useTypingTest(words: string[]) {
 			if (typed !== expected) {
 				setIncorrect(true);
 				incorrectCurr = true;
+				wordHadErrorRef.current = true;
+				setStreak(0);
+			} else if (expected === " ") {
+				const wordIdx = getWordIndex(idx, words);
+				if (
+					!wordHadErrorRef.current &&
+					wordIdx > lastCompletedWordRef.current
+				) {
+					setStreak((s) => s + 1);
+					lastCompletedWordRef.current = wordIdx;
+				}
+				wordHadErrorRef.current = false;
 			}
 		} else if (val.length < prev.length && prev.startsWith(val)) {
 			if (incorrect && val === passageChars.slice(0, val.length)) {
@@ -90,5 +109,6 @@ export function useTypingTest(words: string[]) {
 		handleInputChange,
 		handleKeyDown,
 		incorrect,
+		streak,
 	};
 }
