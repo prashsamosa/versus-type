@@ -67,7 +67,7 @@ export function PvpGame() {
 	}
 
 	return (
-		<div className="relative pt-10 px-10">
+		<div className="relative pt-18 px-10">
 			<PassageConfigPanel />
 			<Passage
 				words={passage.split(" ")}

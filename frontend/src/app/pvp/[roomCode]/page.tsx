@@ -5,25 +5,16 @@ import {
 	ChevronDown,
 	ChevronUp,
 	Copy,
-	Settings,
 	WifiOff,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { GameSettings } from "@/app/_game-config/config-modal";
 import { QuickPlayButton } from "@/app/quick-play";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
 import { Header } from "@/components/ui/header";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { DEFAULT_KEY_BUFFER_SIZE } from "@/const";
 import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
@@ -62,6 +53,8 @@ export default function PvpPage() {
 	const isSpectating = myUserId ? players[myUserId]?.spectator : false;
 	const waitingCountdown = usePvpStore((s) => s.waitingCountdown);
 	const setKeyBufferSize = usePvpStore((s) => s.setKeyBufferSize);
+	const config = usePvpStore((s) => s.gameConfig);
+	const setConfig = usePvpStore((s) => s.setGameConfig);
 
 	useEffect(() => {
 		return () => {
@@ -160,7 +153,7 @@ export default function PvpPage() {
 					) : (
 						<LatencyStatus latency={latency} />
 					)}
-					<GameSettings />
+					<GameSettings config={config} setConfig={setConfig} />
 					<Button variant="secondary" onClick={handleExit}>
 						Exit
 					</Button>
@@ -217,48 +210,6 @@ export default function PvpPage() {
 				</div>
 			</div>
 		</div>
-	);
-}
-
-function GameSettings() {
-	const config = usePvpStore((s) => s.gameConfig);
-	const setConfig = usePvpStore((s) => s.setGameConfig);
-	return (
-		<Dialog>
-			<DialogTrigger asChild>
-				<Button variant="outline" size="icon">
-					<Settings className="size-4" />
-				</Button>
-			</DialogTrigger>
-			<DialogContent className="w-sm">
-				<DialogHeader>
-					<DialogTitle>Game Settings</DialogTitle>
-				</DialogHeader>
-				<div className="flex flex-col">
-					<div className="flex items-center justify-between py-2">
-						<Label htmlFor="show-opp-cursors">Show opponent cursors</Label>
-						<Switch
-							id="show-opp-cursors"
-							checked={config.showOppCursors}
-							onCheckedChange={(checked) =>
-								setConfig({ ...config, showOppCursors: checked })
-							}
-						/>
-					</div>
-
-					<div className="flex items-center justify-between py-2">
-						<Label htmlFor="show-opp-cursors">Enable confetti on win</Label>
-						<Switch
-							id="show-opp-cursors"
-							checked={config.enableConfetti}
-							onCheckedChange={(checked) =>
-								setConfig({ ...config, enableConfetti: checked })
-							}
-						/>
-					</div>
-				</div>
-			</DialogContent>
-		</Dialog>
 	);
 }
 

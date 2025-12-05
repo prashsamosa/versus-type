@@ -9,6 +9,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
+import { loadGameConfig } from "../_game-config";
+import { GameSettings } from "../_game-config/config-modal";
 import Passage from "./Passage";
 
 const SOLO_CONFIG_KEY = "solo-passage-config";
@@ -39,6 +41,7 @@ function saveConfig(config: GeneratorConfig) {
 export default function SoloPage() {
 	const [config, setConfig] = useState<GeneratorConfig>(defaultConfig);
 	const [words, setWords] = useState<string[] | null>(null);
+	const [gameConfig, setGameConfig] = useState(loadGameConfig());
 
 	useEffect(() => {
 		const loaded = loadConfig();
@@ -66,16 +69,20 @@ export default function SoloPage() {
 	return (
 		<>
 			<Header>Solo Practice</Header>
-			<Button variant="ghost" asChild>
-				<Link className="absolute top-5 left-5" href="/">
-					<ChevronLeft className="mt-0.5 -mr-1 -ml-1" /> Home
-				</Link>
-			</Button>
+			<div className="absolute top-5 flex justify-between w-screen px-5">
+				<Button variant="ghost" asChild>
+					<Link href="/">
+						<ChevronLeft className="mt-0.5 -mr-1 -ml-1" /> Home
+					</Link>
+				</Button>
+				<GameSettings config={gameConfig} setConfig={setGameConfig} solo />
+			</div>
 			<div className="bg-background flex items-center justify-center min-h-screen py-2">
 				<Passage
 					words={words}
 					config={config}
 					onConfigChange={handleConfigChange}
+					enableStreak={gameConfig.enableStreak}
 				/>
 			</div>
 		</>

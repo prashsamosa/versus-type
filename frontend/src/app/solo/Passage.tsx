@@ -14,14 +14,15 @@ export default function Passage({
 	words,
 	config,
 	onConfigChange,
+	enableStreak = true,
 }: {
 	words: string[];
 	config: GeneratorConfig;
 	onConfigChange: (config: GeneratorConfig) => void;
+	enableStreak: boolean;
 }) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const charRefs = useRef<HTMLSpanElement[]>([]);
-
 	const {
 		passageChars,
 		typedText,
@@ -112,29 +113,29 @@ export default function Passage({
 					}}
 					disabled={startRef.current !== null}
 				/>
-				<StreakDisplay streak={streak} />
+				{enableStreak ? <StreakDisplay streak={streak} /> : null}
 			</div>
 			<div
 				ref={containerRef}
-				className="max-w-3xl min-h-[13rem] overflow-hidden mx-auto transition px-4 pt-2 pb-10 bg-card/50 rounded-md relative cursor-text"
+				className="max-w-4xl min-h-[13.5rem] overflow-hidden mx-auto transition px-4 pt-2 pb-10 bg-card/50 rounded-md relative cursor-text"
 				onClick={() => {
 					hiddenInputRef.current?.focus();
 				}}
 			>
 				<div
 					className={
-						"absolute top-0 left-0 w-full h-14 z-10 select-none transition " +
+						"absolute -top-3 left-0 w-full h-14 z-10 select-none transition " +
 						(finalScrollOffset ? "opacity-100" : "opacity-0")
 					}
 					style={{
 						background: `
       linear-gradient(
         to bottom,
-        var(--background) 20%,
+        var(--background) 10%,
         rgba(var(--background-rgb), 0.9) 30%,
-        rgba(var(--background-rgb), 0.6) 45%,
+        rgba(var(--background-rgb), 0.6) 55%,
         rgba(var(--background-rgb), 0.3) 70%,
-        rgba(var(--background-rgb), 0.1) 60%,
+        rgba(var(--background-rgb), 0.1) 80%,
         transparent 100%
       )
     `,

@@ -6,36 +6,12 @@ import type {
 } from "@versus-type/shared";
 import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { create } from "zustand";
+import {
+	type GameConfig,
+	loadGameConfig,
+	saveGameConfig,
+} from "@/app/_game-config";
 import { DEFAULT_KEY_BUFFER_SIZE } from "@/const";
-
-export type GameConfig = {
-	showOppCursors: boolean;
-	enableConfetti: boolean;
-};
-
-const GAME_CONFIG_KEY = "pvp-game-config";
-const defaultGameConfig: GameConfig = {
-	showOppCursors: true,
-	enableConfetti: true,
-};
-
-function loadGameConfig(): GameConfig {
-	if (typeof window === "undefined") return defaultGameConfig;
-	try {
-		const stored = localStorage.getItem(GAME_CONFIG_KEY);
-		if (stored) {
-			return { ...defaultGameConfig, ...JSON.parse(stored) };
-		}
-	} catch {}
-	return defaultGameConfig;
-}
-
-function saveGameConfig(config: GameConfig) {
-	if (typeof window === "undefined") return;
-	try {
-		localStorage.setItem(GAME_CONFIG_KEY, JSON.stringify(config));
-	} catch {}
-}
 
 type PvpStore = {
 	players: LobbyInfo;

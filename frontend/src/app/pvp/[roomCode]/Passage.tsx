@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Cursor from "@/app/_passage/Cursor";
 import { useCursorPosition } from "@/app/_passage/hooks/useCursorPosition";
 import PassageText from "@/app/_passage/PassageText";
+import { StreakDisplay } from "@/components/ui/streak-display";
 import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
@@ -28,6 +29,7 @@ export default function Passage({
 	const updateOppTypingIndex = usePvpStore((s) => s.updateOppTypingIndex);
 	const initialIndex = usePvpStore((s) => s.initialIndex);
 	const showOppCursors = usePvpStore((s) => s.gameConfig.showOppCursors);
+	const enableStreak = usePvpStore((s) => s.gameConfig.enableStreak);
 
 	const {
 		typedText,
@@ -36,6 +38,7 @@ export default function Passage({
 		shakeWordIndex,
 		incorrect,
 		resetTypingState,
+		streak,
 	} = usePvpTypingState(words, initialIndex);
 
 	const matchEnded = usePvpStore((s) => s.matchEnded);
@@ -110,38 +113,47 @@ export default function Passage({
 		container.addEventListener("wheel", handleWheel, { passive: false });
 		return () => container.removeEventListener("wheel", handleWheel);
 	}, [scrollOffset]);
+	const finalScrollOffset =
+		manualScrollOffset === null ? scrollOffset : manualScrollOffset;
 
 	return (
-		<div
-			ref={containerRef}
-			className={
-				"max-w-5xl min-h-[10rem] overflow-hidden mx-auto transition px-6 py-10 bg-passage rounded-md relative cursor-text " +
-				(disabled ? "opacity-80" : "")
-			}
-			onClick={() => {
-				hiddenInputRef.current?.focus();
-			}}
-		>
+		<>
+			<div className="absolute top-10 right-12 z-20">
+				{enableStreak ? <StreakDisplay streak={streak} /> : null}
+			</div>
 			<div
-				className="absolute top-0 left-0 w-full h-14 z-10 select-none"
-				style={{
-					background: `
+				ref={containerRef}
+				className={
+					"max-w-4xl min-h-[13.5rem] overflow-hidden mx-auto transition px-4 pt-2 pb-10 bg-passage rounded-md relative cursor-text " +
+					(disabled ? "opacity-80" : "")
+				}
+				onClick={() => {
+					hiddenInputRef.current?.focus();
+				}}
+			>
+				<div
+					className={
+						"absolute -top-3 left-0 w-full h-14 z-10 select-none transition " +
+						(finalScrollOffset ? "opacity-100" : "opacity-0")
+					}
+					style={{
+						background: `
       linear-gradient(
         to bottom,
-        var(--background) 20%,
+        var(--background) 10%,
         rgba(var(--background-rgb), 0.9) 30%,
-        rgba(var(--background-rgb), 0.6) 45%,
+        rgba(var(--background-rgb), 0.6) 55%,
         rgba(var(--background-rgb), 0.3) 70%,
-        rgba(var(--background-rgb), 0.1) 60%,
+        rgba(var(--background-rgb), 0.1) 80%,
         transparent 100%
       )
     `,
-				}}
-			/>
-			<div
-				className="absolute bottom-0 left-0 w-full h-14 z-10 select-none"
-				style={{
-					background: `
+					}}
+				/>
+				<div
+					className="absolute bottom-0 left-0 w-full h-14 z-10 select-none"
+					style={{
+						background: `
       linear-gradient(
         to top,
         var(--background) 20%,
@@ -152,63 +164,62 @@ export default function Passage({
         transparent 100%
       )
     `,
-				}}
-			/>
-			<input
-				id="passage-input"
-				ref={hiddenInputRef}
-				type="text"
-				className="absolute opacity-0 -z-10"
-				value={typedText}
-				onChange={
-					disabled || inputDisabled
-						? () => {}
-						: (e) => {
-								setManualScrollOffset(null);
-								handleInputChange(e);
-							}
-				}
-				onFocus={() => setFocused(true)}
-				onBlur={() => setFocused(false)}
-			/>
-
-			<PassageText
-				words={words}
-				typedText={typedText}
-				charRefs={charRefs}
-				scrollOffset={
-					manualScrollOffset === null ? scrollOffset : manualScrollOffset
-				}
-				shakeWordIndex={shakeWordIndex}
-			/>
-
-			{(!disabled || isSpectator) && showOppCursors
-				? Object.entries(oppCursorPoses).map(([oppId, pos]) => {
-						if (oppId === userId || players[oppId]?.finished) return null;
-						return (
-							<Cursor
-								key={oppId}
-								x={pos.x}
-								y={pos.y}
-								color={players[oppId]?.color || "gray"}
-								disabled={
-									players[oppId]?.disconnected || players[oppId]?.finished
-								}
-								dim={!isSpectator && !finished}
-							/>
-						);
-					})
-				: null}
-
-			{!disabled && !finished && !isSpectator ? (
-				<Cursor
-					x={cursorPos.x}
-					y={cursorPos.y}
-					color={color}
-					disabled={!focused}
-					redGlow={incorrect}
+					}}
 				/>
-			) : null}
-		</div>
+				<input
+					id="passage-input"
+					ref={hiddenInputRef}
+					type="text"
+					className="absolute opacity-0 -z-10"
+					value={typedText}
+					onChange={
+						disabled || inputDisabled
+							? () => {}
+							: (e) => {
+									setManualScrollOffset(null);
+									handleInputChange(e);
+								}
+					}
+					onFocus={() => setFocused(true)}
+					onBlur={() => setFocused(false)}
+				/>
+
+				<PassageText
+					words={words}
+					typedText={typedText}
+					charRefs={charRefs}
+					scrollOffset={finalScrollOffset}
+					shakeWordIndex={shakeWordIndex}
+				/>
+
+				{(!disabled || isSpectator) && showOppCursors
+					? Object.entries(oppCursorPoses).map(([oppId, pos]) => {
+							if (oppId === userId || players[oppId]?.finished) return null;
+							return (
+								<Cursor
+									key={oppId}
+									x={pos.x}
+									y={pos.y}
+									color={players[oppId]?.color || "gray"}
+									disabled={
+										players[oppId]?.disconnected || players[oppId]?.finished
+									}
+									dim={!isSpectator && !finished}
+								/>
+							);
+						})
+					: null}
+
+				{!disabled && !finished && !isSpectator ? (
+					<Cursor
+						x={cursorPos.x}
+						y={cursorPos.y}
+						color={color}
+						disabled={!focused}
+						redGlow={incorrect}
+					/>
+				) : null}
+			</div>
+		</>
 	);
 }
