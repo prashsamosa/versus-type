@@ -2,6 +2,7 @@ import type { UserStats } from "@versus-type/shared";
 import { fromNodeHeaders } from "better-auth/node";
 import { eq } from "drizzle-orm";
 import { Router } from "express";
+import { rollingAvgWpmFromDB } from "@/socket/dbservice";
 import { auth } from "../auth/auth";
 import { db } from "../db";
 import { userStats } from "../db/schema";
@@ -23,17 +24,34 @@ userRouter.get("/stats", async (req, res) => {
 		res.status(401).json({ error: "Unauthorized" });
 		return;
 	}
+	const [statsResult, rollingAvgResult] = await Promise.allSettled([
+		await db
+			.select()
+			.from(userStats)
+			.where(eq(userStats.userId, session.user.id)),
+		await rollingAvgWpmFromDB(session.user.id),
+	]);
 
-	const stats = await db
-		.select()
-		.from(userStats)
-		.where(eq(userStats.userId, session.user.id));
+	if (statsResult.status === "rejected") {
+		res.status(500).json({ error: "Database error" });
+		return;
+	}
+
+	const stats = statsResult.value;
 	if (stats.length === 0) {
 		res.status(404).json({ error: "stats not found" });
 		return;
 	}
+
 	const { userId: _, updatedAt: __, ...returnObj } = stats[0];
-	res.json(returnObj as UserStats);
+
+	res.json({
+		...returnObj,
+		rollingAvgWpm:
+			rollingAvgResult.status === "fulfilled"
+				? (rollingAvgResult.value ?? 0)
+				: 0,
+	} as UserStats);
 });
 
 export default userRouter;

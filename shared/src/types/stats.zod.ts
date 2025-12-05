@@ -8,6 +8,7 @@ export const UserStatsSchema = z.object({
 	avgAccuracy: z.number().nonnegative().default(0),
 	highestWpm: z.number().nonnegative().default(0),
 	totalTimeTyped: z.number().int().nonnegative().default(0),
+	rollingAvgWpm: z.number().nonnegative().default(0),
 });
 
 export type UserStats = z.infer<typeof UserStatsSchema>;

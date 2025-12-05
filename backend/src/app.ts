@@ -19,6 +19,9 @@ import userRouter from "./routes/user.router";
 import { initializeSocket } from "./socket";
 
 const app = express();
+
+app.set("trust proxy", 1);
+
 app.use(
 	cors({
 		origin: env.CORS_ORIGIN.split(" "),

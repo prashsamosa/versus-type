@@ -52,6 +52,7 @@ export async function updatePlayersInfoInDB(roomState: RoomState) {
 					avgWpm: sql`(((${userStats.avgWpm} * ${userStats.pvpMatches}) + ${player.wpm || 0}) / (${userStats.pvpMatches} + 1))`,
 					avgAccuracy: sql`(((${userStats.avgAccuracy} * ${userStats.pvpMatches}) + ${accuracy}) / (${userStats.pvpMatches} + 1))`,
 					highestWpm: sql`CASE WHEN ${player.wpm || 0} > ${userStats.highestWpm} THEN ${player.wpm || 0} ELSE ${userStats.highestWpm} END`,
+					totalTimeTyped: sql`${userStats.totalTimeTyped} + ${player.timeTyped ?? 0}`,
 				})
 				.where(eq(userStats.userId, userId))
 				.catch((err) => {

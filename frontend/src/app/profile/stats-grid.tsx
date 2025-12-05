@@ -3,6 +3,7 @@
 import {
 	Clock,
 	Gamepad2,
+	History,
 	Rocket,
 	Swords,
 	Target,
@@ -21,6 +22,7 @@ type StatsGridProps = {
 	totalMatches: number;
 	soloMatches: number;
 	timePlayed: number;
+	rollingAvgWpm: number;
 };
 
 export function StatsGrid({
@@ -32,6 +34,7 @@ export function StatsGrid({
 	totalMatches,
 	soloMatches,
 	timePlayed,
+	rollingAvgWpm,
 }: StatsGridProps) {
 	return (
 		<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -43,6 +46,12 @@ export function StatsGrid({
 				icon={Zap}
 				className="col-span-2 row-span-2"
 			/>
+			<StatCard
+				title="Avg (last 10 matches)"
+				value={rollingAvgWpm}
+				suffix="WPM"
+				icon={History}
+			/>
 
 			<StatCard
 				title="Highest WPM"
@@ -52,7 +61,6 @@ export function StatsGrid({
 			/>
 			<ProgressStatCard title="Accuracy" value={avgAccuracy} icon={Target} />
 			<StatCard title="PvP Wins" value={wins} icon={Trophy} />
-			<ProgressStatCard title="Win Rate" value={winRate} icon={TrendingUp} />
 
 			<StatCard title="Total Matches" value={totalMatches} icon={Swords} />
 			<StatCard title="Solo Sessions" value={soloMatches} icon={Gamepad2} />
@@ -62,8 +70,8 @@ export function StatsGrid({
 				value={timePlayed}
 				suffix="min"
 				icon={Clock}
-				className="col-span-2"
 			/>
+			<ProgressStatCard title="Win Rate" value={winRate} icon={TrendingUp} />
 		</div>
 	);
 }
