@@ -95,10 +95,12 @@ export default function Passage({
 			/>
 		);
 	}
+	const finalScrollOffset =
+		manualScrollOffset === null ? scrollOffset : manualScrollOffset;
 
 	return (
 		<div className="relative -mt-10">
-			<div className="absolute -top-4 left-0 z-20 flex justify-between items-center w-full pl-2 pr-4">
+			<div className="absolute -top-10 left-0 z-20 flex justify-between items-center w-full pl-2">
 				<PassageConfigPanel
 					config={config}
 					onConfigChange={(config) => {
@@ -111,13 +113,16 @@ export default function Passage({
 			</div>
 			<div
 				ref={containerRef}
-				className="max-w-3xl min-h-[13rem] overflow-hidden mx-auto transition px-4 py-10 bg-card/50 rounded-md relative cursor-text"
+				className="max-w-3xl min-h-[13rem] overflow-hidden mx-auto transition px-4 pt-2 pb-10 bg-card/50 rounded-md relative cursor-text"
 				onClick={() => {
 					hiddenInputRef.current?.focus();
 				}}
 			>
 				<div
-					className="absolute top-0 left-0 w-full h-14 z-10 select-none"
+					className={
+						"absolute top-0 left-0 w-full h-14 z-10 select-none transition " +
+						(finalScrollOffset ? "opacity-100" : "opacity-0")
+					}
 					style={{
 						background: `
       linear-gradient(
@@ -165,9 +170,7 @@ export default function Passage({
 					words={words}
 					typedText={typedText}
 					charRefs={charRefs}
-					scrollOffset={
-						manualScrollOffset === null ? scrollOffset : manualScrollOffset
-					}
+					scrollOffset={finalScrollOffset}
 				/>
 				<Cursor
 					x={cursorPos.x}
