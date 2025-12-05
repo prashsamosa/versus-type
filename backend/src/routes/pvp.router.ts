@@ -54,8 +54,6 @@ pvpRouter.post("/host", async (req, res) => {
 	while (roomStates[roomCode] || roomCode === "") roomCode = nanoid();
 	await initializeRoom(roomCode, toRoomSettings(settings));
 
-	console.log(`Room ${roomCode} created`);
-
 	res.json({ success: true, roomCode: roomCode });
 });
 
@@ -124,7 +122,9 @@ function startNukeTimer(roomCode: string) {
 		if (roomState && Object.keys(roomState.players).length === 0) {
 			roomState.status = "closed";
 			delete roomStates[roomCode];
-			console.log(`Matchmaking room ${roomCode} nuked due to inactivity`);
+			console.log(
+				`Matchmaking room ${roomCode} nuked coz no one joined in time`,
+			);
 		}
 	}, NUKE_TIME_MS);
 }

@@ -1,0 +1,40 @@
+import { SoloStatsSchema } from "@versus-type/shared";
+import { fromNodeHeaders } from "better-auth/node";
+import { sql } from "drizzle-orm";
+import { eq } from "drizzle-orm/sqlite-core/expressions";
+import { Router } from "express";
+import { auth } from "../auth/auth";
+import { db } from "../db";
+import { soloMatch, userStats } from "../db/schema";
+
+const soloRouter = Router();
+
+soloRouter.post("/", async (req, res) => {
+	const session = await auth.api.getSession({
+		headers: fromNodeHeaders(req.headers),
+	});
+	if (!session) {
+		res.status(401).json({ error: "Unauthorized" });
+		return;
+	}
+	const matchData = SoloStatsSchema.parse(req.body);
+	await db.transaction(async (tx) => {
+		await tx.insert(soloMatch).values({
+			userId: session.user.id,
+			...matchData,
+		});
+		await tx
+			.update(userStats)
+			.set({
+				soloMatches: sql`${userStats.soloMatches} + 1`,
+				avgWpm: sql`(((${userStats.avgWpm} * (${userStats.soloMatches} + ${userStats.pvpMatches})) + ${matchData.wpm}) / (${userStats.soloMatches} + ${userStats.pvpMatches} + 1))`,
+				avgAccuracy: sql`(((${userStats.avgAccuracy} * (${userStats.soloMatches} + ${userStats.pvpMatches})) + ${matchData.accuracy}) / (${userStats.soloMatches} + ${userStats.pvpMatches} + 1))`,
+				totalTimeTyped: sql`${userStats.totalTimeTyped} + ${matchData.time}`,
+				highestWpm: sql`CASE WHEN ${matchData.wpm} > ${userStats.highestWpm} THEN ${matchData.wpm} ELSE ${userStats.highestWpm} END`,
+			})
+			.where(eq(userStats.userId, session.user.id));
+	});
+	res.json({ message: "Successfully saved match data" });
+});
+
+export default soloRouter;

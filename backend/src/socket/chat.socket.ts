@@ -5,7 +5,6 @@ const MAX_CHAT_MESSAGES = 100;
 
 export function registerChatHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("chat:send-message", (data) => {
-		console.log("chat:send-message", data);
 		const username = socket.data.username;
 		if (!username) {
 			return socket.emit("chat:error", { message: "Username not set" });
@@ -31,7 +30,6 @@ export function emitNewMessage(
 	roomCode: string,
 	newMessage: ChatMessage,
 ) {
-	console.log("Emitting message to", roomCode, newMessage);
 	const roomState = roomStates[roomCode];
 	if (!roomState) {
 		console.warn(

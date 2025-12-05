@@ -14,7 +14,7 @@ import { auth } from "./auth/auth";
 import env from "./env";
 import errorHandler from "./middlewares/error.middleware";
 import { pvpRouter } from "./routes/pvp.router";
-import testRouter from "./routes/test.router";
+import soloRouter from "./routes/solo.router";
 import userRouter from "./routes/user.router";
 import { initializeSocket } from "./socket";
 
@@ -43,7 +43,7 @@ app.get("/ping", (_, res) => {
 app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use(express.json({ limit: "16kb" }));
 app.use("/api/user", userRouter);
-app.use("/api/test", testRouter);
+app.use("/api/solo", soloRouter);
 app.use("/api/pvp", pvpRouter);
 app.use(errorHandler);
 

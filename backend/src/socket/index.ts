@@ -10,14 +10,10 @@ export function initializeSocket(io: ioServer) {
 	startKeyBufController(io);
 
 	io.on("connection", (socket) => {
-		console.log("user connected: ", socket.id);
-		// registerMatchmakingHandlers(socket, io);
-		// registerInitHandlers(socket);
 		registerPvpSessionHandlers(io, socket);
 		registerChatHandlers(io, socket);
 
 		socket.on("disconnect", () => {
-			console.log("user disconnected", socket.id);
 			if (socket.data.userId) {
 				cleanupUserSocket(socket.data.userId);
 			}

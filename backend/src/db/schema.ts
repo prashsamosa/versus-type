@@ -148,8 +148,8 @@ export const matchParticipants = sqliteTable(
 	(table) => [index("idx_matchParticipants_userId").on(table.userId)],
 );
 
-export const tests = sqliteTable(
-	"tests",
+export const soloMatch = sqliteTable(
+	"soloMatch",
 	{
 		id: text()
 			.primaryKey()

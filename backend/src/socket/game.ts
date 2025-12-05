@@ -52,7 +52,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			console.warn(`Room state for ${roomCode} not found when joining`);
 			return callback({
 				success: false,
-				message: `Room ${roomCode} not found`,
+				message: `Room '${roomCode}' not found`,
 			});
 		}
 
@@ -218,9 +218,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 						if (!roomState.players[newHostUserId]) return;
 						roomState.players[newHostUserId].isHost = true;
 						disconnectedPlayer.isHost = false;
-						console.log(
-							`Player ${newHostSocket.id}(${newHostSocket.data.username}) is the new host of the room ${roomCode}`,
-						);
 						emitNewMessage(io, roomCode, {
 							username: "",
 							message: `${newHostSocket.data.username ?? "<Unknown>"} is the new host`,
@@ -354,7 +351,6 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			if (player.incorrectIdx === null && passage[player.typingIndex] === key) {
 				if (player.typingIndex >= passage.length - 1) {
 					// PLAYER FINISHED
-					console.log("PLAYER FINISHED");
 					lastCorrectIndex = player.typingIndex + 1;
 					player.finished = true;
 					player.wpm = calcWpm(player.typingIndex, player.startedAt);
@@ -522,7 +518,6 @@ function sendLobbyUpdate(io: ioServer, roomCode: string) {
 }
 
 async function endMatch(roomCode: string, io: ioServer) {
-	console.log(`Match in room ${roomCode} ended`);
 	const matchResults: MatchResults = {};
 	const roomState = roomStates[roomCode];
 	for (const userId in roomState.players) {
@@ -586,7 +581,6 @@ async function startMatch(
 	startWpmUpdates(io, roomCode);
 
 	for (const [userId] of Object.entries(roomState.players)) {
-		console.log("sending reset progress of", userId);
 		io.to(roomCode).emit("pvp:progress-update", {
 			userId,
 			typingIndex: 0,

@@ -16,7 +16,6 @@ userRouter.get("/", async (req, res) => {
 });
 
 userRouter.get("/stats", async (req, res) => {
-	console.log("Fetching user stats");
 	const session = await auth.api.getSession({
 		headers: fromNodeHeaders(req.headers),
 	});
@@ -68,7 +67,6 @@ export default userRouter;
 // });
 //
 // userRouter.get("/settings", async (req, res) => {
-// 	console.log("YOOOOO");
 // 	const session = await auth.api.getSession({
 // 		headers: fromNodeHeaders(req.headers),
 // 	});
