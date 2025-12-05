@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "./badge";
 
 const ANIMATION_DURATION = 400;
 
@@ -88,6 +89,7 @@ export function StatCard({
 	icon: Icon,
 	className = "",
 	size = "default",
+	tag,
 	children,
 }: {
 	title?: string;
@@ -96,6 +98,7 @@ export function StatCard({
 	icon?: LucideIcon;
 	className?: string;
 	size?: "default" | "large";
+	tag?: string;
 	children?: React.ReactNode;
 }) {
 	const animatedValue = useCountUp(value ?? 0);
@@ -113,6 +116,16 @@ export function StatCard({
 					}
 				>
 					<div className="space-y-1">
+						{tag ? (
+							<Badge
+								variant={"secondary"}
+								className={`text-lg font-medium text-primary ${
+									isLarge ? "text-sm" : "text-xs"
+								}`}
+							>
+								{tag}
+							</Badge>
+						) : null}
 						{title ? (
 							<p
 								className={`font-medium text-muted-foreground ${isLarge ? "text-xl" : "text-sm"}`}
@@ -139,8 +152,9 @@ export function StatCard({
 					</div>
 					{Icon ? (
 						<Button
+							disabled={true}
 							variant="secondary"
-							className={`text-primary hover:bg-secondary cursor-default hover:bg- group-hover:bg-primary/20 ${isLarge ? "p-10" : "p-5"}`}
+							className={`text-primary disabled:hover:bg-secondary disabled:opacity-100 cursor-default hover:bg- group-hover:bg-primary/20 ${isLarge ? "p-10" : "p-5"}`}
 						>
 							<Icon className={isLarge ? "size-16" : "size-6"} />
 						</Button>

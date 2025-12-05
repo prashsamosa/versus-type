@@ -22,23 +22,35 @@ soloRouter.post("/", async (req, res) => {
 		return res.status(400).json({ error: "Invalid match data" });
 	}
 	const matchData = result.data;
+	let isNewHighest = false;
 	await db.transaction(async (tx) => {
-		await tx.insert(soloMatch).values({
-			userId: session.user.id,
-			...matchData,
-		});
-		await tx
-			.update(userStats)
-			.set({
-				soloMatches: sql`${userStats.soloMatches} + 1`,
-				avgWpm: sql`(((${userStats.avgWpm} * (${userStats.soloMatches} + ${userStats.pvpMatches})) + ${matchData.wpm}) / (${userStats.soloMatches} + ${userStats.pvpMatches} + 1))`,
-				avgAccuracy: sql`(((${userStats.avgAccuracy} * (${userStats.soloMatches} + ${userStats.pvpMatches})) + ${matchData.accuracy}) / (${userStats.soloMatches} + ${userStats.pvpMatches} + 1))`,
-				totalTimeTyped: sql`${userStats.totalTimeTyped} + ${matchData.time}`,
-				highestWpm: sql`CASE WHEN ${matchData.wpm} > ${userStats.highestWpm} THEN ${matchData.wpm} ELSE ${userStats.highestWpm} END`,
-			})
-			.where(eq(userStats.userId, session.user.id));
+		const [currentStats] = await tx
+			.select({ highestWpm: userStats.highestWpm })
+			.from(userStats)
+			.where(eq(userStats.userId, session.user.id))
+			.limit(1);
+
+		const previousHighest = currentStats?.highestWpm || 0;
+		isNewHighest = previousHighest > 0 && matchData.wpm > previousHighest;
+
+		await Promise.all([
+			tx.insert(soloMatch).values({
+				userId: session.user.id,
+				...matchData,
+			}),
+			tx
+				.update(userStats)
+				.set({
+					soloMatches: sql`${userStats.soloMatches} + 1`,
+					avgWpm: sql`(((${userStats.avgWpm} * (${userStats.soloMatches} + ${userStats.pvpMatches})) + ${matchData.wpm}) / (${userStats.soloMatches} + ${userStats.pvpMatches} + 1))`,
+					avgAccuracy: sql`(((${userStats.avgAccuracy} * (${userStats.soloMatches} + ${userStats.pvpMatches})) + ${matchData.accuracy}) / (${userStats.soloMatches} + ${userStats.pvpMatches} + 1))`,
+					totalTimeTyped: sql`${userStats.totalTimeTyped} + ${matchData.time}`,
+					highestWpm: sql`CASE WHEN ${matchData.wpm} > ${userStats.highestWpm} THEN ${matchData.wpm} ELSE ${userStats.highestWpm} END`,
+				})
+				.where(eq(userStats.userId, session.user.id)),
+		]);
 	});
-	res.json({ message: "Successfully saved match data" });
+	res.json({ message: "Successfully saved match data", isNewHighest });
 });
 
 export default soloRouter;

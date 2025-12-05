@@ -8,6 +8,7 @@ import {
 import type { SoloStats } from "@versus-type/shared/index";
 import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { computeStats } from "@versus-type/shared/stats";
+import confetti from "canvas-confetti";
 import {
 	CheckCircle,
 	Clock,
@@ -19,7 +20,7 @@ import {
 	XCircle,
 	Zap,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProgressStatCard, StatCard } from "@/components/ui/stat-card";
@@ -50,10 +51,26 @@ export default function FinishedStats({
 	const errors = getErrorCount(accuracyState);
 	const [saving, setSaving] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const { data: session } = authClient.useSession();
+	const user = authClient.useSession().data?.user;
+	const hasSaved = useRef(false);
+	const [isNewHighest, setIsNewHighest] = useState(false);
+
+	function fireConfetti() {
+		confetti({
+			angle: 60,
+			spread: 55,
+			origin: { x: 0, y: 0.6 },
+		});
+		confetti({
+			angle: 120,
+			spread: 55,
+			origin: { x: 1, y: 0.6 },
+		});
+	}
 
 	useEffect(() => {
-		if (!session?.user) {
+		if (hasSaved.current) return;
+		if (!user) {
 			setSaving(false);
 			return;
 		}
@@ -61,6 +78,8 @@ export default function FinishedStats({
 			setSaving(false);
 			return;
 		}
+		setSaving(true);
+		hasSaved.current = true;
 		const finalStats: SoloStats = {
 			wpm: stats.wpm,
 			rawWpm: stats.rawWpm,
@@ -73,7 +92,11 @@ export default function FinishedStats({
 		};
 		async function callComplete() {
 			try {
-				await completeSoloMatch(finalStats);
+				const isNewHighest_ = await completeSoloMatch(finalStats);
+				setIsNewHighest(isNewHighest_);
+				if (isNewHighest_) {
+					fireConfetti();
+				}
 			} catch (err) {
 				console.error("Failed to save result", err);
 				setError(
@@ -85,7 +108,7 @@ export default function FinishedStats({
 			}
 		}
 		callComplete();
-	}, [session]);
+	}, [user]);
 
 	if (!stats) {
 		return (
@@ -116,6 +139,7 @@ export default function FinishedStats({
 					size="large"
 					icon={Zap}
 					className="col-span-2 row-span-2"
+					tag={isNewHighest ? "New Highest" : undefined}
 				/>
 				<ProgressStatCard
 					title="Accuracy"
@@ -162,19 +186,21 @@ export default function FinishedStats({
 				</StatCard>
 			</div>
 
-			{saving && (
-				<div className="text-center text-muted-foreground">
-					Saving result...
-				</div>
-			)}
-			{error && <div className="text-center text-destructive">{error}</div>}
-
 			<div className="flex justify-center pt-2">
 				<Button size="lg" onClick={onRestartAction}>
 					<RotateCcw className="size-4 mr-2" />
 					Restart
 				</Button>
 			</div>
+			<div
+				className={
+					"text-center text-muted-foreground " +
+					(saving ? "opacity-100" : "opacity-0")
+				}
+			>
+				Saving result...
+			</div>
+			{error && <div className="text-center text-destructive">{error}</div>}
 		</div>
 	);
 }
