@@ -17,7 +17,11 @@ soloRouter.post("/", async (req, res) => {
 		res.status(401).json({ error: "Unauthorized" });
 		return;
 	}
-	const matchData = SoloStatsSchema.parse(req.body);
+	const result = SoloStatsSchema.safeParse(req.body);
+	if (!result.success) {
+		return res.status(400).json({ error: "Invalid match data" });
+	}
+	const matchData = result.data;
 	await db.transaction(async (tx) => {
 		await tx.insert(soloMatch).values({
 			userId: session.user.id,
