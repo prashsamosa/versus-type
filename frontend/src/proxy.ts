@@ -17,7 +17,7 @@ export default async function proxy(req: NextRequest) {
 
 	// removing ts coz guests are also authenticated(anon)
 	// const guestOnlyPaths = ["/sign-in", "/sign-up"];
-	const protectedPaths = ["/dashboard", "/profile", "/settings"];
+	const protectedPaths = ["/dashboard", "/profile", "/settings", "/solo"];
 
 	// anon sign non-authenticated users
 	if (
