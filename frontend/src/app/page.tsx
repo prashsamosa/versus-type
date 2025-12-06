@@ -20,15 +20,15 @@ export default function Home() {
 
 	return (
 		<div className="min-h-screen flex items-center justify-center p-4">
-			<div className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-				<div className="space-y-3">
-					<div className="flex justify-center items-center gap-4">
-						<img src="./icon.svg" alt="Versus Type Logo" className="size-20" />
-						<h1 className="text-5xl font-bold tracking-tight">
+			<div className="text-center space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+				<div className="space-y-1">
+					<div className="flex justify-center items-center gap-6">
+						<img src="./icon.svg" alt="Logo" className="size-28" />
+						<h1 className="md:text-7xl text-5xl font-bold tracking-tight text-nowrap">
 							<span className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent">
 								Versus{" "}
 							</span>
-							<span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground/90 to-foreground/65">
+							<span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground/80 to-foreground/60">
 								Type
 							</span>
 						</h1>

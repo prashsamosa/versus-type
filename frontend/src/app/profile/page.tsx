@@ -33,24 +33,21 @@ export default function ProfilePage() {
 					</Link>
 				</Button>
 
-				<div className="flex flex-col items-center gap-4">
-					<div className="p-4 rounded-full bg-primary/10">
+				<div className="flex items-center justify-center gap-4">
+					<div className="p-4 relative rounded-full bg-primary/10">
 						<User className="size-12 text-primary" />
+						<div className="absolute">
+							<GuestMessage />
+						</div>
 					</div>
-					<div className="text-center space-y-2">
-						<h1 className="text-4xl font-bold tracking-tight">Your Profile</h1>
-						<GuestMessage />
-					</div>
-				</div>
-
-				<div className="max-w-md mx-auto w-full">
 					<UsernameForm />
 				</div>
+
+				<div className="max-w-md mx-auto w-full"></div>
 
 				<Separator />
 
 				<div className="space-y-6">
-					<h2 className="text-2xl font-semibold tracking-tight">Statistics</h2>
 					<Suspense fallback={<StatsSkeleton />}>
 						<StatsView />
 					</Suspense>
