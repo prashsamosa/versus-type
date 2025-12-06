@@ -56,7 +56,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			});
 		}
 
-		let isHost = roomState.type !== "single-match";
+		let isHost = roomState.type !== "matchmaking";
 		if (isHost && io.sockets.adapter.rooms.has(roomCode)) isHost = false;
 
 		socket.data.roomCode = roomCode;
@@ -81,7 +81,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		let oppTypingIndexes: Record<string, number> = {};
 		const playerCnt = activePlayersCount(roomCode);
 		let reconnected = false;
-		if (isHost || (roomState.type === "single-match" && playerCnt === 0)) {
+		if (isHost || (roomState.type === "matchmaking" && playerCnt === 0)) {
 			roomState.passage = await generatePassage(roomState.passageConfig);
 		} else {
 			oppTypingIndexes = roomState.isMatchStarted
@@ -153,7 +153,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 
 		if (
 			playerCnt === 1 &&
-			roomState.type === "single-match" &&
+			roomState.type === "matchmaking" &&
 			roomState.status === "waiting"
 		) {
 			// second player joined, start waiting countdown
@@ -227,7 +227,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				}
 				sendWpmUpdate(io, roomCode);
 				if (
-					roomState.type === "single-match" &&
+					roomState.type === "matchmaking" &&
 					roomState.status === "waiting"
 				) {
 					delete roomState.players[socket.data.userId];
@@ -236,7 +236,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				}
 
 				if (
-					roomState.type === "single-match" &&
+					roomState.type === "matchmaking" &&
 					roomState.status === "waiting" &&
 					roomState.stopWaitingCountdown &&
 					activePlayersCount(roomCode) < 2

@@ -48,9 +48,9 @@ export function findBestMatch(
 		const activeCount = activePlayersCount(roomCode);
 		// filter
 		if (
-			room.type !== "single-match" ||
+			room.type !== "matchmaking" ||
 			activeCount >= room.maxPlayers ||
-			(room.type === "single-match" && room.status !== "waiting")
+			(room.type === "matchmaking" && room.status !== "waiting")
 		) {
 			continue;
 		}

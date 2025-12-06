@@ -38,7 +38,7 @@ export type RoomInfo = {
 	avgWpm?: number;
 };
 
-export type RoomType = "public" | "private" | "single-match";
+export type RoomType = "public" | "private" | "matchmaking";
 
 export type JoinResponse = {
 	success: boolean;

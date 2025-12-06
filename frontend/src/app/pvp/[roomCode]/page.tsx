@@ -80,7 +80,7 @@ export default function PvpPage() {
 	}, []);
 
 	const waitingForPlayers =
-		roomType === "single-match" && !matchStarted && !matchEnded
+		roomType === "matchmaking" && !matchStarted && !matchEnded
 			? Object.keys(players).length < 2 || !!waitingCountdown
 			: false;
 
@@ -130,7 +130,7 @@ export default function PvpPage() {
 	return (
 		<div className="flex flex-col items-center justify-start min-h-screen">
 			<Header>
-				{roomType === "single-match"
+				{roomType === "matchmaking"
 					? "Quick Play"
 					: roomType === "public"
 						? "Public Room"
@@ -157,7 +157,7 @@ export default function PvpPage() {
 					<Button variant="secondary" onClick={handleExit}>
 						Exit
 					</Button>
-					{roomType !== "single-match" &&
+					{roomType !== "matchmaking" &&
 					isHost &&
 					!countingDown &&
 					!matchStarted ? (
@@ -169,7 +169,7 @@ export default function PvpPage() {
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
 				<div className="pt-16 relative">
-					{players[myUserId ?? ""]?.finished && roomType === "single-match" ? (
+					{players[myUserId ?? ""]?.finished && roomType === "matchmaking" ? (
 						<div className="relative z-10 text-center -mb-10">
 							<QuickPlayButton label="Find New Match" />
 						</div>

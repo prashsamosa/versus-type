@@ -106,7 +106,7 @@ pvpRouter.get("/matchmake", async (req, res) => {
 			newRoomCode = nanoid();
 
 		const settings: RoomSettings = {
-			type: "single-match",
+			type: "matchmaking",
 			maxPlayers: MAX_MATCHMAKING_PLAYERS,
 		};
 		await initializeRoom(newRoomCode, settings, MATCHMAKING_PASSAGE_CONFIG);
