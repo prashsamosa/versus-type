@@ -14,7 +14,7 @@ export type TypingStats = {
 	time: number;
 };
 
-export function fmtTime(n: number) {
+export function round2Decimal(n: number) {
 	return Math.round(n * 100) / 100;
 }
 
@@ -69,11 +69,11 @@ export function computeStats(
 	const net = (chars.correctChars * (60 / secs)) / 5;
 
 	return {
-		wpm: Number.isFinite(net) ? fmtTime(net) : 0,
-		rawWpm: Number.isFinite(gross) ? fmtTime(gross) : 0,
+		wpm: Number.isFinite(net) ? round2Decimal(net) : 0,
+		rawWpm: Number.isFinite(gross) ? round2Decimal(gross) : 0,
 		correctChars: chars.correctChars,
 		incorrectChars: chars.incorrectChars,
 		allChars: inputString.length,
-		time: fmtTime(secs),
+		time: round2Decimal(secs),
 	};
 }

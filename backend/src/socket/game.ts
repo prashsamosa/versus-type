@@ -356,7 +356,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					player.wpm = calcWpm(player.typingIndex, player.startedAt);
 					player.accuracy = getAccuracy(player.accState);
 					sendWpmUpdate(io, roomCode);
-					player.timeTyped = Date.now() - player.startedAt;
+					player.timeTyped = Math.round((Date.now() - player.startedAt) / 1000);
 
 					newRollingAvgWpmFromDB(socket.data.userId, player.wpm).then(
 						(newAvg) => {
