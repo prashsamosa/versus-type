@@ -15,6 +15,9 @@ const robotoMono = Roboto_Mono({
 export const metadata: Metadata = {
 	title: "Versus Type",
 	description: "Race your typing skills against others in real-time",
+	icons: {
+		icon: "/iconOpaque.svg",
+	},
 };
 
 export default function RootLayout({

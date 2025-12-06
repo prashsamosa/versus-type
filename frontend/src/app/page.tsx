@@ -1,10 +1,9 @@
 "use client";
 
-import { Globe, Keyboard, LogIn, User, UserPlus } from "lucide-react";
+import { Globe, LogIn, User, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { authClient } from "@/lib/auth-client";
 import { BrowseModal } from "./browse-modal";
 import { HostModal } from "./host-modal";
@@ -23,14 +22,17 @@ export default function Home() {
 		<div className="min-h-screen flex items-center justify-center p-4">
 			<div className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
 				<div className="space-y-3">
-					<div className="flex justify-center">
-						<div className="p-3 rounded-xl bg-primary/10 ring-1 ring-primary/20">
-							<Keyboard className="size-8 text-primary" />
-						</div>
+					<div className="flex justify-center items-center gap-4">
+						<img src="./icon.svg" alt="Versus Type Logo" className="size-20" />
+						<h1 className="text-5xl font-bold tracking-tight">
+							<span className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent">
+								Versus{" "}
+							</span>
+							<span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground/90 to-foreground/65">
+								Type
+							</span>
+						</h1>
 					</div>
-					<h1 className="text-5xl font-bold tracking-tight bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent">
-						Versus Type
-					</h1>
 					<p className="text-muted-foreground">
 						Race your friends. Prove you're the fastest.
 					</p>
@@ -72,9 +74,7 @@ export default function Home() {
 					</div>
 				</div>
 
-				<Separator className="w-32 mx-auto" />
-
-				<div className="flex gap-3 justify-center flex-wrap">
+				<div className="flex gap-3 justify-center flex-wrap mt-4 pt-4 px-4 bg-gradient-to-b from-card to-40% to-background border-t-2">
 					<Button variant="ghost" size="sm" asChild>
 						<Link href="/profile">
 							<User className="size-4" />
