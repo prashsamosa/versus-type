@@ -1,22 +1,14 @@
 import { createServer } from "node:http";
-import type {
-	ClientToServerEvents,
-	InterServerEvents,
-	ServerToClientEvents,
-	SocketData,
-} from "@versus-type/shared";
 import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
-import { Server } from "socket.io";
 import { auth } from "./auth/auth";
 import env from "./env";
 import errorHandler from "./middlewares/error.middleware";
 import { pvpRouter } from "./routes/pvp.router";
 import soloRouter from "./routes/solo.router";
 import userRouter from "./routes/user.router";
-import { initializeSocket } from "./socket";
 
 const app = express();
 
@@ -74,17 +66,5 @@ app.use("/api/pvp", pvpRouter);
 app.use(errorHandler);
 
 export const httpServer = createServer(app);
-export const io = new Server<
-	ClientToServerEvents,
-	ServerToClientEvents,
-	InterServerEvents,
-	SocketData
->(httpServer, {
-	cors: { origin: env.CORS_ORIGIN.split(" "), credentials: true },
-	allowEIO3: true,
-	cookie: { name: "io", path: "/", httpOnly: true, sameSite: false },
-});
-
-initializeSocket(io);
 
 export default app;

@@ -7,7 +7,6 @@ import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { fromNodeHeaders } from "better-auth/node";
 import { Router } from "express";
 import { customAlphabet } from "nanoid";
-import { io } from "@/app";
 import { auth } from "@/auth/auth";
 import { findBestMatch } from "@/matchmaking";
 import { rollingAvgWpmFromDB } from "@/socket/dbservice";
@@ -17,6 +16,7 @@ import {
 	type RoomSettings,
 	roomStates,
 } from "@/socket/store";
+import { io } from "@/ws-server";
 
 const DEFAULT_WPM = 60;
 const MATCH_CODE_LENGTH = 6;
