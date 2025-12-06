@@ -4,7 +4,15 @@ import { useState } from "react";
 import { ErrorTooltipBtn } from "@/components/ui/error-tooltip-btn";
 import { getQuickPlayRoom } from "@/services/pvp.client";
 
-export function QuickPlayButton({ label = "Quick Play" }: { label?: string }) {
+export function QuickPlayButton({
+	label = "Quick Play",
+	className,
+	icon,
+}: {
+	label?: string;
+	className?: string;
+	icon?: React.ReactNode;
+}) {
 	const router = useRouter();
 	const [quickPlayLoading, setQuickPlayLoading] = useState(false);
 	const [quickPlayError, setQuickPlayError] = useState<string | null>(null);
@@ -30,11 +38,12 @@ export function QuickPlayButton({ label = "Quick Play" }: { label?: string }) {
 			error={quickPlayError}
 			setError={setQuickPlayError}
 			disabled={quickPlayLoading}
+			className={className}
 		>
 			{quickPlayLoading ? (
 				<Loader2 className="size-4 animate-spin" />
 			) : (
-				<Zap className="size-4" />
+				icon || <Zap className="size-4" />
 			)}
 			{label}
 		</ErrorTooltipBtn>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, LogIn, User, UserPlus } from "lucide-react";
+import { Globe, LogIn, User, UserPlus, Zap } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -39,13 +39,12 @@ export default function Home() {
 				</div>
 
 				<div className="flex flex-col gap-3 w-64 mx-auto">
-					<QuickPlayButton />
-					<Button size="lg" variant="secondary" asChild>
-						<Link href="/solo">
-							<User className="size-4" />
-							Solo Practice
-						</Link>
-					</Button>
+					<div className="h-14">
+						<QuickPlayButton
+							className="h-full w-full text-xl"
+							icon={<Zap className="size-5" />}
+						/>
+					</div>
 					<Button
 						size="lg"
 						variant="secondary"
@@ -54,7 +53,7 @@ export default function Home() {
 						<Globe className="size-4" />
 						Browse Rooms
 					</Button>
-					<div className="flex gap-3">
+					<div className="flex gap-3 mb-3">
 						<Button
 							className="flex-1"
 							size="lg"
@@ -72,6 +71,12 @@ export default function Home() {
 							Join
 						</Button>
 					</div>
+					<Button size="lg" variant="secondary" asChild>
+						<Link href="/solo">
+							<User className="size-4" />
+							Solo Practice
+						</Link>
+					</Button>
 				</div>
 
 				<div className="flex gap-3 justify-center flex-wrap mt-4 pt-4 px-4 bg-gradient-to-b from-card to-40% to-background border-t-2">
