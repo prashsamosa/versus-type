@@ -41,7 +41,9 @@ A real-time typing app where you can practice solo or battle friends/randoms in 
    pnpm install
    ```
 
-3. Set up environment variables. Copy [backend/.env.example](backend/.env.example) to `backend/.env` and configure DB and Auth. In frontend, `NEXT_PUBLIC_SERVER_RUL` in should point to your backend server (default: `http://localhost:4000`).
+3. Set up environment variables.
+  - Copy [backend/.env.example](backend/.env.example) to `backend/.env` and configure DB and Auth.
+  - Copy [frontend/.env.example](frontend/.env.example) to `frontend/.env` and configure the WS and HTTP server URLs.
 
 4. Run the database migrations:
 
