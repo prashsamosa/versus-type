@@ -16,7 +16,7 @@ export async function StatsView() {
 			winRate={winRate}
 			totalMatches={totalMatches}
 			soloMatches={data.soloMatches}
-			timePlayed={Math.round(data.totalTimeTyped / 60)}
+			timeTyped={Math.round(data.totalTimeTyped / 60)}
 			rollingAvgWpm={Number(data.rollingAvgWpm.toFixed(0))}
 		/>
 	);

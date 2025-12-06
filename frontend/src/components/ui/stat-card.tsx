@@ -82,6 +82,15 @@ export function CircularProgress({
 	);
 }
 
+function fmtTime(mins: number) {
+	mins = Math.round(mins);
+	const hours = Math.floor(mins / 60);
+	if (hours > 0) {
+		return `${hours}h ${mins % 60}m`;
+	}
+	return `${mins}m`;
+}
+
 export function StatCard({
 	title,
 	value,
@@ -91,6 +100,7 @@ export function StatCard({
 	size = "default",
 	tag,
 	children,
+	minutes,
 }: {
 	title?: string;
 	value?: number;
@@ -100,6 +110,7 @@ export function StatCard({
 	size?: "default" | "large";
 	tag?: string;
 	children?: React.ReactNode;
+	minutes?: boolean;
 }) {
 	const animatedValue = useCountUp(value ?? 0);
 	const isLarge = size === "large";
@@ -139,7 +150,9 @@ export function StatCard({
 							<p
 								className={`font-bold tracking-tight ${isLarge ? "text-8xl" : "text-3xl"}`}
 							>
-								{Math.round(animatedValue).toLocaleString()}
+								{minutes
+									? fmtTime(animatedValue)
+									: Math.round(animatedValue).toLocaleString()}
 								{suffix && (
 									<span
 										className={`font-medium text-muted-foreground ml-1 ${isLarge ? "text-3xl" : "text-lg"}`}

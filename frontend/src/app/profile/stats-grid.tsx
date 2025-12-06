@@ -21,7 +21,7 @@ type StatsGridProps = {
 	winRate: number;
 	totalMatches: number;
 	soloMatches: number;
-	timePlayed: number;
+	timeTyped: number;
 	rollingAvgWpm: number;
 };
 
@@ -33,7 +33,7 @@ export function StatsGrid({
 	winRate,
 	totalMatches,
 	soloMatches,
-	timePlayed,
+	timeTyped,
 	rollingAvgWpm,
 }: StatsGridProps) {
 	return (
@@ -65,12 +65,7 @@ export function StatsGrid({
 			<StatCard title="Total Matches" value={totalMatches} icon={Swords} />
 			<StatCard title="Solo Sessions" value={soloMatches} icon={Gamepad2} />
 
-			<StatCard
-				title="Time Played"
-				value={timePlayed}
-				suffix="min"
-				icon={Clock}
-			/>
+			<StatCard title="Time Typed" value={timeTyped} icon={Clock} minutes />
 			<ProgressStatCard title="Win Rate" value={winRate} icon={TrendingUp} />
 		</div>
 	);
