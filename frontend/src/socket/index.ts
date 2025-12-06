@@ -4,7 +4,7 @@ import type {
 	ServerToClientEvents,
 } from "@versus-type/shared";
 import { io, type Socket } from "socket.io-client";
-import { SERVER_URL } from "@/const";
+import { WS_URL } from "@/const";
 
 export let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null =
 	null;
@@ -13,7 +13,7 @@ export async function setupSocketAndJoin(
 	roomCode: string,
 ): Promise<JoinResponse> {
 	return new Promise((resolve, reject) => {
-		socket = io(SERVER_URL, { withCredentials: true });
+		socket = io(WS_URL, { withCredentials: true });
 
 		socket.on("connect", async () => {
 			try {
