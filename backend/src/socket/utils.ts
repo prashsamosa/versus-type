@@ -17,15 +17,24 @@ export function getRandomColor(roomCode: string) {
 		"#818CF8",
 		"#14B8A6",
 	];
+	const colors2 = ["#F43F5E", "#FF00FF", "#FF4500", "#FFFF00"];
 	let notUsed = colors.slice();
+	let notUsed2 = colors2.slice();
 	if (roomStates[roomCode]) {
 		for (const userId in roomStates[roomCode].players) {
 			notUsed = notUsed.filter(
 				(c) => c !== roomStates[roomCode].players[userId].color,
 			);
+			notUsed2 = notUsed2.filter(
+				(c) => c !== roomStates[roomCode].players[userId].color,
+			);
 		}
 		if (notUsed.length === 0) {
-			return colors[Math.floor(Math.random() * colors.length)];
+			if (notUsed2.length === 0) {
+				notUsed = colors.slice();
+			} else {
+				notUsed = notUsed2;
+			}
 		}
 	}
 	return notUsed[Math.floor(Math.random() * notUsed.length)];
