@@ -46,14 +46,12 @@ async function authMiddleware(
 	next();
 }
 
-export const apiLimiter = rateLimit({
+const apiLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
 	max: 50,
 	standardHeaders: true,
-	legacyHeaders: false,
 	message: { error: "Too many requests, chill out" },
 	keyGenerator: (req, res) => {
-		console.log(res.locals.session?.user.id);
 		return res.locals.session?.user.id || ipKeyGenerator(req.ip || "unknown");
 	},
 });
@@ -65,11 +63,10 @@ app.get("/ping", (_, res) => {
 app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use(express.json({ limit: "16kb" }));
 
-app.use("/api/user", authMiddleware);
-app.use("/api/solo", authMiddleware);
-app.use("/api/pvp/host", authMiddleware);
-
-app.use("/api/", apiLimiter);
+app.use("/api/user", authMiddleware, apiLimiter);
+app.use("/api/solo", authMiddleware, apiLimiter);
+app.use("/api/pvp/host", authMiddleware, apiLimiter);
+app.use("/api/pvp/rooms", apiLimiter);
 
 app.use("/api/user", userRouter);
 app.use("/api/solo", soloRouter);
