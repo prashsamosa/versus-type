@@ -19,4 +19,10 @@ export const auth = betterAuth({
 	hooks: {
 		after: afterSignUpHook,
 	},
+	advanced: {
+		crossSubDomainCookies: {
+			enabled: true,
+			domain: env.NODE_ENV === "production" ? ".sahaj.dev" : undefined,
+		},
+	},
 });
