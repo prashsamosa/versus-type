@@ -2,9 +2,12 @@
 	"name": "versus-type-backend",
 	"version": "1.0.0",
 	"description": "",
+	"type": "module",
 	"main": "src/index.ts",
 	"scripts": {
 		"dev": "tsx --watch .",
+		"build": "tsup",
+		"start": "node --env-file=.env ./dist/index.js",
 		"db:generate": "drizzle-kit generate --out=./src/db/migrations",
 		"db:push": "drizzle-kit push",
 		"db:migrate": "drizzle-kit migrate",
@@ -35,6 +38,7 @@
 	},
 	"devDependencies": {
 		"drizzle-kit": "^0.31.4",
+		"tsup": "^8.5.1",
 		"tsx": "^4.20.5",
 		"typescript": "^5.9.2"
 	}

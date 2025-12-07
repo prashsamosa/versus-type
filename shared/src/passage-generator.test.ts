@@ -1,30 +1,40 @@
 import { describe, expect, it } from "vitest";
-import { generatePassage } from "./passage-generator";
+import { type GeneratorConfig, generatePassage } from "./passage-generator";
+
+const config: GeneratorConfig = {
+	language: "English 200",
+	numbers: false,
+	punctuation: true,
+	wordCount: 50,
+};
 
 describe("await generateWords", async () => {
 	describe("basic generation", async () => {
-		it("generates default 50 words", async () => {
-			const words = (await generatePassage()).split(" ");
-			expect(words).toHaveLength(50);
-		});
-
 		it("generates specified word count", async () => {
-			const words = (await generatePassage({ wordCount: 20 })).split(" ");
+			const words = (await generatePassage({ ...config, wordCount: 20 })).split(
+				" ",
+			);
 			expect(words).toHaveLength(20);
 		});
 
 		it("generates 0 word", async () => {
-			const words = (await generatePassage({ wordCount: 0 })).split(" ");
+			const words = (await generatePassage({ ...config, wordCount: 0 })).split(
+				" ",
+			);
 			expect(words[0]).toBe("");
 		});
 
 		it("generates -5 words as 0", async () => {
-			const words = (await generatePassage({ wordCount: -5 })).split(" ");
+			const words = (await generatePassage({ ...config, wordCount: -5 })).split(
+				" ",
+			);
 			expect(words[0]).toBe("");
 		});
 
 		it("generates 200 words", async () => {
-			const words = (await generatePassage({ wordCount: 200 })).split(" ");
+			const words = (
+				await generatePassage({ ...config, wordCount: 200 })
+			).split(" ");
 			expect(words).toHaveLength(200);
 		});
 	});
@@ -32,7 +42,7 @@ describe("await generateWords", async () => {
 	describe("capitalization with punctuation", async () => {
 		it("capitalizes first word", async () => {
 			const words = (
-				await generatePassage({ wordCount: 100, punctuation: true })
+				await generatePassage({ ...config, wordCount: 100, punctuation: true })
 			).split(" ");
 			const firstWord = words[0] as string;
 			const firstChar = firstWord[0];
@@ -41,7 +51,7 @@ describe("await generateWords", async () => {
 
 		it("does not capitalize when punctuation is off", async () => {
 			const words = (
-				await generatePassage({ wordCount: 50, punctuation: false })
+				await generatePassage({ ...config, wordCount: 50, punctuation: false })
 			).split(" ");
 			const hasCapital = words.some((word) => /^[A-Z]/.test(word as string));
 			expect(hasCapital).toBe(false);
@@ -49,7 +59,7 @@ describe("await generateWords", async () => {
 
 		it("generates words without punctuation when disabled", async () => {
 			const words = (
-				await generatePassage({ wordCount: 50, punctuation: false })
+				await generatePassage({ ...config, wordCount: 50, punctuation: false })
 			).split(" ");
 			const hasPunctuation = words.some((word) =>
 				/[.,?!]/.test(word as string),
@@ -62,6 +72,7 @@ describe("await generateWords", async () => {
 		it("includes numbers when enabled", async () => {
 			const words = (
 				await generatePassage({
+					...config,
 					wordCount: 100,
 					numbers: true,
 					punctuation: false,
@@ -73,6 +84,7 @@ describe("await generateWords", async () => {
 		it("excludes numbers when disabled", async () => {
 			const words = (
 				await generatePassage({
+					...config,
 					wordCount: 50,
 					numbers: false,
 					punctuation: false,
@@ -85,6 +97,7 @@ describe("await generateWords", async () => {
 		it("generated numbers are within range 0-999", async () => {
 			const words = (
 				await generatePassage({
+					...config,
 					wordCount: 200,
 					numbers: true,
 					punctuation: false,
@@ -104,6 +117,7 @@ describe("await generateWords", async () => {
 		it("adds punctuation to some words", async () => {
 			const words = (
 				await generatePassage({
+					...config,
 					wordCount: 100,
 					punctuation: true,
 					numbers: false,
@@ -117,7 +131,7 @@ describe("await generateWords", async () => {
 
 		it("does not add punctuation to last word", async () => {
 			const words = (
-				await generatePassage({ wordCount: 50, punctuation: true })
+				await generatePassage({ ...config, wordCount: 50, punctuation: true })
 			).split(" ");
 			const lastWord = words[words.length - 1] as string;
 			expect(lastWord).not.toMatch(/[.,?!]$/);
@@ -126,6 +140,7 @@ describe("await generateWords", async () => {
 		it("uses valid punctuation marks", async () => {
 			const words = (
 				await generatePassage({
+					...config,
 					wordCount: 100,
 					punctuation: true,
 					numbers: false,
@@ -146,6 +161,7 @@ describe("await generateWords", async () => {
 		it("works with all features enabled", async () => {
 			const words = (
 				await generatePassage({
+					...config,
 					wordCount: 50,
 					punctuation: true,
 					numbers: true,
@@ -160,6 +176,7 @@ describe("await generateWords", async () => {
 		it("works with all features disabled", async () => {
 			const words = (
 				await generatePassage({
+					...config,
 					wordCount: 30,
 					punctuation: false,
 					numbers: false,
@@ -174,11 +191,6 @@ describe("await generateWords", async () => {
 
 			expect(hasPunctuation).toBe(false);
 			expect(hasNumber).toBe(false);
-		});
-
-		it("works with empty config object", async () => {
-			const words = (await generatePassage({})).split(" ");
-			expect(words).toHaveLength(50);
 		});
 	});
 });
