@@ -4,6 +4,7 @@ import { authClient } from "@/lib/auth-client";
 export function useEnsureSignedIn(trigger: boolean = true) {
 	const { data: session, isPending } = authClient.useSession();
 	const [authResolved, setAuthResolved] = useState(false);
+	const [error, setError] = useState<Error | null>(null);
 	const signingIn = useRef(false);
 
 	useEffect(() => {
@@ -16,16 +17,24 @@ export function useEnsureSignedIn(trigger: boolean = true) {
 
 		if (!session?.user && !signingIn.current) {
 			signingIn.current = true;
-			authClient.signIn.anonymous().then((result) => {
-				if (result.data?.user) setAuthResolved(true);
-			});
-			return;
+			authClient.signIn
+				.anonymous()
+				.then((result) => {
+					if (result.data?.user) setAuthResolved(true);
+				})
+				.catch((err) => {
+					setError(err);
+				});
 		}
 
-		if (session?.user?.isAnonymous) setAuthResolved(true);
+		if (session?.user?.isAnonymous) {
+			setAuthResolved(true);
+		}
+		console.log(error);
 	}, [session, isPending]);
 
 	return {
+		error,
 		authResolved,
 	};
 }

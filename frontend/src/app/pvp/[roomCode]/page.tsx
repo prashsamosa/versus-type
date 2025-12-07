@@ -20,15 +20,15 @@ import { authClient } from "@/lib/auth-client";
 import { socket } from "@/socket";
 import { Banner } from "./banner";
 import Chat from "./Chat";
+import { ErrorPage } from "./ErrorPage";
 import { usePvpSession } from "./hooks/usePvpSession";
 import { Lobby } from "./Lobby";
 import { PvpGame } from "./PvpGame";
-import SocketErrorPage from "./SocketErrorPage";
 import { usePvpStore } from "./store";
 import { UsernameForm } from "./UsernameForm";
 
 export default function PvpPage() {
-	const { data, isPending } = authClient.useSession();
+	const { data, isPending, error: authError } = authClient.useSession();
 	let username = data?.user.name.trim() || "";
 	if (username === "Anonymous") username = "";
 	const { loading, socketError, roomCode, latency, disconnected } =
@@ -101,8 +101,15 @@ export default function PvpPage() {
 			</div>
 		);
 	}
-	if (socketError) {
-		return <SocketErrorPage message={socketError} />;
+	if (socketError || authError) {
+		return (
+			<ErrorPage
+				title={socketError ? "Connection error" : "Authentication error"}
+				message={
+					socketError || authError?.message || "An unknown error occurred."
+				}
+			/>
+		);
 	}
 
 	function copyMatchLink() {

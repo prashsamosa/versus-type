@@ -33,12 +33,17 @@ export function UsernameForm() {
 		}
 		authClient
 			.updateUser({ name: username })
-			.catch((err) => {
-				setError(err.message);
+			.catch((err) => setError(err.message))
+			.then((data) => {
+				if (data?.error) {
+					setError(
+						data.error.message
+							? "Error: " + data.error.message
+							: "Unexpected error occurred",
+					);
+				}
 			})
-			.finally(() => {
-				setLoading(false);
-			});
+			.finally(() => setLoading(false));
 	}
 
 	return (
