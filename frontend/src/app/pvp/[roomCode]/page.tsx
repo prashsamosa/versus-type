@@ -84,6 +84,21 @@ export default function PvpPage() {
 			? Object.keys(players).length < 2 || !!waitingCountdown
 			: false;
 
+	if (!data && !isPending) {
+		window.location.href = "/anonymous-sign?from=" + window.location.pathname;
+		return null;
+	}
+
+	if (socketError || authError) {
+		return (
+			<ErrorPage
+				title={socketError ? "Connection error" : "Authentication error"}
+				message={
+					socketError || authError?.message || "An unknown error occurred."
+				}
+			/>
+		);
+	}
 	if (!username && !isPending) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-background">
@@ -99,16 +114,6 @@ export default function PvpPage() {
 				<div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
 				<p className="text-xl text-muted-foreground">Connecting to match</p>
 			</div>
-		);
-	}
-	if (socketError || authError) {
-		return (
-			<ErrorPage
-				title={socketError ? "Connection error" : "Authentication error"}
-				message={
-					socketError || authError?.message || "An unknown error occurred."
-				}
-			/>
 		);
 	}
 

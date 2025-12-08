@@ -36,7 +36,9 @@ export async function getUserStats(): Promise<UserStats> {
 		if (!response.ok) {
 			const errMsg =
 				(await response.json().catch(() => ({})))?.error || response.statusText;
-			throw new Error(`Error fetching user stats: ${errMsg}`);
+			throw new Error(`Error fetching user stats: ${errMsg}`, {
+				cause: response.status,
+			});
 		}
 		return await response.json();
 	} catch (error) {
