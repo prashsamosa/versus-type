@@ -1,5 +1,11 @@
 import { roomStates } from "./store";
 
+const colors = [
+	["#60A5FA", "#34D399", "#FBBF24", "#A78BFA", "#F87171"],
+	["#73e9f7", "#acf80c", "#f466e5"],
+	["#F43F5E", "#FF00FF", "#FF4500", "#FFFF00"],
+];
+
 export function calcWpm(typingIndex: number, startedAt?: number): number {
 	if (!startedAt) return 0;
 	const elapsedTime = Date.now() - startedAt;
@@ -7,35 +13,24 @@ export function calcWpm(typingIndex: number, startedAt?: number): number {
 }
 
 export function getRandomColor(roomCode: string) {
-	const colors = [
-		"#60A5FA",
-		"#34D399",
-		"#FBBF24",
-		"#A78BFA",
-		"#F472B6",
-		"#F87171",
-		"#818CF8",
-		"#14B8A6",
-	];
-	const colors2 = ["#F43F5E", "#FF00FF", "#FF4500", "#FFFF00"];
-	let notUsed = colors.slice();
-	let notUsed2 = colors2.slice();
-	if (roomStates[roomCode]) {
-		for (const userId in roomStates[roomCode].players) {
-			notUsed = notUsed.filter(
-				(c) => c !== roomStates[roomCode].players[userId].color,
-			);
-			notUsed2 = notUsed2.filter(
-				(c) => c !== roomStates[roomCode].players[userId].color,
-			);
-		}
-		if (notUsed.length === 0) {
-			if (notUsed2.length === 0) {
-				notUsed = colors.slice();
-			} else {
-				notUsed = notUsed2;
-			}
+	const usedColors = new Set(
+		Object.values(roomStates[roomCode]?.players || {}).map((p) => p.color),
+	);
+
+	for (const colorSet of colors) {
+		const availableColors = colorSet.filter((c) => !usedColors.has(c));
+		if (availableColors.length > 0) {
+			return availableColors[
+				Math.floor(Math.random() * availableColors.length)
+			];
 		}
 	}
-	return notUsed[Math.floor(Math.random() * notUsed.length)];
+
+	for (const colorSet of colors) {
+		if (colorSet.length > 0) {
+			return colorSet[Math.floor(Math.random() * colorSet.length)];
+		}
+	}
+
+	return "#FFFFFF";
 }
