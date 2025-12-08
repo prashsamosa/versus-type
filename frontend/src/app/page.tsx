@@ -23,7 +23,7 @@ export default function Home() {
 			<div className="text-center space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
 				<div className="space-y-1">
 					<div className="flex justify-center items-center gap-6">
-						<img src="./icon.svg" alt="Logo" className="size-28" />
+						<img src="/icon.svg" alt="Logo" className="size-28" />
 						<h1 className="md:text-7xl text-5xl font-bold tracking-tight text-nowrap">
 							<span className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent">
 								Versus{" "}
@@ -79,7 +79,7 @@ export default function Home() {
 					</Button>
 				</div>
 
-				<div className="flex gap-3 justify-between flex-wrap mt-4 pt-4 px-4 bg-gradient-to-b from-card to-40% to-background border-t-2">
+				<div className="flex gap-3 justify-between flex-wrap mt-18 pt-3 px-4 bg-gradient-to-b from-card to-40% to-background border-t-2">
 					<Button variant="ghost" size="sm" asChild>
 						<Link href="/profile">
 							<User className="size-4" />

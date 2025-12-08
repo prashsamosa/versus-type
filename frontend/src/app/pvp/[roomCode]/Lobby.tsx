@@ -17,13 +17,26 @@ export function Lobby() {
 	const myUserId = authClient.useSession().data?.user.id;
 	const matchEnded = usePvpStore((s) => s.matchEnded);
 	const countingDown = usePvpStore((s) => s.countingDown);
+	const roomType = usePvpStore((s) => s.roomType);
 	const playerCnt = Object.values(players).filter(
 		(player) => !player.disconnected,
 	).length;
+	const status = matchStarted
+		? "Match in progress"
+		: matchEnded
+			? roomType !== "matchmaking"
+				? "Match ended, waiting for host"
+				: null
+			: null;
 	return (
 		<SexyCard>
 			<SexyCardHeader>
-				Lobby
+				<div className="flex gap-3 items-center">
+					<span>Lobby</span>
+					{status ? (
+						<span className="text-foreground/40 font-medium"> {status} </span>
+					) : null}
+				</div>
 				<div className="text-foreground/40">
 					{playerCnt} {playerCnt === 1 ? "player" : "players"}
 				</div>
@@ -67,7 +80,7 @@ export function Lobby() {
 									"flex items-center flex-1 gap-0 transition ease-in-out duration-300 " +
 									((countingDown || matchStarted || matchEnded) &&
 									!player.spectator &&
-									!(!player.finished && matchEnded && !player.disconnected) // matchEnd & player not finished means a new/reconecter joined while match is ended
+									!(!player.finished && matchEnded && !player.disconnected) // matchEnd & !player.finished means a new/reconecter joined while match is ended
 										? ""
 										: "translate-x-[150%]")
 								}
