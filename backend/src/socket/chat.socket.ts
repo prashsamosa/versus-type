@@ -46,3 +46,11 @@ export function emitNewMessage(
 
 	io.to(roomCode).emit("chat:new-message", newMessage);
 }
+
+export function broadcastShutdown(io: ioServer, shutdownDelay: string) {
+	io.emit("chat:new-message", {
+		username: "",
+		message: `Server restarting in ${shutdownDelay} seconds`,
+		system: true,
+	});
+}

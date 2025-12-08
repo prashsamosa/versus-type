@@ -1,6 +1,10 @@
 import { httpServer } from "./app";
 import env from "./env";
+import { gracefulShutdown } from "./shutdown";
 import { uwsApp } from "./ws-server";
+
+process.on("SIGINT", gracefulShutdown);
+process.on("SIGTERM", gracefulShutdown);
 
 const port = env.HTTP_PORT;
 httpServer.listen(port, "0.0.0.0", () => {

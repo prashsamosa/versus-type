@@ -9,6 +9,7 @@ import errorHandler from "./middlewares/error.middleware";
 import { pvpRouter } from "./routes/pvp.router";
 import soloRouter from "./routes/solo.router";
 import userRouter from "./routes/user.router";
+import { isShuttingDown } from "./shutdown";
 
 const app = express();
 
@@ -20,6 +21,15 @@ app.use(
 		credentials: true,
 	}),
 );
+
+app.use("/api", (_, res, next) => {
+	if (isShuttingDown) {
+		return res
+			.status(503)
+			.json({ error: "Server is restarting, please try again later." });
+	}
+	next();
+});
 
 async function authMiddleware(
 	req: express.Request,
