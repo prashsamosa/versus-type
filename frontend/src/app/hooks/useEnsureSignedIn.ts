@@ -21,16 +21,17 @@ export function useEnsureSignedIn(trigger: boolean = true) {
 				.anonymous()
 				.then((result) => {
 					if (result.data?.user) setAuthResolved(true);
+					else
+						setError(
+							new Error(result.error?.message || "Anonymous sign-in failed"),
+						);
 				})
-				.catch((err) => {
-					setError(err);
-				});
+				.catch((err) => setError(err));
 		}
 
 		if (session?.user?.isAnonymous) {
 			setAuthResolved(true);
 		}
-		console.log(error);
 	}, [session, isPending]);
 
 	return {
