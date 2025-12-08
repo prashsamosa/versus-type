@@ -21,7 +21,7 @@ export const auth = betterAuth({
 	},
 	advanced: {
 		crossSubDomainCookies: {
-			enabled: true,
+			enabled: env.NODE_ENV === "production",
 			domain: env.NODE_ENV === "production" ? ".sahaj.dev" : undefined,
 		},
 	},
