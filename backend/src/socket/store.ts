@@ -22,7 +22,10 @@ export type PlayerState = {
 	finished?: boolean;
 	timeTyped?: number;
 	ordinal?: number;
+	streak?: number;
+	maxStreak?: number;
 	incorrectIdx: number | null;
+	lastCompletedWord?: number;
 };
 
 export type RoomSettings = {
@@ -84,6 +87,9 @@ export const initialPlayerState = {
 	isHost: false,
 	spectator: false,
 	incorrectIdx: null,
+	streak: 0,
+	maxStreak: 0,
+	lastCompletedWord: undefined,
 } satisfies Partial<PlayerState>;
 
 export async function reinitializeRoomState(roomCode: string) {

@@ -34,3 +34,11 @@ export function getRandomColor(roomCode: string) {
 
 	return "#FFFFFF";
 }
+
+export function getWordIndex(charIndex: number, passage: string): number {
+	let wordIdx = 0;
+	for (let i = 0; i < charIndex && i < passage.length; i++) {
+		if (passage[i] === " ") wordIdx++;
+	}
+	return wordIdx;
+}

@@ -42,6 +42,7 @@ soloRouter.post("/", async (req, res) => {
 					avgAccuracy: sql`(((${userStats.avgAccuracy} * (${userStats.soloMatches} + ${userStats.pvpMatches})) + ${matchData.accuracy}) / (${userStats.soloMatches} + ${userStats.pvpMatches} + 1))`,
 					totalTimeTyped: sql`${userStats.totalTimeTyped} + ${matchData.time}`,
 					highestWpm: sql`CASE WHEN ${matchData.wpm} > ${userStats.highestWpm} THEN ${matchData.wpm} ELSE ${userStats.highestWpm} END`,
+					maxStreak: sql`CASE WHEN ${matchData.maxStreak} > ${userStats.maxStreak} THEN ${matchData.maxStreak} ELSE ${userStats.maxStreak} END`,
 				})
 				.where(eq(userStats.userId, session.user.id)),
 		]);

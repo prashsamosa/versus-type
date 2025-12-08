@@ -25,7 +25,7 @@ import {
 	typingPlayerCount,
 	updateRoomAvgWpm,
 } from "./store";
-import { calcWpm, getRandomColor } from "./utils";
+import { calcWpm, getRandomColor, getWordIndex } from "./utils";
 
 const COUNTDOWN_SECONDS = 3;
 const WAITING_COUNTDOWN_SECONDS = 15;
@@ -350,6 +350,17 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			);
 
 			if (player.incorrectIdx === null && passage[player.typingIndex] === key) {
+				if (key === " ") {
+					const wordIdx = getWordIndex(player.typingIndex, passage);
+					if (wordIdx > (player.lastCompletedWord ?? -1)) {
+						player.streak = (player.streak || 0) + 1;
+						if (player.streak > (player.maxStreak || 0)) {
+							player.maxStreak = player.streak;
+						}
+						player.lastCompletedWord = wordIdx;
+					}
+				}
+
 				if (player.typingIndex >= passage.length - 1) {
 					// PLAYER FINISHED
 					lastCorrectIndex = player.typingIndex + 1;
@@ -381,8 +392,11 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 					break;
 				}
 				lastCorrectIndex = player.typingIndex + 1;
-			} else if (player.incorrectIdx === null) {
-				player.incorrectIdx = player.typingIndex;
+			} else {
+				if (player.incorrectIdx === null)
+					player.incorrectIdx = player.typingIndex;
+
+				player.streak = 0;
 			}
 			player.typingIndex++;
 		}

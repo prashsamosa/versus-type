@@ -109,6 +109,7 @@ export const userStats = sqliteTable("userStats", {
 	avgWpm: real().notNull().default(0),
 	avgAccuracy: real().notNull().default(0),
 	totalTimeTyped: integer().notNull().default(0),
+	maxStreak: integer().default(0),
 	updatedAt: integer("updated_at", { mode: "timestamp" })
 		.notNull()
 		.$onUpdateFn(() => new Date()),

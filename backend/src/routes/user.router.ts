@@ -37,7 +37,6 @@ userRouter.get("/stats", async (_, res) => {
 	}
 
 	const { userId: __, updatedAt: ___, ...returnObj } = stats[0];
-
 	res.json({
 		...returnObj,
 		rollingAvgWpm:
