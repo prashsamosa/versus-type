@@ -116,6 +116,10 @@ pvpRouter.get("/matchmake", async (req, res) => {
 	}
 });
 
+pvpRouter.get("/total-players", (_, res) => {
+	res.send(io.engine.clientsCount);
+});
+
 function startNukeTimer(roomCode: string) {
 	setTimeout(() => {
 		const roomState = roomStates[roomCode];
