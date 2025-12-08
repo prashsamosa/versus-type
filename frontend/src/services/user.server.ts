@@ -27,8 +27,10 @@ import { API_URL } from "@/const";
 
 export async function getUserStats(): Promise<UserStats> {
 	try {
+		const headersList = await headers();
+		const cookie = headersList.get("cookie");
 		const response = await fetch(`${API_URL}/user/stats`, {
-			headers: await headers(),
+			headers: cookie ? { cookie } : {},
 			credentials: "include",
 		});
 		if (!response.ok) {
