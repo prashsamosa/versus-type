@@ -3,7 +3,7 @@ import { isShuttingDown } from "@/shutdown";
 import { registerChatHandlers } from "./chat.socket";
 import { registerPvpSessionHandlers } from "./game";
 import { startKeyBufController } from "./keyBufSizeController";
-import { authWithDuplicateCheck, cleanupUserSocket } from "./middleware";
+import { authWithDuplicateCheck, removeFromUserSocket } from "./middleware";
 
 export function initializeSocket(io: ioServer) {
 	io.use((_, next) => {
@@ -23,7 +23,7 @@ export function initializeSocket(io: ioServer) {
 
 		socket.on("disconnect", () => {
 			if (socket.data.userId) {
-				cleanupUserSocket(socket.data.userId);
+				removeFromUserSocket(socket.data.userId);
 			}
 		});
 		socket.on("ping", (callback) => {

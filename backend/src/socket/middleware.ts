@@ -33,6 +33,10 @@ export async function authWithDuplicateCheck(
 	next();
 }
 
-export function cleanupUserSocket(userId: string) {
+export function removeFromUserSocket(userId: string) {
 	userToSocket.delete(userId);
+}
+
+export function clearUserSocketMap() {
+	userToSocket.clear();
 }
