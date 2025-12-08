@@ -1,4 +1,4 @@
-import type { UserStats } from "@versus-type/shared";
+import type { MatchHistoryResponse, UserStats } from "@versus-type/shared";
 import { headers } from "next/headers";
 import { API_URL } from "@/const";
 
@@ -43,6 +43,34 @@ export async function getUserStats(): Promise<UserStats> {
 		return await response.json();
 	} catch (error) {
 		console.error("Failed to fetch user stats:", error);
+		throw error;
+	}
+}
+
+export async function getMatchHistory(
+	limit = 10,
+	offset = 0,
+): Promise<MatchHistoryResponse> {
+	try {
+		const headersList = await headers();
+		const cookie = headersList.get("cookie");
+		const response = await fetch(
+			`${API_URL}/user/matches?limit=${limit}&offset=${offset}`,
+			{
+				headers: cookie ? { cookie } : {},
+				credentials: "include",
+			},
+		);
+		if (!response.ok) {
+			const errMsg =
+				(await response.json().catch(() => ({})))?.error || response.statusText;
+			throw new Error(`Error fetching match history: ${errMsg}`, {
+				cause: response.status,
+			});
+		}
+		return await response.json();
+	} catch (error) {
+		console.error("Failed to fetch match history:", error);
 		throw error;
 	}
 }

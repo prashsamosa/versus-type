@@ -21,13 +21,14 @@ export function Lobby() {
 	const playerCnt = Object.values(players).filter(
 		(player) => !player.disconnected,
 	).length;
-	const status = matchStarted
-		? "Match in progress"
-		: matchEnded
-			? roomType !== "matchmaking"
-				? "Match ended, waiting for host"
-				: null
-			: null;
+	const status =
+		matchStarted || countingDown
+			? "Match in progress"
+			: matchEnded
+				? roomType !== "matchmaking"
+					? "Match ended, waiting for host"
+					: null
+				: null;
 	return (
 		<SexyCard>
 			<SexyCardHeader>

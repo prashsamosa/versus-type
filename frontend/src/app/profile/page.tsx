@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { UsernameForm } from "../pvp/[roomCode]/UsernameForm";
 import { GuestMessage } from "./guest";
+import { MatchHistoryView } from "./match-history-view";
 import { StatsView } from "./stats";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +22,29 @@ function StatsSkeleton() {
 			<div className="h-full rounded-xl bg-muted/50 animate-pulse" />
 			<div className="h-44 rounded-xl bg-muted/50 animate-pulse" />
 			<div className="h-44 rounded-xl bg-muted/50 animate-pulse" />
+		</div>
+	);
+}
+
+function MatchHistorySkeleton() {
+	return (
+		<div className="space-y-4">
+			<div className="flex items-center gap-2">
+				<div className="size-5 rounded bg-muted/50 animate-pulse" />
+				<div className="h-6 w-48 rounded bg-muted/50 animate-pulse" />
+			</div>
+			<div className="rounded-xl border bg-card p-2">
+				{[...Array(5)].map((_, i) => (
+					<div key={i} className="flex items-center justify-between py-3 px-4">
+						<div className="flex items-center gap-6">
+							<div className="h-5 w-12 rounded bg-muted/50 animate-pulse" />
+							<div className="h-5 w-20 rounded bg-muted/50 animate-pulse" />
+							<div className="h-5 w-16 rounded bg-muted/50 animate-pulse" />
+						</div>
+						<div className="h-4 w-16 rounded bg-muted/50 animate-pulse" />
+					</div>
+				))}
+			</div>
 		</div>
 	);
 }
@@ -55,6 +79,10 @@ export default function ProfilePage() {
 						<StatsView />
 					</Suspense>
 				</div>
+
+				<Suspense fallback={<MatchHistorySkeleton />}>
+					<MatchHistoryView />
+				</Suspense>
 			</div>
 		</div>
 	);

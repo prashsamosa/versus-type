@@ -10,7 +10,6 @@ import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { computeStats } from "@versus-type/shared/stats";
 import confetti from "canvas-confetti";
 import {
-	CheckCircle,
 	Clock,
 	Flame,
 	Gauge,
@@ -89,6 +88,8 @@ export default function FinishedStats({
 			time: stats.time,
 			wordsTyped: input.trim().split(/\s+/).length,
 			mode: "words",
+			passageConfig,
+			maxStreak,
 		};
 		async function callComplete() {
 			try {
@@ -132,7 +133,7 @@ export default function FinishedStats({
 
 	return (
 		<div className="max-w-5xl mx-auto mt-10 space-y-4">
-			<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+			<div className="grid grid-cols-4 gap-4">
 				<StatCard
 					value={Math.round(stats.wpm)}
 					suffix="WPM"
@@ -141,29 +142,25 @@ export default function FinishedStats({
 					className="col-span-2 row-span-2"
 					tag={isNewHighest ? "New Highest" : undefined}
 				/>
-				<ProgressStatCard
-					title="Accuracy"
-					value={Math.round(acc)}
-					icon={Target}
-				/>
-
 				<StatCard
 					title="Raw WPM"
 					value={Math.round(stats.rawWpm)}
 					suffix="WPM"
 					icon={Gauge}
+					className="min-w-[13rem]"
 				/>
-
 				<StatCard title="Time" value={stats.time} suffix="s" icon={Clock} />
-				<StatCard title="Max Streak" value={maxStreak} icon={Flame} />
 
-				<StatCard
-					title="Correct chars"
-					value={stats.correctChars}
-					icon={CheckCircle}
-				/>
+				<StatCard title="Max Streak" value={maxStreak} icon={Flame} />
 				<StatCard title="Errors" value={errors} icon={XCircle} />
 
+				<ProgressStatCard
+					size="large"
+					title="Accuracy"
+					value={Math.round(acc)}
+					icon={Target}
+					className="col-span-2"
+				/>
 				<StatCard title="Config" icon={Settings2} className="col-span-2">
 					<div className="text-sm flex gap-2">
 						<div>{passageConfig.language}</div>
