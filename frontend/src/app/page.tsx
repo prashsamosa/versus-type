@@ -79,7 +79,7 @@ export default function Home() {
 					</Button>
 				</div>
 
-				<div className="flex gap-3 justify-center flex-wrap mt-4 pt-4 px-4 bg-gradient-to-b from-card to-40% to-background border-t-2">
+				<div className="flex gap-3 justify-between flex-wrap mt-4 pt-4 px-4 bg-gradient-to-b from-card to-40% to-background border-t-2">
 					<Button variant="ghost" size="sm" asChild>
 						<Link href="/profile">
 							<User className="size-4" />
@@ -87,20 +87,21 @@ export default function Home() {
 						</Link>
 					</Button>
 					{isGuest ? (
-						<>
+						<div className="flex items-center">
 							<Button variant="ghost" size="sm" asChild>
 								<Link href="/sign-in">
 									<LogIn className="size-4" />
 									Sign In
 								</Link>
 							</Button>
+							<div className="inline-block w-[2px] h-5 bg-muted-foreground/40 mx-2 rotate-12" />
 							<Button variant="ghost" size="sm" asChild>
 								<Link href="/sign-up">
 									<UserPlus className="size-4" />
 									Sign Up
 								</Link>
 							</Button>
-						</>
+						</div>
 					) : null}
 					<LogoutButton />
 					<Button variant="ghost" size="sm" asChild>

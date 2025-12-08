@@ -12,14 +12,15 @@ export const dynamic = "force-dynamic";
 function StatsSkeleton() {
 	return (
 		<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-			<div className="col-span-2 row-span-2 h-52 rounded-xl bg-muted/50 animate-pulse" />
-			<div className="h-24 rounded-xl bg-muted/50 animate-pulse" />
-			<div className="h-24 rounded-xl bg-muted/50 animate-pulse" />
-			<div className="h-24 rounded-xl bg-muted/50 animate-pulse" />
-			<div className="h-24 rounded-xl bg-muted/50 animate-pulse" />
-			<div className="h-24 rounded-xl bg-muted/50 animate-pulse" />
-			<div className="h-24 rounded-xl bg-muted/50 animate-pulse" />
-			<div className="col-span-2 h-24 rounded-xl bg-muted/50 animate-pulse" />
+			<div className="col-span-2 row-span-2 h-[22rem] rounded-xl bg-muted/50 animate-pulse" />
+			<div className="h-full rounded-xl bg-muted/50 animate-pulse" />
+			<div className="h-full rounded-xl bg-muted/50 animate-pulse" />
+			<div className="h-full rounded-xl bg-muted/50 animate-pulse" />
+			<div className="h-full rounded-xl bg-muted/50 animate-pulse" />
+			<div className="h-full rounded-xl bg-muted/50 animate-pulse" />
+			<div className="h-full rounded-xl bg-muted/50 animate-pulse" />
+			<div className="h-44 rounded-xl bg-muted/50 animate-pulse" />
+			<div className="h-44 rounded-xl bg-muted/50 animate-pulse" />
 		</div>
 	);
 }
