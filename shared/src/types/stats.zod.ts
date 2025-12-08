@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { GeneratorConfig } from "../passage-generator";
 
 export const UserStatsSchema = z.object({
 	soloMatches: z.number().int().nonnegative().default(0),
@@ -14,3 +15,18 @@ export const UserStatsSchema = z.object({
 
 export type UserStats = z.infer<typeof UserStatsSchema>;
 export type StatsUpdate = Partial<UserStats>;
+
+export type MatchHistoryItem = {
+	id: string;
+	type: "solo" | "pvp";
+	wpm: number | null;
+	accuracy: number | null;
+	ordinal: number | null;
+	passageConfig: GeneratorConfig;
+	createdAt: string;
+};
+
+export type MatchHistoryResponse = {
+	matches: MatchHistoryItem[];
+	hasMore: boolean;
+};

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
+import type { GeneratorConfig } from "@versus-type/shared/passage-generator";
 import { sql } from "drizzle-orm";
 import {
-	check,
 	index,
 	integer,
 	real,
@@ -120,7 +120,7 @@ export const matches = sqliteTable("matches", {
 		.primaryKey()
 		.$defaultFn(() => randomUUID()),
 
-	passage: text().notNull(),
+	passageConfig: text({ mode: "json" }).notNull().$type<GeneratorConfig>(),
 
 	createdAt: integer("created_at", { mode: "timestamp" })
 		.notNull()
@@ -146,7 +146,12 @@ export const matchParticipants = sqliteTable(
 			.notNull()
 			.$defaultFn(() => new Date()),
 	},
-	(table) => [index("idx_matchParticipants_userId").on(table.userId)],
+	(table) => [
+		index("idx_matchParticipants_userId_createdAt").on(
+			table.userId,
+			table.createdAt,
+		),
+	],
 );
 
 export const soloMatch = sqliteTable(
@@ -160,18 +165,15 @@ export const soloMatch = sqliteTable(
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
 		wpm: real().notNull(),
-		rawWpm: real().notNull(),
 		accuracy: real().notNull(),
-		time: integer().notNull(),
-		wordsTyped: integer().notNull(),
-		correctChars: integer().notNull(),
-		errorChars: integer().notNull(),
-		mode: text().$type<"time" | "words">().notNull(),
+		passageConfig: text({ mode: "json" }).notNull().$type<GeneratorConfig>(),
 		createdAt: integer("created_at", { mode: "timestamp" })
 			.notNull()
 			.$defaultFn(() => new Date()),
 	},
-	(table) => [check("chk_mode", sql`${table.mode} IN ('time', 'words')`)],
+	(table) => [
+		index("idx_soloMatch_userId_createdAt").on(table.userId, table.createdAt),
+	],
 );
 
 export type RoomStatus = "inProgress" | "closed" | "waiting";

@@ -9,7 +9,7 @@ export async function updatePlayersInfoInDB(roomState: RoomState) {
 	const matchId = await db
 		.insert(matches)
 		.values({
-			passage: roomState.passage,
+			passageConfig: roomState.passageConfig,
 		})
 		.returning({ id: matches.id })
 		.then((r) => r[0]?.id);

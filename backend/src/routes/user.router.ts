@@ -1,9 +1,9 @@
-import type { UserStats } from "@versus-type/shared";
-import { eq } from "drizzle-orm";
+import type { MatchHistoryResponse, UserStats } from "@versus-type/shared";
+import { desc, eq, sql } from "drizzle-orm";
 import { Router } from "express";
 import { rollingAvgWpmFromDB } from "@/socket/dbservice";
 import { db } from "../db";
-import { userStats } from "../db/schema";
+import { matches, matchParticipants, soloMatch, userStats } from "../db/schema";
 
 const userRouter = Router();
 
@@ -44,6 +44,75 @@ userRouter.get("/stats", async (_, res) => {
 				? (rollingAvgResult.value ?? 0)
 				: 0,
 	} as UserStats);
+});
+
+userRouter.get("/matches", async (req, res) => {
+	const session = res.locals.session;
+	if (!session) {
+		res.status(401).json({ error: "Unauthorized" });
+		return;
+	}
+
+	const limit = Math.min(Number(req.query.limit) || 10, 50);
+	const offset = Number(req.query.offset) || 0;
+
+	try {
+		const pvpQuery = db
+			.select({
+				id: matchParticipants.id,
+				type: sql<string>`'pvp'`.as("type"),
+				wpm: matchParticipants.wpm,
+				accuracy: matchParticipants.accuracy,
+				ordinal: matchParticipants.ordinal,
+				passageConfig: matches.passageConfig,
+				createdAt: matchParticipants.createdAt,
+			})
+			.from(matchParticipants)
+			.innerJoin(matches, eq(matchParticipants.matchId, matches.id))
+			.where(eq(matchParticipants.userId, session.user.id));
+
+		const soloQuery = db
+			.select({
+				id: soloMatch.id,
+				type: sql<string>`'solo'`.as("type"),
+				wpm: soloMatch.wpm,
+				accuracy: soloMatch.accuracy,
+				ordinal: sql<null>`NULL`.as("ordinal"),
+				passageConfig: soloMatch.passageConfig,
+				createdAt: soloMatch.createdAt,
+			})
+			.from(soloMatch)
+			.where(eq(soloMatch.userId, session.user.id));
+
+		const results = await db
+			.select()
+			.from(pvpQuery.unionAll(soloQuery).as("combined"))
+			.orderBy(desc(sql`created_at`))
+			.limit(limit + 1)
+			.offset(offset);
+
+		const hasMore = results.length > limit;
+		const matchesToReturn = hasMore ? results.slice(0, limit) : results;
+
+		res.json({
+			matches: matchesToReturn.map((m) => ({
+				id: m.id,
+				type: m.type as "solo" | "pvp",
+				wpm: m.wpm,
+				accuracy: m.accuracy,
+				ordinal: m.ordinal,
+				passageConfig: m.passageConfig,
+				createdAt:
+					m.createdAt instanceof Date
+						? m.createdAt.toISOString()
+						: new Date(m.createdAt * 1000).toISOString(),
+			})),
+			hasMore,
+		} as MatchHistoryResponse);
+	} catch (error) {
+		console.error("Error fetching match history:", error);
+		res.status(500).json({ error: "Database error" });
+	}
 });
 
 export default userRouter;

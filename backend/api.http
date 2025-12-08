@@ -28,6 +28,9 @@ GET {{server}}/user
 ### get stats
 GET {{server}}/user/stats
 
+### get match history
+GET {{server}}/user/matches?limit=10&offset=0
+
 ##### Tests
 ### Complete test
 POST {{server}}/test/
