@@ -80,6 +80,7 @@ export const usePvpStore = create<PvpStore>((set) => ({
 		set((state) => ({
 			countdown: num === 0 ? null : num,
 			matchStarted: num === 0 ? true : state.matchStarted,
+			matchEnded: false,
 			countingDown: num !== null && num > 0,
 			oppTypingIndexes: {},
 			wpms: {},
@@ -108,6 +109,7 @@ export const usePvpStore = create<PvpStore>((set) => ({
 			matchStarted: false,
 			matchEnded: false,
 			gameConfig: state.gameConfig,
+			chatMessages: state.chatMessages,
 			players: Object.entries(state.players).reduce((acc, [userId, player]) => {
 				acc[userId] = {
 					...player,

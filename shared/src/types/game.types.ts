@@ -45,6 +45,7 @@ export type JoinResponse = {
 	message?: string;
 	gameState?: {
 		isStarted: boolean;
+		isEnded: boolean;
 		type: RoomType;
 		typingIndex: number;
 		oppTypingIndexes: { [userId: string]: number };

@@ -65,7 +65,9 @@ export function Lobby() {
 							<div
 								className={
 									"flex items-center flex-1 gap-0 transition ease-in-out duration-300 " +
-									(countingDown || matchStarted || matchEnded
+									((countingDown || matchStarted || matchEnded) &&
+									!player.spectator &&
+									!(!player.finished && matchEnded && !player.disconnected) // matchEnd & player not finished means a new/reconecter joined while match is ended
 										? ""
 										: "translate-x-[150%]")
 								}
@@ -93,6 +95,7 @@ export function Lobby() {
 													: "th"}
 										</Badge>
 									) : null}
+
 									<Badge
 										variant="outline"
 										className="text-right text-nowrap text-md shrink-0"
@@ -112,8 +115,10 @@ export function Lobby() {
 								</div>
 								<div
 									className={
-										"bg-muted ring ring-muted p-1 rounded h-4 overflow-hidden rounded-full transition-all ease-out shrink-0 shadow-[inset_0_2px_5px_rgba(0,0,0,0.8),inset_0_-1px_3px_rgba(0,0,0,0.6)] " +
-										(player.finished ? "w-0 ml-0" : "flex-3 min-w-[3rem] ml-2")
+										"bg-muted ring ring-muted p-1 h-4 overflow-hidden rounded-full transition-all ease-out shrink-0 shadow-[inset_0_2px_5px_rgba(0,0,0,0.8),inset_0_-1px_3px_rgba(0,0,0,0.6)] " +
+										(player.finished
+											? "w-0 -ml-4 translate-x-8"
+											: "flex-3 min-w-[3rem] ml-2")
 									}
 								>
 									<div

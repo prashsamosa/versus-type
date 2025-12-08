@@ -10,8 +10,8 @@ export function usePvpSession(ready = true) {
 	const [socketError, setSocketError] = useState<string | null>(null);
 	const [latency, setLatency] = useState<number | null>(null);
 	const [disconnected, setDisconnected] = useState(false);
-	const endMatch = usePvpStore((s) => s.endMatch);
 
+	const endMatch = usePvpStore((s) => s.endMatch);
 	const setPlayers = usePvpStore((s) => s.setPlayers);
 	const handleStartMatch = usePvpStore((s) => s.handleStartMatch);
 	const setInitialIndex = usePvpStore((s) => s.setInitialIndex);
@@ -44,13 +44,15 @@ export function usePvpSession(ready = true) {
 
 					setInitialIndex(gameState.typingIndex);
 					// if (gameState.typingIndex >= gameState.passage.length) setFinished(true);
-					if (gameState.isStarted && gameState.oppTypingIndexes)
+					if (gameState.isStarted)
 						setOppTypingIndexes(gameState.oppTypingIndexes);
-					if (gameState.chatHistory) setChatMessages(gameState.chatHistory);
-					if (gameState.passage) setPassage(gameState.passage);
-					if (gameState.passageConfig)
-						setPassageConfig(gameState.passageConfig);
-					if (gameState.type) setRoomType(gameState.type);
+
+					setChatMessages(gameState.chatHistory);
+					setPassage(gameState.passage);
+					setPassageConfig(gameState.passageConfig);
+					setRoomType(gameState.type);
+
+					if (gameState.isEnded) endMatch();
 				}
 			})
 			.catch((err) => {

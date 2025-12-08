@@ -123,6 +123,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			gameState: {
 				type: roomState.type,
 				isStarted: roomState.isMatchStarted,
+				isEnded: roomState.isMatchEnded,
 				typingIndex: player?.typingIndex || 0,
 				oppTypingIndexes,
 				chatHistory: roomState.chat,
