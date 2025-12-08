@@ -1,7 +1,7 @@
 import { Loader2, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ErrorTooltipBtn } from "@/components/ui/error-tooltip-btn";
+import { TooltipButton } from "@/components/ui/tooltip-button";
 import { getQuickPlayRoom } from "@/services/pvp.client";
 
 export function QuickPlayButton({
@@ -32,11 +32,11 @@ export function QuickPlayButton({
 		}
 	}
 	return (
-		<ErrorTooltipBtn
+		<TooltipButton
 			size="lg"
 			onClick={handleQuickPlay}
-			error={quickPlayError}
-			setError={setQuickPlayError}
+			message={quickPlayError}
+			clearMessage={() => setQuickPlayError(null)}
 			disabled={quickPlayLoading}
 			className={className}
 		>
@@ -46,6 +46,6 @@ export function QuickPlayButton({
 				icon || <Zap className="size-4" />
 			)}
 			{label}
-		</ErrorTooltipBtn>
+		</TooltipButton>
 	);
 }
