@@ -9,5 +9,6 @@ export const SoloStatsSchema = z.object({
 	time: z.number().min(0),
 	wordsTyped: z.number().min(0),
 	mode: z.enum(["time", "words"]),
+	maxStreak: z.number().min(0),
 });
 export type SoloStats = z.infer<typeof SoloStatsSchema>;

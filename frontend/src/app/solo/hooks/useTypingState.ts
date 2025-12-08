@@ -43,7 +43,6 @@ export function useTypingState(words: string[]) {
 	function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
 		if (finished) return;
 		const val = e.target.value;
-		let incorrectCurr = incorrect;
 
 		const prev = prevInputRef.current;
 		const idx = prev.length;
@@ -55,7 +54,6 @@ export function useTypingState(words: string[]) {
 			accuracyRef.current = recordKey(accuracyRef.current, typed, expected);
 			if (typed !== expected) {
 				setIncorrect(true);
-				incorrectCurr = true;
 				wordHadErrorRef.current = true;
 				setStreak(0);
 			} else if (expected === " ") {
@@ -73,7 +71,6 @@ export function useTypingState(words: string[]) {
 		} else if (val.length < prev.length && prev.startsWith(val)) {
 			if (incorrect && val === passageChars.slice(0, val.length)) {
 				setIncorrect(false);
-				incorrectCurr = false;
 			}
 		} else {
 			return;
@@ -84,7 +81,7 @@ export function useTypingState(words: string[]) {
 
 		if (startRef.current === null) startRef.current = performance.now();
 
-		if (val.length >= passageChars.length && !finished && !incorrectCurr) {
+		if (val.length >= passageChars.length && !finished) {
 			endRef.current = performance.now();
 			setFinished(true);
 		}

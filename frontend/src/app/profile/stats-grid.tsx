@@ -2,6 +2,7 @@
 
 import {
 	Clock,
+	Flame,
 	Gamepad2,
 	History,
 	Rocket,
@@ -23,6 +24,7 @@ type StatsGridProps = {
 	soloMatches: number;
 	timeTyped: number;
 	rollingAvgWpm: number;
+	maxStreak: number;
 };
 
 export function StatsGrid({
@@ -35,7 +37,9 @@ export function StatsGrid({
 	soloMatches,
 	timeTyped,
 	rollingAvgWpm,
+	maxStreak,
 }: StatsGridProps) {
+	console.log(maxStreak);
 	return (
 		<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
 			<StatCard
@@ -44,29 +48,64 @@ export function StatsGrid({
 				suffix="WPM"
 				size="large"
 				icon={Zap}
-				className="col-span-2 row-span-2"
+				className="col-span-2"
+			/>
+			<ProgressStatCard
+				size="large"
+				title="Avg Accuracy"
+				value={avgAccuracy}
+				icon={Target}
+				className="col-span-2 lg:order-1"
 			/>
 			<StatCard
-				title="Avg (last 10 matches)"
+				title="PvP Avg (last 10)"
 				value={rollingAvgWpm}
 				suffix="WPM"
 				icon={History}
 			/>
-
 			<StatCard
 				title="Highest WPM"
 				value={highestWpm}
 				suffix="WPM"
 				icon={Rocket}
 			/>
-			<ProgressStatCard title="Accuracy" value={avgAccuracy} icon={Target} />
-			<StatCard title="PvP Wins" value={wins} icon={Trophy} />
-
-			<StatCard title="Total Matches" value={totalMatches} icon={Swords} />
-			<StatCard title="Solo Sessions" value={soloMatches} icon={Gamepad2} />
-
-			<StatCard title="Time Typed" value={timeTyped} icon={Clock} minutes />
-			<ProgressStatCard title="Win Rate" value={winRate} icon={TrendingUp} />
+			<StatCard
+				title="Max Word Streak"
+				value={maxStreak}
+				icon={Flame}
+				className="lg:order-2"
+			/>
+			<StatCard
+				title="Total PvP Matches"
+				value={totalMatches}
+				icon={Swords}
+				className="lg:order-3"
+			/>
+			<StatCard
+				title="PvP Wins"
+				value={wins}
+				icon={Trophy}
+				className="lg:order-4"
+			/>
+			<StatCard
+				title="Solo Sessions"
+				value={soloMatches}
+				icon={Gamepad2}
+				className="lg:order-5"
+			/>
+			<ProgressStatCard
+				title="Win Rate"
+				value={winRate}
+				icon={TrendingUp}
+				className="lg:order-6"
+			/>
+			<StatCard
+				title="Time Typed"
+				value={timeTyped}
+				icon={Clock}
+				minutes
+				className="lg:order-7"
+			/>
 		</div>
 	);
 }

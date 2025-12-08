@@ -29,14 +29,165 @@ function useCountUp(target: number, duration: number = ANIMATION_DURATION) {
 
 	return value;
 }
+function fmtTime(mins: number) {
+	mins = Math.round(mins);
+	const hours = Math.floor(mins / 60);
+	if (hours > 0) {
+		return `${hours}h ${mins % 60}m`;
+	}
+	return `${mins}m`;
+}
+
+export function StatCard({
+	title,
+	value,
+	suffix = "",
+	icon: Icon,
+	className = "",
+	size = "default",
+	tag,
+	children,
+	minutes,
+}: {
+	title?: string;
+	value?: number;
+	suffix?: string;
+	icon?: LucideIcon;
+	className?: string;
+	size?: "default" | "large";
+	tag?: string;
+	children?: React.ReactNode;
+	minutes?: boolean;
+}) {
+	const animatedValue = useCountUp(value ?? 0);
+	const isLarge = size === "large";
+
+	return (
+		<Card
+			className={`group hover:border-primary/50 transition-colors ${className}`}
+		>
+			<CardContent
+				className={"h-full " + (isLarge ? "pr-10 pl-8 py-4" : "p-6")}
+			>
+				<div
+					className={
+						"flex items-center h-full " +
+						(Icon ? "justify-between" : "justify-center")
+					}
+				>
+					<div className="space-y-1">
+						{tag ? (
+							<Badge
+								variant={"secondary"}
+								className={`text-lg font-medium text-primary ${
+									isLarge ? "text-sm" : "text-xs"
+								}`}
+							>
+								{tag}
+							</Badge>
+						) : null}
+						{title ? (
+							<p
+								className={`font-medium text-muted-foreground ${isLarge ? "text-xl" : "text-sm"}`}
+							>
+								{title}
+							</p>
+						) : null}
+						{children ? (
+							children
+						) : (
+							<p
+								className={`font-bold tracking-tight ${isLarge ? "text-7xl" : "text-3xl"}`}
+							>
+								{minutes
+									? fmtTime(animatedValue)
+									: Math.round(animatedValue).toLocaleString()}
+								{suffix && (
+									<span
+										className={`font-medium text-muted-foreground ml-1 ${isLarge ? "text-3xl" : "text-lg"}`}
+									>
+										{suffix}
+									</span>
+								)}
+							</p>
+						)}
+					</div>
+					{Icon ? (
+						<Button
+							disabled={true}
+							variant="secondary"
+							className={`text-primary disabled:hover:bg-secondary disabled:opacity-100 cursor-default hover:bg- group-hover:bg-primary/20 ${isLarge ? "p-10" : "p-5"}`}
+						>
+							<Icon className={isLarge ? "size-16" : "size-6"} />
+						</Button>
+					) : null}
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+export function ProgressStatCard({
+	title,
+	value,
+	icon: Icon,
+	className = "",
+	size = "default",
+}: {
+	title: string;
+	value: number;
+	icon: LucideIcon;
+	className?: string;
+	size?: "default" | "large";
+}) {
+	return (
+		<Card
+			className={`group hover:border-primary/50 transition-colors min-w-[14rem] ${className}`}
+		>
+			<CardContent className={size === "large" ? "px-8 py-2" : "p-6"}>
+				<div className="flex items-center justify-between">
+					<div className="space-y-2">
+						<div className="flex items-center gap-3">
+							<Icon
+								className={
+									"text-muted-foreground mt-0.5 " +
+									(size === "large" ? "size-8" : "size-5")
+								}
+							/>
+							<p
+								className={
+									"font-medium text-muted-foreground " +
+									(size === "large" ? "text-2xl" : "text-sm")
+								}
+							>
+								{title}
+							</p>
+						</div>
+					</div>
+					<CircularProgress
+						value={value}
+						size={size === "large" ? 120 : 80}
+						strokeWidth={size === "large" ? 12 : 10}
+						className={
+							size === "large" ? "font-bold text-3xl" : "font-bold text-lg"
+						}
+					/>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
 export function CircularProgress({
 	value,
 	size = 80,
 	strokeWidth = 10,
+	className = "",
 }: {
 	value: number;
 	size?: number;
 	strokeWidth?: number;
+	className?: string;
 }) {
 	const animatedValue = useCountUp(value);
 	const radius = (size - strokeWidth) / 2;
@@ -75,135 +226,11 @@ export function CircularProgress({
 					className="text-foreground/35 group-hover:text-foreground/60 transition-all"
 				/>
 			</svg>
-			<div className="absolute inset-0 flex items-center justify-center">
-				<span className="text-lg font-bold">{animatedValue.toFixed(0)}%</span>
+			<div className={"absolute inset-0 flex items-center justify-center"}>
+				<span className={className ? className : "font-bold text-lg"}>
+					{animatedValue.toFixed(0)}%
+				</span>
 			</div>
 		</div>
-	);
-}
-
-function fmtTime(mins: number) {
-	mins = Math.round(mins);
-	const hours = Math.floor(mins / 60);
-	if (hours > 0) {
-		return `${hours}h ${mins % 60}m`;
-	}
-	return `${mins}m`;
-}
-
-export function StatCard({
-	title,
-	value,
-	suffix = "",
-	icon: Icon,
-	className = "",
-	size = "default",
-	tag,
-	children,
-	minutes,
-}: {
-	title?: string;
-	value?: number;
-	suffix?: string;
-	icon?: LucideIcon;
-	className?: string;
-	size?: "default" | "large";
-	tag?: string;
-	children?: React.ReactNode;
-	minutes?: boolean;
-}) {
-	const animatedValue = useCountUp(value ?? 0);
-	const isLarge = size === "large";
-
-	return (
-		<Card
-			className={`group hover:border-primary/50 transition-colors ${className}`}
-		>
-			<CardContent className={"h-full " + (isLarge ? "p-8" : "p-6")}>
-				<div
-					className={
-						"flex items-center h-full " +
-						(Icon ? "justify-between" : "justify-center")
-					}
-				>
-					<div className="space-y-1">
-						{tag ? (
-							<Badge
-								variant={"secondary"}
-								className={`text-lg font-medium text-primary ${
-									isLarge ? "text-sm" : "text-xs"
-								}`}
-							>
-								{tag}
-							</Badge>
-						) : null}
-						{title ? (
-							<p
-								className={`font-medium text-muted-foreground ${isLarge ? "text-xl" : "text-sm"}`}
-							>
-								{title}
-							</p>
-						) : null}
-						{children ? (
-							children
-						) : (
-							<p
-								className={`font-bold tracking-tight ${isLarge ? "text-8xl" : "text-3xl"}`}
-							>
-								{minutes
-									? fmtTime(animatedValue)
-									: Math.round(animatedValue).toLocaleString()}
-								{suffix && (
-									<span
-										className={`font-medium text-muted-foreground ml-1 ${isLarge ? "text-3xl" : "text-lg"}`}
-									>
-										{suffix}
-									</span>
-								)}
-							</p>
-						)}
-					</div>
-					{Icon ? (
-						<Button
-							disabled={true}
-							variant="secondary"
-							className={`text-primary disabled:hover:bg-secondary disabled:opacity-100 cursor-default hover:bg- group-hover:bg-primary/20 ${isLarge ? "p-10" : "p-5"}`}
-						>
-							<Icon className={isLarge ? "size-16" : "size-6"} />
-						</Button>
-					) : null}
-				</div>
-			</CardContent>
-		</Card>
-	);
-}
-
-export function ProgressStatCard({
-	title,
-	value,
-	icon: Icon,
-	className = "",
-}: {
-	title: string;
-	value: number;
-	icon: LucideIcon;
-	className?: string;
-}) {
-	return (
-		<Card
-			className={`group hover:border-primary/50 transition-colors min-w-[14rem] ${className}`}
-		>
-			<CardContent className="p-6">
-				<div className="flex items-center justify-between">
-					<div className="space-y-2">
-						<div className="flex items-center gap-1">
-							<Icon className="size-4 text-muted-foreground" />
-							<p className="font-medium text-muted-foreground">{title}</p>
-						</div>
-					</div>
-					<CircularProgress value={value} />
-				</div>
-			</CardContent>
-		</Card>
 	);
 }
