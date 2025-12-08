@@ -1,0 +1,12 @@
+services:
+  backend:
+    container_name: vtype-backend
+    build: .
+    init: true
+    env_file:
+      - ./backend/.env
+    ports:
+      - "${HTTP_PORT:-4000}:${HTTP_PORT:-4000}"
+      - "${WS_PORT:-4001}:${WS_PORT:-4001}"
+    restart: unless-stopped
+    stop_grace_period: 60s
