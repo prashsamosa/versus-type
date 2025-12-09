@@ -8,7 +8,7 @@
 	"keywords": [],
 	"author": "sahaj-b",
 	"license": "ISC",
-	"packageManager": "pnpm@10.15.0",
+	"packageManager": "pnpm@10.25.0",
 	"dependencies": {
 		"better-auth": "^1.4.3",
 		"zod": "^4.1.13"

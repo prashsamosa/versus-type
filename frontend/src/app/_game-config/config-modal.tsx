@@ -64,6 +64,15 @@ export function GameSettings({
 							}
 						/>
 					</div>
+					<div className="flex items-center justify-between py-2">
+						<Label htmlFor="show-opp-cursors">Enable sorting in lobby</Label>
+						<Switch
+							checked={config.enableSorting}
+							onCheckedChange={(checked) =>
+								setConfig({ ...config, enableSorting: checked })
+							}
+						/>
+					</div>
 				</div>
 			</DialogContent>
 		</Dialog>

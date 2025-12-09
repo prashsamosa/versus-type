@@ -2,6 +2,7 @@ export type GameConfig = {
 	showOppCursors: boolean;
 	enableConfetti: boolean;
 	enableStreak: boolean;
+	enableSorting: boolean;
 };
 
 const GAME_CONFIG_KEY = "game-config";
@@ -9,6 +10,7 @@ const defaultGameConfig: GameConfig = {
 	showOppCursors: true,
 	enableConfetti: true,
 	enableStreak: true,
+	enableSorting: true,
 };
 
 export function loadGameConfig(): GameConfig {
