@@ -30,9 +30,15 @@ userRouter.get("/stats", async (_, res) => {
 		return;
 	}
 
-	const stats = statsResult.value;
+	let stats = statsResult.value;
 	if (stats.length === 0) {
-		res.status(404).json({ error: "stats not found" });
+		stats = await db
+			.insert(userStats)
+			.values({ userId: session.user.id })
+			.returning();
+	}
+	if (stats.length === 0) {
+		res.status(500).json({ error: "Could not create user stats" });
 		return;
 	}
 
