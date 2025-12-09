@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { authClient } from "@/lib/auth-client";
 
 export function GuestMessage() {
-	const isGuest = authClient.useSession().data?.user.isAnonymous ?? true;
+	const user = authClient.useSession().data?.user;
+	const isGuest = user ? user.isAnonymous : true;
 	if (!isGuest) return null;
 	return <Badge>Guest</Badge>;
 }
