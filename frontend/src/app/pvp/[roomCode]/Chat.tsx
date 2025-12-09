@@ -53,7 +53,7 @@ export default function Chat() {
 					</Button>
 				) : null}
 				{messages.length === 0 ? (
-					<div className="flex flex-col gap-2 items-center justify-center h-full text-muted-foreground text-xl">
+					<div className="flex flex-col gap-2 items-center justify-center md:h-full h-[90%] text-muted-foreground text-xl">
 						<MessageCircleMore />
 						No messages yet
 					</div>

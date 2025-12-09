@@ -23,8 +23,8 @@ export default function Home() {
 		<div className="min-h-screen flex items-center justify-center p-4">
 			<div className="text-center space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
 				<div className="space-y-1">
-					<div className="flex justify-center items-center gap-6">
-						<img src="/icon.svg" alt="Logo" className="size-28" />
+					<div className="flex justify-center items-center md:gap-6 gap-5">
+						<img src="/icon.svg" alt="Logo" className="md:size-28 size-26" />
 						<h1 className="md:text-7xl text-5xl font-bold tracking-tight text-nowrap">
 							<span className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent">
 								Versus{" "}
