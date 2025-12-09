@@ -51,8 +51,11 @@ export default function PvpPage() {
 	const resetStore = usePvpStore((s) => s.resetStore);
 	const [expanded, setExpanded] = useState(false);
 	const smallScreen = useSmallScreen();
+	const smallHeight = useSmallScreen("(max-height: 600px)");
+	const verySmallHeight = useSmallScreen("(max-height: 500px)");
 	const roomType = usePvpStore((s) => s.roomType);
-	const isSpectating = myUserId ? players[myUserId]?.spectator : false;
+	const isSpectating =
+		!matchEnded && (myUserId ? players[myUserId]?.spectator : false);
 	const waitingCountdown = usePvpStore((s) => s.waitingCountdown);
 	const setKeyBufferSize = usePvpStore((s) => s.setKeyBufferSize);
 	const config = usePvpStore((s) => s.gameConfig);
@@ -186,7 +189,16 @@ export default function PvpPage() {
 				</div>
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
-				<div className="pt-16 absolute bottom-[47vh] ">
+				<div
+					className={
+						"pt-16 absolute " +
+						(smallHeight
+							? verySmallHeight
+								? "top-10"
+								: "bottom-[35vh]"
+							: "bottom-[47vh]")
+					}
+				>
 					{players[myUserId ?? ""]?.finished && roomType === "matchmaking" ? (
 						<div className="relative z-10 text-center -mb-10">
 							<QuickPlayButton label="Find New Match" />
@@ -217,7 +229,9 @@ export default function PvpPage() {
 						"flex gap-4 p-4 w-full pt-9 absolute bottom-0 left-1/2 -translate-x-1/2 z-30 transition-all " +
 						(expanded
 							? "max-w-full h-[79vh] backdrop-blur-xs"
-							: "max-w-7xl h-[40vh]")
+							: "max-w-7xl h-[40vh]") +
+						" " +
+						(verySmallHeight ? "hidden" : "")
 					}
 				>
 					<button

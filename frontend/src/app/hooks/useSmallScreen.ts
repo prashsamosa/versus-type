@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-export function useSmallScreen(): boolean {
+export function useSmallScreen(customQuery?: string) {
 	const [matches, setMatches] = useState(false);
-	const query = "(max-width: 48rem)";
+	const query = customQuery ?? "(max-width: 48rem)";
 	useEffect(() => {
 		const mediaQuery = window.matchMedia(query);
 		setMatches(mediaQuery.matches);
