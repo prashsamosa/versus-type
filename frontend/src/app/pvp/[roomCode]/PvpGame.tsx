@@ -5,6 +5,7 @@ import { OrdinalBadge } from "@/components/ui/ordinal-badge";
 import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
+import { MatchEndOverlay } from "./MatchEndOverlay";
 import Passage from "./Passage";
 import { PassageConfigPanel } from "./PassageConfigPanel";
 import { usePvpStore } from "./store";
@@ -25,6 +26,7 @@ function fireConfetti() {
 export function PvpGame() {
 	const passage = usePvpStore((s) => s.passage);
 	const matchStarted = usePvpStore((s) => s.matchStarted);
+	const matchEnded = usePvpStore((s) => s.matchEnded);
 	const countdown = usePvpStore((s) => s.countdown);
 	const countingDown = usePvpStore((s) => s.countingDown);
 	const userId = authClient.useSession()?.data?.user?.id;
@@ -36,6 +38,10 @@ export function PvpGame() {
 
 	const myPlayer = players[userId || ""];
 	const isWinner = myPlayer?.finished && myPlayer?.ordinal === 1;
+	const isLast =
+		myPlayer?.finished &&
+		myPlayer?.ordinal ===
+			Object.values(players).filter((p) => !p.spectator).length;
 
 	const smallScreen = useSmallScreen();
 
@@ -78,11 +84,12 @@ export function PvpGame() {
 				disabled={!matchStarted}
 				inputDisabled={isSpectating}
 			/>
-			{(!isWinner || !enableConfetti) && myPlayer?.finished && (
-				<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-ordinal pointer-events-none text-5xl">
-					<OrdinalBadge ordinal={myPlayer.ordinal} large />
+			{matchEnded && <MatchEndOverlay players={players} />}
+			{myPlayer?.finished && !isLast && (!isWinner || !enableConfetti) ? (
+				<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-ordinal pointer-events-none z-30">
+					<OrdinalBadge ordinal={myPlayer.ordinal ?? null} large />
 				</div>
-			)}
+			) : null}
 			{countingDown && (
 				<div
 					key={countdown}

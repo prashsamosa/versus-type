@@ -108,11 +108,11 @@
 
 @keyframes ordinal {
 	0% {
-		scale: 0.8;
-		opacity: 1;
+		scale: 1.2;
+		opacity: 0.8;
 	}
 	100% {
-		scale: 1.8;
+		scale: 2;
 		opacity: 0;
 	}
 }
