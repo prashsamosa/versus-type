@@ -1,5 +1,7 @@
 "use client";
 
+import { useSmallScreen } from "../hooks/useSmallScreen";
+
 export default function Cursor({
 	x,
 	y,
@@ -15,13 +17,14 @@ export default function Cursor({
 	redGlow?: boolean;
 	dim?: boolean;
 }) {
+	const smallScreen = useSmallScreen();
 	return (
 		<span
 			aria-hidden
 			className="pointer-events-none absolute left-0 top-0 rounded bg-primary will-change-transform transition duration-100 ease-out"
 			style={{
 				transform: `translate(${x - 2}px, ${y + 3}px)`,
-				height: "2em",
+				height: smallScreen ? "1.5em" : "2em",
 				width: dim ? "2px" : "2.5px",
 				backgroundColor: color,
 				opacity: dim ? 0.6 : 1,

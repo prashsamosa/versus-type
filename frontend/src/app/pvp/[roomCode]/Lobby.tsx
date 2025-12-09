@@ -69,14 +69,14 @@ export function Lobby() {
 							}
 						>
 							<span
-								className={`truncate ${userId === myUserId ? "font-bold" : ""} ${player.disconnected ? "line-through" : ""}`}
+								className={`truncate ${userId === myUserId ? "font-bold" : ""} ${player.disconnected ? "line-through" : ""} ${smallScreen ? "text-sm" : "text-md"}`}
 								style={{ color: player.color }}
 							>
 								{player.username}
 							</span>
 							{player.isHost ? (
 								<Badge variant="secondary" className="shrink-0">
-									<User className="-ml-0.5" />
+									{smallScreen ? null : <User className="-ml-0.5" />}
 									Host
 								</Badge>
 							) : null}
@@ -127,10 +127,13 @@ export function Lobby() {
 
 									<Badge
 										variant="outline"
-										className="text-right text-nowrap text-md shrink-0"
+										className={
+											"text-right text-nowrap shrink-0 " +
+											(smallScreen ? "text-sm" : "text-md")
+										}
 									>
 										{Math.round(wpms[userId] ?? 0)}{" "}
-										<span className="opacity-50">WPM</span>
+										<span className="opacity-50 ">WPM</span>
 									</Badge>
 									{player.finished ? (
 										<Badge
