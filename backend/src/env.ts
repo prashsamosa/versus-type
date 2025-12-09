@@ -10,6 +10,8 @@ const envSchema = z.object({
 	HTTP_PORT: z.coerce.number().default(4000),
 	WS_PORT: z.coerce.number().default(4001),
 	CORS_ORIGIN: z.string(),
+	GOOGLE_CLIENT_ID: z.string(),
+	GOOGLE_CLIENT_SECRET: z.string(),
 });
 
 const env = envSchema.parse(process.env);

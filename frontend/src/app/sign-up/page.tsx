@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { GoogleButton } from "@/components/ui/google-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignUp() {
@@ -98,6 +100,14 @@ export default function SignUp() {
 						{loading ? "Creating Account..." : "Sign Up"}
 					</Button>
 				</form>
+
+				<div className="flex items-center gap-3 my-4">
+					<Separator className="flex-1" />
+					<span className="text-muted-foreground text-sm">or</span>
+					<Separator className="flex-1" />
+				</div>
+
+				<GoogleButton />
 
 				<div className="text-center text-sm">
 					<span className="text-muted-foreground">

@@ -8,6 +8,12 @@ import { afterSignUpHook } from "./afterSignUp.middleware";
 
 export const auth = betterAuth({
 	trustedOrigins: env.BETTER_AUTH_TRUSTED_ORIGINS.split(" "),
+	socialProviders: {
+		google: {
+			clientId: env.GOOGLE_CLIENT_ID,
+			clientSecret: env.GOOGLE_CLIENT_SECRET,
+		},
+	},
 	database: drizzleAdapter(db, {
 		provider: "sqlite",
 		schema: schema,
