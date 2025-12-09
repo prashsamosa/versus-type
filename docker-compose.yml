@@ -6,7 +6,7 @@ services:
     env_file:
       - ./backend/.env
     ports:
-      - "${HTTP_PORT:-4000}:${HTTP_PORT:-4000}"
-      - "${WS_PORT:-4001}:${WS_PORT:-4001}"
+      - "8443:8443"
+      - "6969:6969"
     restart: unless-stopped
     stop_grace_period: 60s

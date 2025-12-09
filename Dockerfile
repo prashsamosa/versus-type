@@ -32,7 +32,4 @@ RUN pnpm install --frozen-lockfile --prod
 
 COPY --from=builder /app/backend/dist ./backend/dist
 
-EXPOSE 8443
-EXPOSE 6969
-
 CMD ["node", "./backend/dist/index.js"]
