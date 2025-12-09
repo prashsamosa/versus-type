@@ -132,7 +132,7 @@ export const userStats = sqliteTable("userStats", {
 	userId: text()
 		.notNull()
 		.primaryKey()
-		.references(() => user.id),
+		.references(() => user.id, { onDelete: "cascade" }),
 	soloMatches: integer().notNull().default(0),
 	pvpMatches: integer().notNull().default(0),
 	wins: integer().notNull().default(0),
@@ -169,7 +169,7 @@ export const matchParticipants = sqliteTable(
 			.references(() => matches.id, { onDelete: "cascade" }),
 		userId: text()
 			.notNull()
-			.references(() => user.id),
+			.references(() => user.id, { onDelete: "cascade" }),
 		wpm: real(),
 		accuracy: real(),
 		ordinal: integer(),
