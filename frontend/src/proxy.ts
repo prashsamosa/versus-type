@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export const config = {
 	matcher: [
-		"/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.json).*)",
+		"/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.json|opengraph-image|twitter-image).*)",
 	],
 };
 
@@ -11,6 +11,22 @@ const SESSION_COOKIE_NAME = "better-auth.session_token";
 
 export default async function proxy(req: NextRequest) {
 	const { pathname } = req.nextUrl;
+
+	if (
+		pathname.endsWith("/opengraph-image") ||
+		pathname.endsWith("/twitter-image")
+	) {
+		return NextResponse.next();
+	}
+
+	const userAgent = req.headers.get("user-agent") || "";
+	const isCrawler =
+		/twitterbot|facebookexternalhit|linkedinbot|slackbot|discordbot|telegrambot|whatsapp/i.test(
+			userAgent,
+		);
+	if (isCrawler) {
+		return NextResponse.next();
+	}
 
 	const sessionCookie = req.cookies.get(SESSION_COOKIE_NAME);
 	const isAuthenticated = !!sessionCookie;

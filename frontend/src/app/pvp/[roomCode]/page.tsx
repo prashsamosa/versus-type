@@ -268,7 +268,11 @@ function CodeCopy({
 }) {
 	const smallScreen = useSmallScreen();
 	return (
-		<div className="p-2 md:p-0 rounded-md md:border flex justify-center items-center gap-2">
+		<div
+			className={
+				"p-0 rounded-md border-0 md:p-2 md:border flex justify-center gap-2 items-center "
+			}
+		>
 			<h1 className="font-bold hidden md:block">Code: {roomCode}</h1>
 			<Button
 				variant="secondary"
