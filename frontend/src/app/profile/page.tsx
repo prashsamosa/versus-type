@@ -1,4 +1,5 @@
 import { ChevronLeft, User } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,17 @@ import { MatchHistoryView } from "./match-history-view";
 import { StatsView } from "./stats";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+	title: "Profile",
+	description:
+		"View your typing stats, match history, and track your progress in Versus Type.",
+	openGraph: {
+		title: "Profile | Versus Type",
+		description:
+			"View your typing stats, match history, and track your progress in Versus Type.",
+	},
+};
 
 function StatsSkeleton() {
 	return (
