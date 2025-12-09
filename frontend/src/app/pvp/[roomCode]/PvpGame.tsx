@@ -1,6 +1,7 @@
 import confetti from "canvas-confetti";
 import { useEffect, useRef } from "react";
 import { useSmallScreen } from "@/app/hooks/useSmallScreen";
+import { OrdinalBadge } from "@/components/ui/ordinal-badge";
 import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
@@ -77,6 +78,11 @@ export function PvpGame() {
 				disabled={!matchStarted}
 				inputDisabled={isSpectating}
 			/>
+			{(!isWinner || !enableConfetti) && myPlayer?.finished && (
+				<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-ordinal pointer-events-none text-5xl">
+					<OrdinalBadge ordinal={myPlayer.ordinal} large />
+				</div>
+			)}
 			{countingDown && (
 				<div
 					key={countdown}

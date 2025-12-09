@@ -4,18 +4,13 @@ import type {
 	MatchHistoryItem,
 	MatchHistoryResponse,
 } from "@versus-type/shared";
-import { Gamepad2, Loader2, Medal, Swords, Target, Zap } from "lucide-react";
+import { Gamepad2, Loader2, Swords, Target, Zap } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { OrdinalBadge } from "@/components/ui/ordinal-badge";
 import { API_URL } from "@/const";
-
-function getOrdinalSuffix(n: number): string {
-	const s = ["th", "st", "nd", "rd"];
-	const v = n % 100;
-	return n + (s[(v - 20) % 10] || s[v] || s[0]);
-}
 
 function formatDate(dateStr: string): string {
 	const date = new Date(dateStr);
@@ -34,27 +29,6 @@ function formatDate(dateStr: string): string {
 		month: "short",
 		day: "numeric",
 	});
-}
-
-function OrdinalBadge({ ordinal }: { ordinal: number | null }) {
-	if (ordinal === null) return null;
-
-	const colors: Record<number, string> = {
-		1: "text-yellow-400",
-		2: "text-gray-300",
-		3: "text-amber-600",
-	};
-
-	return (
-		<div className="flex items-center gap-1.5">
-			{ordinal <= 3 && <Medal className={`size-4 ${colors[ordinal]}`} />}
-			<span
-				className={ordinal <= 3 ? colors[ordinal] : "text-muted-foreground"}
-			>
-				{getOrdinalSuffix(ordinal)}
-			</span>
-		</div>
-	);
 }
 
 function MatchTypeBadge({ type }: { type: "solo" | "pvp" }) {

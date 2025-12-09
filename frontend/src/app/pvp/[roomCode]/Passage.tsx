@@ -118,7 +118,7 @@ export default function Passage({
 
 	return (
 		<>
-			<div className="absolute top-10 right-12 z-20">
+			<div className="absolute top-3 right-12 z-20">
 				{enableStreak ? <StreakDisplay streak={streak} /> : null}
 			</div>
 			<div
