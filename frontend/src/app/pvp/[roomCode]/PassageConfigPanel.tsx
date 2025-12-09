@@ -2,6 +2,7 @@ import {
 	type GeneratorConfig,
 	languageOptions,
 } from "@versus-type/shared/passage-generator";
+import { useSmallScreen } from "@/app/hooks/useSmallScreen";
 import { Badge } from "@/components/ui/badge";
 import { BadgeToggle } from "@/components/ui/badge-toggle";
 import {
@@ -31,10 +32,16 @@ export function PassageConfigPanel() {
 		setPassageConfig(newConfig);
 		socket.emit("passage:config-change", newConfig);
 	}
+	const smallScreen = useSmallScreen();
 	if (!passageConfig || countingDown || matchStarted) return null;
 
 	return (
-		<div className="absolute top-8 left-12 z-20 flex justify-start items-center gap-2">
+		<div
+			className={
+				"absolute top-0 z-20 flex justify-start items-center gap-2 " +
+				(smallScreen ? "left-8" : "left-12")
+			}
+		>
 			{isHost ? (
 				<>
 					<Select
@@ -86,7 +93,7 @@ export function PassageConfigPanel() {
 						}
 						enabled={passageConfig.punctuation || false}
 					>
-						Punctuation
+						{smallScreen ? "P" : "Punctuation"}
 					</BadgeToggle>
 					<BadgeToggle
 						onToggle={(enabled) => {
@@ -97,7 +104,7 @@ export function PassageConfigPanel() {
 						}}
 						enabled={passageConfig.numbers || false}
 					>
-						Numbers
+						{smallScreen ? "N" : "Numbers"}
 					</BadgeToggle>
 				</>
 			) : (

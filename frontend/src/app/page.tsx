@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { BrowseModal } from "./browse-modal";
+import { useSmallScreen } from "./hooks/useSmallScreen";
 import { HostModal } from "./host-modal";
 import { JoinModal } from "./join-modal";
 import { LogoutButton } from "./logoutButton";
@@ -17,7 +18,7 @@ export default function Home() {
 	const [browseOpen, setBrowseOpen] = useState(false);
 	const user = authClient.useSession().data?.user;
 	const isGuest = !user || user.isAnonymous;
-
+	const smallScreen = useSmallScreen();
 	return (
 		<div className="min-h-screen flex items-center justify-center p-4">
 			<div className="text-center space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -79,7 +80,12 @@ export default function Home() {
 					</Button>
 				</div>
 
-				<div className="flex gap-3 justify-between flex-wrap mt-18 pt-3 px-4 bg-gradient-to-b from-card to-40% to-background border-t-2">
+				<div
+					className={
+						"flex gap-3 flex-wrap mt-18 pt-3 px-4 bg-gradient-to-b from-card to-40% to-background border-t-2 " +
+						(smallScreen ? "justify-center" : "justify-between")
+					}
+				>
 					<Button variant="ghost" size="sm" asChild>
 						<Link href="/profile">
 							<User className="size-4" />

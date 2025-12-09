@@ -1,4 +1,5 @@
-import { Crown, Eye, User, WifiOff } from "lucide-react";
+import { Crown, Eye, MessageCircleMore, User, WifiOff } from "lucide-react";
+import { useSmallScreen } from "@/app/hooks/useSmallScreen";
 import { Badge } from "@/components/ui/badge";
 import {
 	SexyCard,
@@ -18,23 +19,37 @@ export function Lobby() {
 	const matchEnded = usePvpStore((s) => s.matchEnded);
 	const countingDown = usePvpStore((s) => s.countingDown);
 	const roomType = usePvpStore((s) => s.roomType);
+	const isHost = myUserId ? players[myUserId]?.isHost : false;
+	const toggleSidebar = usePvpStore((s) => s.toggleSidebar);
+	const smallScreen = useSmallScreen();
 	const playerCnt = Object.values(players).filter(
 		(player) => !player.disconnected,
 	).length;
 	const status =
 		matchStarted || countingDown
 			? "Match in progress"
-			: matchEnded
-				? roomType !== "matchmaking"
-					? "Match ended, waiting for host"
-					: null
-				: null;
+			: !matchEnded
+				? null
+				: roomType !== "matchmaking"
+					? isHost
+						? "Match ended"
+						: "Match ended, waiting for host"
+					: null;
 	return (
 		<SexyCard>
 			<SexyCardHeader>
 				<div className="flex gap-3 items-center">
 					<span>Lobby</span>
-					{status ? (
+
+					{smallScreen ? (
+						<button
+							className="flex items-center gap-1"
+							onClick={() => toggleSidebar()}
+						>
+							<MessageCircleMore className="size-4 mt-0.5" />
+							Open Chat
+						</button>
+					) : status ? (
 						<span className="text-foreground/40 font-medium"> {status} </span>
 					) : null}
 				</div>

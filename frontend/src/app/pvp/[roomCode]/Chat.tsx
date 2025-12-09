@@ -1,7 +1,8 @@
 "use client";
 
-import { MessageCircleMore } from "lucide-react";
+import { MessageCircleMore, PanelRightClose } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useSmallScreen } from "@/app/hooks/useSmallScreen";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,8 @@ export default function Chat() {
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const shouldAutoScroll = useRef(true);
 	const players = usePvpStore((s) => s.players);
+	const smallScreen = useSmallScreen();
+	const toggleSidebar = usePvpStore((s) => s.toggleSidebar);
 
 	function handleScroll() {
 		if (!scrollContainerRef.current) return;
@@ -44,6 +47,11 @@ export default function Chat() {
 				className="overflow-y-auto h-full"
 				onScroll={handleScroll}
 			>
+				{smallScreen ? (
+					<Button variant="secondary" onClick={toggleSidebar} className="mb-2">
+						<PanelRightClose className="size-5 text-muted-foreground" />
+					</Button>
+				) : null}
 				{messages.length === 0 ? (
 					<div className="flex flex-col gap-2 items-center justify-center h-full text-muted-foreground text-xl">
 						<MessageCircleMore />

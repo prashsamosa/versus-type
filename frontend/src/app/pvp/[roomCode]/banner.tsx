@@ -33,7 +33,7 @@ export function Banner({
 				>
 					<div
 						className={
-							"overflow-hidden transition-all " +
+							"overflow-hidden flex items-center justify-center gap-3 ransition-all " +
 							(isSpectating ? "max-w-xl" : "max-w-0 delay-1000")
 						}
 					>

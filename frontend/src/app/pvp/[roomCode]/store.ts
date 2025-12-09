@@ -50,6 +50,8 @@ type PvpStore = {
 	setRoomType: (roomType: RoomType) => void;
 	keyBufferSize: number;
 	setKeyBufferSize: (size: number) => void;
+	sidebarExpanded: boolean;
+	toggleSidebar: () => void;
 };
 
 const initialState = {
@@ -68,6 +70,7 @@ const initialState = {
 	passageConfig: null,
 	gameConfig: loadGameConfig(),
 	keyBufferSize: DEFAULT_KEY_BUFFER_SIZE,
+	sidebarExpanded: false,
 } satisfies Partial<PvpStore>;
 // why 'satisfies' instead of type annotation? Coz TS magic: type annotation infers this type to initialState, which makes TS cry later when we spread initialState in create. Using satisfies doesn't infer the type, and we get sexy autocomplete.
 
@@ -135,4 +138,6 @@ export const usePvpStore = create<PvpStore>((set) => ({
 	},
 	setRoomType: (roomType) => set({ roomType }),
 	setKeyBufferSize: (size) => set({ keyBufferSize: size }),
+	toggleSidebar: () =>
+		set((state) => ({ sidebarExpanded: !state.sidebarExpanded })),
 }));

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSmallScreen } from "../hooks/useSmallScreen";
 import Word from "./Word";
 
 interface PassageDisplayProps {
@@ -62,9 +63,15 @@ export default function PassageText({
 	const currentIndex = typedText.length;
 
 	let idx = 0;
+
+	const smallScreen = useSmallScreen();
+
 	return (
 		<div
-			className="relative text-2xl leading-relaxed font-mono select-none"
+			className={
+				"relative leading-relaxed font-mono select-none " +
+				(smallScreen ? "text-lg" : "text-2xl")
+			}
 			style={{
 				transform: `translateY(-${scrollOffset}px)`,
 				transition: "transform 0.1s ease-out",

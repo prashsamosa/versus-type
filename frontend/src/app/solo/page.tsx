@@ -12,6 +12,7 @@ import { Header } from "@/components/ui/header";
 import { loadGameConfig } from "../_game-config";
 import { GameSettings } from "../_game-config/config-modal";
 import { useEnsureSignedIn } from "../hooks/useEnsureSignedIn";
+import { useSmallScreen } from "../hooks/useSmallScreen";
 import Passage from "./Passage";
 
 const SOLO_CONFIG_KEY = "solo-passage-config";
@@ -45,6 +46,7 @@ export default function SoloPage() {
 	const [config, setConfig] = useState<GeneratorConfig>(defaultConfig);
 	const [words, setWords] = useState<string[] | null>(null);
 	const [gameConfig, setGameConfig] = useState(loadGameConfig());
+	const smallScreen = useSmallScreen();
 
 	useEffect(() => {
 		const loaded = loadConfig();
@@ -80,7 +82,12 @@ export default function SoloPage() {
 				</Button>
 				<GameSettings config={gameConfig} setConfig={setGameConfig} solo />
 			</div>
-			<div className="bg-background flex items-center justify-center min-h-screen py-2">
+			<div
+				className={
+					"bg-background flex items-center justify-center min-h-screen py-2 " +
+					(smallScreen ? "px-2" : "px-10")
+				}
+			>
 				<Passage
 					words={words}
 					config={config}

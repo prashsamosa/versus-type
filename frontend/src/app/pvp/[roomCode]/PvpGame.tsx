@@ -1,5 +1,6 @@
 import confetti from "canvas-confetti";
 import { useEffect, useRef } from "react";
+import { useSmallScreen } from "@/app/hooks/useSmallScreen";
 import { authClient } from "@/lib/auth-client";
 import { registerSocketHandlers } from "@/lib/registerSocketHandlers";
 import { socket } from "@/socket";
@@ -35,6 +36,8 @@ export function PvpGame() {
 	const myPlayer = players[userId || ""];
 	const isWinner = myPlayer?.finished && myPlayer?.ordinal === 1;
 
+	const smallScreen = useSmallScreen();
+
 	useEffect(() => {
 		if (isWinner && !hasConfettiFired.current && enableConfetti) {
 			hasConfettiFired.current = true;
@@ -67,7 +70,7 @@ export function PvpGame() {
 	}
 
 	return (
-		<div className="relative pt-18 px-10">
+		<div className={"relative pt-10 " + (smallScreen ? "px-5" : "px-10")}>
 			<PassageConfigPanel />
 			<Passage
 				words={passage.split(" ")}

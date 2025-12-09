@@ -12,6 +12,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useSmallScreen } from "../hooks/useSmallScreen";
 
 const WORD_COUNT_OPTIONS = [10, 25, 50, 75, 100, 150, 200, 250, 300, 500];
 
@@ -24,6 +25,7 @@ export function PassageConfigPanel({
 	onConfigChange: (config: GeneratorConfig) => void;
 	disabled?: boolean;
 }) {
+	const smallScreen = useSmallScreen();
 	return (
 		<div
 			className={
@@ -86,7 +88,7 @@ export function PassageConfigPanel({
 				}
 				enabled={config.punctuation || false}
 			>
-				Punctuation
+				{smallScreen ? "P" : "Punctuation"}
 			</BadgeToggle>
 			<BadgeToggle
 				onToggle={(enabled) =>
@@ -97,7 +99,7 @@ export function PassageConfigPanel({
 				}
 				enabled={config.numbers || false}
 			>
-				Numbers
+				{smallScreen ? "N" : "Numbers"}
 			</BadgeToggle>
 		</div>
 	);

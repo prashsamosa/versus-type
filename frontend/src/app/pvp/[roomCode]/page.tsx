@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { GameSettings } from "@/app/_game-config/config-modal";
+import { useSmallScreen } from "@/app/hooks/useSmallScreen";
 import { QuickPlayButton } from "@/app/quick-play";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,12 +50,15 @@ export default function PvpPage() {
 	);
 	const resetStore = usePvpStore((s) => s.resetStore);
 	const [expanded, setExpanded] = useState(false);
+	const smallScreen = useSmallScreen();
 	const roomType = usePvpStore((s) => s.roomType);
 	const isSpectating = myUserId ? players[myUserId]?.spectator : false;
 	const waitingCountdown = usePvpStore((s) => s.waitingCountdown);
 	const setKeyBufferSize = usePvpStore((s) => s.setKeyBufferSize);
 	const config = usePvpStore((s) => s.gameConfig);
 	const setConfig = usePvpStore((s) => s.setGameConfig);
+
+	const sidebarExpanded = usePvpStore((s) => s.sidebarExpanded);
 
 	useEffect(() => {
 		return () => {
@@ -118,7 +122,6 @@ export default function PvpPage() {
 	}
 
 	function copyMatchLink() {
-		console.log("Copying match link for code:", roomCode);
 		const url = `${window.location.origin}/pvp/${roomCode}`;
 		navigator.clipboard.writeText(url);
 		setCopied(true);
@@ -138,7 +141,6 @@ export default function PvpPage() {
 	function handleExit() {
 		router.push("/");
 	}
-
 	return (
 		<div className="flex flex-col items-center justify-start min-h-screen">
 			<Header>
@@ -174,13 +176,17 @@ export default function PvpPage() {
 					!countingDown &&
 					!matchStarted ? (
 						<Button onClick={handleStartCountdown}>
-							{matchEnded ? "Start Next Match" : "Start Match"}
+							{smallScreen
+								? "Start"
+								: matchEnded
+									? "Start Next Match"
+									: "Start Match"}
 						</Button>
 					) : null}
 				</div>
 			</div>
 			<div className="flex flex-col justify-center items-center h-full w-full">
-				<div className="pt-16 relative">
+				<div className="pt-16 absolute bottom-[47vh] ">
 					{players[myUserId ?? ""]?.finished && roomType === "matchmaking" ? (
 						<div className="relative z-10 text-center -mb-10">
 							<QuickPlayButton label="Find New Match" />
@@ -196,12 +202,22 @@ export default function PvpPage() {
 					</div>
 					<PvpGame />
 				</div>
+				{smallScreen && (
+					<div
+						className={
+							"fixed right-0 top-0 bottom-0 z-40 p-2 w-[90%] transition " +
+							(sidebarExpanded ? "" : "translate-x-full")
+						}
+					>
+						<Chat />
+					</div>
+				)}
 				<div
 					className={
-						"flex gap-4 p-4 w-full pt-9 absolute bottom-0 left-1/2 -translate-x-1/2 z-30 transition-all min-h-[290px] " +
+						"flex gap-4 p-4 w-full pt-9 absolute bottom-0 left-1/2 -translate-x-1/2 z-30 transition-all " +
 						(expanded
-							? "max-w-[1400px] h-[79vh] backdrop-blur-xs"
-							: "max-w-7xl h-[30vh]")
+							? "max-w-full h-[79vh] backdrop-blur-xs"
+							: "max-w-7xl h-[40vh]")
 					}
 				>
 					<button
@@ -216,9 +232,11 @@ export default function PvpPage() {
 					<div className={"flex-1 transition-all min-w-0"}>
 						<Lobby />
 					</div>
-					<div className={"flex-1 transition-all "}>
-						<Chat />
-					</div>
+					{!smallScreen && (
+						<div className="flex-1 transition-all">
+							<Chat />
+						</div>
+					)}
 				</div>
 			</div>
 		</div>
@@ -234,9 +252,10 @@ function CodeCopy({
 	copied: boolean;
 	copyMatchLink: () => void;
 }) {
+	const smallScreen = useSmallScreen();
 	return (
 		<div className="p-2 rounded-md border flex justify-center items-center gap-2">
-			<h1 className="font-bold">Code: {roomCode}</h1>
+			<h1 className="font-bold hidden md:block">Code: {roomCode}</h1>
 			<Button
 				variant="secondary"
 				size="sm"
@@ -251,7 +270,7 @@ function CodeCopy({
 				) : (
 					<>
 						<Copy className="size-4" />
-						Copy Invite Link
+						{smallScreen ? "Invite" : "Copy Invite Link"}
 					</>
 				)}
 			</Button>
