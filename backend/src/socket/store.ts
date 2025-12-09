@@ -209,3 +209,13 @@ export function updateRoomAvgWpm(roomCode: string) {
 	}
 	roomState.avgWpm = count > 0 ? totalWpm / count : 0;
 }
+
+export function startNukeTimer(roomCode: string, delayMs: number) {
+	setTimeout(() => {
+		const roomState = roomStates[roomCode];
+		if (roomState && Object.keys(roomState.players).length === 0) {
+			roomState.status = "closed";
+			delete roomStates[roomCode];
+		}
+	}, delayMs);
+}

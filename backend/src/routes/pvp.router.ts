@@ -15,13 +15,14 @@ import {
 	initializeRoom,
 	type RoomSettings,
 	roomStates,
+	startNukeTimer,
 } from "@/socket/store";
 import { io } from "@/ws-server";
 
 const DEFAULT_WPM = 60;
 const MATCH_CODE_LENGTH = 6;
 const MAX_MATCHMAKING_PLAYERS = 6;
-const NUKE_TIME_MS = 1 * 60 * 1000; // 1m
+const MATCHMAKING_NUKE_TIME_MS = 30 * 1000;
 
 const MATCHMAKING_PASSAGE_CONFIG: GeneratorConfig = {
 	language: "English 200",
@@ -110,7 +111,7 @@ pvpRouter.get("/matchmake", async (req, res) => {
 			maxPlayers: MAX_MATCHMAKING_PLAYERS,
 		};
 		await initializeRoom(newRoomCode, settings, MATCHMAKING_PASSAGE_CONFIG);
-		startNukeTimer(newRoomCode);
+		startNukeTimer(newRoomCode, MATCHMAKING_NUKE_TIME_MS);
 
 		res.json({ roomCode: newRoomCode });
 	}
@@ -119,16 +120,3 @@ pvpRouter.get("/matchmake", async (req, res) => {
 pvpRouter.get("/total-players", (_, res) => {
 	res.send(io.engine.clientsCount);
 });
-
-function startNukeTimer(roomCode: string) {
-	setTimeout(() => {
-		const roomState = roomStates[roomCode];
-		if (roomState && Object.keys(roomState.players).length === 0) {
-			roomState.status = "closed";
-			delete roomStates[roomCode];
-			console.log(
-				`Matchmaking room ${roomCode} nuked coz no one joined in time`,
-			);
-		}
-	}, NUKE_TIME_MS);
-}

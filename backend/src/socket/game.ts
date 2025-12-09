@@ -21,6 +21,7 @@ import {
 	participantCount,
 	reinitializeRoomState,
 	roomStates,
+	startNukeTimer,
 	toPlayersInfo,
 	typingPlayerCount,
 	updateRoomAvgWpm,
@@ -29,6 +30,7 @@ import { calcWpm, getRandomColor, getWordIndex } from "./utils";
 
 const COUNTDOWN_SECONDS = 3;
 const WAITING_COUNTDOWN_SECONDS = 15;
+const NUKE_TIMEOUT_MS = 30 * 1000;
 
 export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 	socket.on("pvp:join", async (data, callback) => {
@@ -194,9 +196,10 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			}
 
 			if (!room || room.size === 0) {
-				console.log(`Room ${roomCode} has closed`);
+				console.log(`Starting nuke timer for ${roomCode}`);
 				if (roomState?.status !== "closed") {
-					closeRoom(roomCode, io);
+					// closeRoom(roomCode, io);
+					startNukeTimer(roomCode, NUKE_TIMEOUT_MS);
 				}
 			} else {
 				if (socket.data.isHost) {
@@ -552,24 +555,24 @@ async function endMatch(roomCode: string, io: ioServer) {
 	await updatePlayersInfoInDB(roomState);
 }
 
-async function closeRoom(roomCode: string, io: ioServer) {
-	// deleting rooms immediately.
-	// alternative: update status to 'closed', setup cron job or setTimeout to delete closed rooms
-	delete roomStates[roomCode];
-	io.to(roomCode).emit("pvp:disconnect", { reason: "Room closed" });
-	// io.socketsLeave(roomCode);
-	setTimeout(() => {
-		// disconnect all clients
-		const room = io.sockets.adapter.rooms.get(roomCode);
-		if (room) {
-			for (const memberId of room) {
-				const memberSocket = io.sockets.sockets.get(memberId);
-				if (memberSocket) memberSocket.disconnect();
-			}
-		}
-	}, 3000); // give clients time to receive the message
-	console.log(`Room ${roomCode} closed`);
-}
+// async function closeRoom(roomCode: string, io: ioServer) {
+// 	// deleting rooms immediately.
+// 	// alternative: update status to 'closed', setup cron job or setTimeout to delete closed rooms
+// 	delete roomStates[roomCode];
+// 	io.to(roomCode).emit("pvp:disconnect", { reason: "Room closed" });
+// 	// io.socketsLeave(roomCode);
+// 	setTimeout(() => {
+// 		// disconnect all clients
+// 		const room = io.sockets.adapter.rooms.get(roomCode);
+// 		if (room) {
+// 			for (const memberId of room) {
+// 				const memberSocket = io.sockets.sockets.get(memberId);
+// 				if (memberSocket) memberSocket.disconnect();
+// 			}
+// 		}
+// 	}, 3000); // give clients time to receive the message
+// 	console.log(`Room ${roomCode} closed`);
+// }
 
 async function startMatch(
 	io: ioServer,
