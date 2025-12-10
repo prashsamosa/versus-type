@@ -19,7 +19,8 @@ export function useOppCursorPositions(
 		Record<string, CursorData>
 	>({});
 
-	const lineHeightRefs = useRef<Record<string, number>>({});
+	// single cached lineHeight, reset on resize
+	const lineHeightRef = useRef<number>(0);
 
 	useLayoutEffect(() => {
 		if (!enabled) {
@@ -32,6 +33,21 @@ export function useOppCursorPositions(
 		const activeOffset =
 			manualScrollOffset === null ? scrollOffset : manualScrollOffset;
 
+		// calculate lineHeight from actual line spacing (first char vs second line char)
+		// NOT from span.offsetHeight which differs from line spacing
+		const firstChar = charRefs.current?.[0];
+		if (lineHeightRef.current === 0 && firstChar) {
+			for (const typingPos of Object.values(typingIndexes)) {
+				const span = charRefs.current?.[typingPos];
+				if (!span || span === firstChar) continue;
+				const diff = span.offsetTop - firstChar.offsetTop;
+				if (diff > 10) {
+					lineHeightRef.current = diff;
+					break;
+				}
+			}
+		}
+
 		for (const [userId, typingPos] of Object.entries(typingIndexes)) {
 			const span = charRefs.current?.[typingPos];
 			const container = containerRef.current;
@@ -39,10 +55,7 @@ export function useOppCursorPositions(
 
 			const containerStyle = getComputedStyle(container);
 
-			if (!lineHeightRefs.current[userId] && span.offsetHeight > 0) {
-				lineHeightRefs.current[userId] = span.offsetHeight;
-			}
-			const lineHeight = lineHeightRefs.current[userId];
+			const lineHeight = lineHeightRef.current || span.offsetHeight;
 
 			const pt = parseFloat(containerStyle.paddingTop) || 0;
 			const pb = parseFloat(containerStyle.paddingBottom) || 0;
@@ -54,12 +67,12 @@ export function useOppCursorPositions(
 
 			container.style.height = `${Math.max(visibleHeight, lineHeight * 4 + pt + pb)}px`;
 
-			const stableOffsetTop =
-				Math.round(span.offsetTop / lineHeight) * lineHeight;
+			// snap to line grid to prevent cursor dip at word boundaries
+			const lineNumber = Math.round(span.offsetTop / lineHeight);
 
 			const raf = requestAnimationFrame(() => {
 				const x = pl + span.offsetLeft;
-				const y = pt + stableOffsetTop - activeOffset;
+				const y = pt + lineNumber * lineHeight - activeOffset;
 
 				setOppCursorPoses((prev) => {
 					const updated = { ...prev };
@@ -82,6 +95,15 @@ export function useOppCursorPositions(
 		manualScrollOffset,
 		enabled,
 	]);
+
+	// reset lineHeight cache on resize
+	useLayoutEffect(() => {
+		function handleResize() {
+			lineHeightRef.current = 0;
+		}
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
 
 	return {
 		oppCursorPoses,
