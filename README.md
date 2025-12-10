@@ -1,8 +1,15 @@
 <div align="center">
 <img src="frontend/public/icon.svg" alt="Versus Type Logo" width="150"/>
 <h1> Versus Type </h1>
-A real-time typing app where you can practice solo or battle friends/randoms in PvP matches.
+<h4>A real-time typing app where you can practice solo or battle friends/randoms in PvP matches.</h4>
+   <br>
 </div>
+
+<img width="1920" alt="image" src="https://github.com/user-attachments/assets/b0049e73-7aac-40ab-b9c3-c4fdc792e7c7" />
+<img width="1083" height="397" alt="image" src="https://github.com/user-attachments/assets/fc00e405-de30-48e2-be7c-bc1d2853a97c" />
+<img width="380" alt="image" src="https://github.com/user-attachments/assets/479f5c88-11de-425b-abc5-f284f6798f47" />
+<img width="420"  alt="image" src="https://github.com/user-attachments/assets/82fb2b22-ca90-4087-b9bf-f2e0c3f7d3a0" />
+
 
 
 ## Features
