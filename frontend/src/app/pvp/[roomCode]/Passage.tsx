@@ -194,7 +194,13 @@ export default function Passage({
 
 				{(!disabled || isSpectator) && showOppCursors
 					? Object.entries(oppCursorPoses).map(([oppId, pos]) => {
-							if (oppId === userId || players[oppId]?.finished) return null;
+							if (
+								oppId === userId ||
+								players[oppId] === null ||
+								players[oppId] === undefined ||
+								players[oppId]?.finished
+							)
+								return null;
 							return (
 								<Cursor
 									key={oppId}
