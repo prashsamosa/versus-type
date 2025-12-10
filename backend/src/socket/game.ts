@@ -96,6 +96,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 			if (player) {
 				// reconnecting player
 				player.disconnected = false;
+				player.username = socket.data.username || player.username;
 				reconnected = true;
 				if (roomStates[roomCode].isMatchStarted && !player.typingIndex) {
 					// only set spectator if player hasn't typed yet
