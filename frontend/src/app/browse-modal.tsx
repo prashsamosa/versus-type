@@ -136,13 +136,13 @@ export function BrowseModal({
 										{room.passageConfig.punctuation && (
 											<>
 												<span className="opacity-50">•</span>
-												<span>punct</span>
+												<span>P</span>
 											</>
 										)}
 										{room.passageConfig.numbers && (
 											<>
 												<span className="opacity-50">•</span>
-												<span>nums</span>
+												<span>N</span>
 											</>
 										)}
 									</div>

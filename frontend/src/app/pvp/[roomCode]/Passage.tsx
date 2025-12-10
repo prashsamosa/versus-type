@@ -29,7 +29,9 @@ export default function Passage({
 	const updateOppTypingIndex = usePvpStore((s) => s.updateOppTypingIndex);
 	const initialIndex = usePvpStore((s) => s.initialIndex);
 	const showOppCursors = usePvpStore((s) => s.gameConfig.showOppCursors);
-	const enableStreak = usePvpStore((s) => s.gameConfig.enableStreak);
+	const matchEnded = usePvpStore((s) => s.matchEnded);
+	const enableStreak =
+		usePvpStore((s) => s.gameConfig.enableStreak) && !matchEnded;
 
 	const {
 		typedText,
@@ -40,8 +42,6 @@ export default function Passage({
 		resetTypingState,
 		streak,
 	} = usePvpTypingState(words, initialIndex);
-
-	const matchEnded = usePvpStore((s) => s.matchEnded);
 
 	useEffect(() => {
 		if (matchEnded) {

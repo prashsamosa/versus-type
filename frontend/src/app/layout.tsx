@@ -15,7 +15,7 @@ const robotoMono = Roboto_Mono({
 
 const siteUrl = "https://versustype.sahaj.dev";
 const description = "Race your typing skills against others in real-time";
-const title = "Versus Type | Typing Racer";
+const title = "Versus Type";
 
 export const metadata: Metadata = {
 	title: {
