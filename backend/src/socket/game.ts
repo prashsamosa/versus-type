@@ -200,6 +200,7 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 				console.log(`Starting nuke timer for ${roomCode}`);
 				if (roomState?.status !== "closed") {
 					// closeRoom(roomCode, io);
+					roomState.players = {};
 					startNukeTimer(roomCode, NUKE_TIMEOUT_MS);
 				}
 			} else {
