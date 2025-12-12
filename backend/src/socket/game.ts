@@ -52,6 +52,9 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 		const roomState = roomStates[roomCode];
 		if (!roomState || roomState.status === "closed") {
 			console.warn(`Room state for ${roomCode} not found when joining`);
+			setTimeout(() => {
+				socket.disconnect(true);
+			}, 1000);
 			return callback({
 				success: false,
 				message: `Room '${roomCode}' not found`,

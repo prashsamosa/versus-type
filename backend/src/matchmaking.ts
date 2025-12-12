@@ -40,7 +40,7 @@ export function findBestMatch(
 		WPM_GAP_PENALTY = 2.2;
 		MIN_SCORE_THRESHOLD = 40;
 	}
-
+	console.log("# STARTING MATCHMAKING");
 	let bestRoomCode: string | null = null;
 	let maxScore = -Infinity;
 	for (const roomCode in rooms) {
@@ -52,6 +52,14 @@ export function findBestMatch(
 			activeCount >= room.maxPlayers ||
 			(room.type === "matchmaking" && room.status !== "waiting")
 		) {
+			console.log(
+				"# SKIPPING ROOM:",
+				roomCode,
+				"activeCount:",
+				activeCount,
+				"status:",
+				room.status,
+			);
 			continue;
 		}
 
@@ -70,12 +78,13 @@ export function findBestMatch(
 		const wpmDiff = Math.abs(room.avgWpm - avgWpm);
 		const wpmGap = Math.max(0, wpmDiff - MIN_WPM_GAP);
 		score -= wpmGap ** WPM_DIFF_POWER * WPM_GAP_PENALTY;
-
+		console.log("# SCORE: ", score, " ROOM:", roomCode);
 		if (score > maxScore) {
 			maxScore = score;
 			bestRoomCode = roomCode;
 		}
 	}
 	if (maxScore < MIN_SCORE_THRESHOLD) return null;
+	console.log("# MATCHMAKING FOUND ROOM:", bestRoomCode);
 	return bestRoomCode;
 }
