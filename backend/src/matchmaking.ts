@@ -26,19 +26,19 @@ export function findBestMatch(
 		ONE_PLAYER_BONUS = 60;
 		MAX_SWEET_SPOT_BONUS = 20;
 		WPM_GAP_PENALTY = 1.8;
-		MIN_SCORE_THRESHOLD = 0;
+		MIN_SCORE_THRESHOLD = -100;
 	} else if (totalOnlinePlayers < 100) {
 		// medium traffic, balance between speed and quality matches
 		ONE_PLAYER_BONUS = 30;
 		MAX_SWEET_SPOT_BONUS = 40;
 		WPM_GAP_PENALTY = 2;
-		MIN_SCORE_THRESHOLD = 20;
+		MIN_SCORE_THRESHOLD = -50;
 	} else {
 		// high traffic, prioritize quality matches, more stacking
 		ONE_PLAYER_BONUS = 10;
 		MAX_SWEET_SPOT_BONUS = 50;
 		WPM_GAP_PENALTY = 2.2;
-		MIN_SCORE_THRESHOLD = 40;
+		MIN_SCORE_THRESHOLD = -10;
 	}
 	console.log("# STARTING MATCHMAKING");
 	let bestRoomCode: string | null = null;
@@ -65,6 +65,7 @@ export function findBestMatch(
 
 		// base score on type
 		let score = BASE_SCORE;
+		console.log("# BASE SCORE: ", score);
 
 		// waiting rooms(removed coz singlematch are always waiting)
 		// if (room.status === "waiting") score += WAITING_BONUS;
@@ -73,12 +74,15 @@ export function findBestMatch(
 		const sweetSpotDiff = Math.abs(activeCount - SWEET_SPOT_PLAYER_COUNT);
 		if (activeCount === 1) score += ONE_PLAYER_BONUS;
 		score += Math.max(0, MAX_SWEET_SPOT_BONUS - sweetSpotDiff * 10);
+		console.log("# AFTER FULLNESS: ", score);
 
 		// skill matching
 		const wpmDiff = Math.abs(room.avgWpm - avgWpm);
 		const wpmGap = Math.max(0, wpmDiff - MIN_WPM_GAP);
 		score -= wpmGap ** WPM_DIFF_POWER * WPM_GAP_PENALTY;
-		console.log("# SCORE: ", score, " ROOM:", roomCode);
+
+		console.log("# AFTER SKILL MATCHING: ", score);
+
 		if (score > maxScore) {
 			maxScore = score;
 			bestRoomCode = roomCode;
