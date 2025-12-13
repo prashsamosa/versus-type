@@ -557,6 +557,10 @@ async function endMatch(roomCode: string, io: ioServer) {
 	roomState.passage = await generatePassage(roomState.passageConfig);
 	io.to(roomCode).emit("pvp:match-ended", matchResults);
 
+	if (roomState.type === "matchmaking") {
+		roomState.status = "closed";
+	}
+
 	await updatePlayersInfoInDB(roomState);
 }
 
