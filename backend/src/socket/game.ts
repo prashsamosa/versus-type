@@ -68,13 +68,12 @@ export function registerPvpSessionHandlers(io: ioServer, socket: ioSocket) {
 
 		if (isHost) socket.data.isHost = true;
 
-		socket.join(roomCode);
 		const room = io.sockets.adapter.rooms.get(roomCode);
-		if (!isHost && room && room.size > roomState.maxPlayers) {
-			// why not just join AFTER check? coz it will make race conditions, if 2 join at the same time, both will pass the check
-			socket.leave(roomCode);
+		if (!isHost && room && room.size >= roomState.maxPlayers) {
 			return callback({ success: false, message: "Room is full" });
 		}
+
+		socket.join(roomCode);
 
 		console.log(
 			isHost
