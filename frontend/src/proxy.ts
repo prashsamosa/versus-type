@@ -8,6 +8,15 @@ export const config = {
 };
 
 const SESSION_COOKIE_NAME = "better-auth.session_token";
+const SECURE_SESSION_COOKIE_NAME = "__Secure-better-auth.session_token";
+
+function getSessionCookie(req: NextRequest) {
+	console.log(req.cookies.getAll());
+	return (
+		req.cookies.get(SESSION_COOKIE_NAME) ||
+		req.cookies.get(SECURE_SESSION_COOKIE_NAME)
+	);
+}
 
 export default async function proxy(req: NextRequest) {
 	const { pathname } = req.nextUrl;
@@ -28,7 +37,7 @@ export default async function proxy(req: NextRequest) {
 		return NextResponse.next();
 	}
 
-	const sessionCookie = req.cookies.get(SESSION_COOKIE_NAME);
+	const sessionCookie = getSessionCookie(req);
 	const isAuthenticated = !!sessionCookie;
 
 	// removing ts coz guests are also authenticated(anon)
