@@ -7,6 +7,7 @@ import * as schema from "../db/schema";
 import { afterSignUpHook } from "./afterSignUp.middleware";
 
 export const auth = betterAuth({
+	baseURL: env.BASE_URL,
 	trustedOrigins: env.BETTER_AUTH_TRUSTED_ORIGINS.split(" "),
 	socialProviders: {
 		google: {
